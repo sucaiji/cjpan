@@ -30,7 +30,7 @@ public class FileOperateImpl implements FileOperate {
     public boolean saveFile(String fileMd5,int total) {
         File file=new File(tempPath.toString()+File.separator+fileMd5+File.separator+fileMd5);
         if(!file.getParentFile().exists()){
-            System.out.println("出错啊");
+            return false;
         }
         try {
             FileOutputStream fos=new FileOutputStream(file);
