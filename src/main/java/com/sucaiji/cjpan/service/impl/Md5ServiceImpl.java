@@ -30,6 +30,7 @@ public class Md5ServiceImpl implements Md5Service{
         for (int i = 0; i < mdbytes.length; i++) {
             md5.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
         }
+        is.close();
         return md5.toString();
     }
 
