@@ -26,7 +26,10 @@ public class MainController {
         return "index";
     }
 
-
+    @RequestMapping("/download")
+    public String download(){
+        return "download";
+    }
 
 
 

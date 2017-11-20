@@ -65,6 +65,12 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
+    public File getFileByUuid(String uuid) {
+
+        return null;
+    }
+
+    @Override
     public boolean md5Exist(String md5) {
         List list=md5Dao.selectByMd5(md5);
         if (list.size()==0){

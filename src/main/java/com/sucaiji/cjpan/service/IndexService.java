@@ -4,6 +4,7 @@ import com.sucaiji.cjpan.entity.Index;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.File;
 import java.util.List;
 
 
@@ -40,6 +41,13 @@ public interface IndexService {
      * @param index
      */
     void saveTemp(MultipartFile multipartFile,String fileMd5,String md5,Integer index);
+
+    /**
+     * 通过uuid获取文件实际所在位置，如果文件不存在则返回null
+     * @param uuid
+     * @return
+     */
+    File getFileByUuid(String uuid);
 
     /**
      * 判断该md5对应的文件是否存在

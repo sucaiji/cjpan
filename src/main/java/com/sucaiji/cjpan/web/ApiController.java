@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,6 +126,47 @@ public class ApiController {
         map.put("error","mmp你传错值了");
         return map;
 
+
+    }
+    @RequestMapping("/download")
+    @ResponseBody
+    public String download(HttpServletRequest request, HttpServletResponse response){
+        String uuid=request.getParameter("uuid");
+
+        File file=indexService.getFileByUuid(uuid);
+        if(file==null) {
+            return "error:没有这个文件";
+        }
+
+        response.setContentType("application/force-download");
+        response.addHeader("Content-Disposition","attachment;filename=123.zip");
+
+        byte[] buffer=new byte[1024];
+        FileInputStream fis = null;
+        BufferedInputStream bis =null;
+        try {
+            fis = new FileInputStream(file);
+            bis = new BufferedInputStream(fis);
+            OutputStream os = response.getOutputStream();
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer);
+                i = bis.read(buffer);
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bis.close();
+                fis.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
 
     }
 
