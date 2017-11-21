@@ -20,8 +20,11 @@ public interface IndexService {
     //List<Index> visitDir();
     //void uploadFile(MultipartFile multipartFile);
 
-
-
+    /**
+     *
+     * @return
+     */
+    Index getIndexByUuid(String uuid);
 
     /**
      * 文件合并和保存到数据库

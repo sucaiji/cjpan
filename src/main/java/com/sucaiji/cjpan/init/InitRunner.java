@@ -1,7 +1,6 @@
 package com.sucaiji.cjpan.init;
 
 import com.sucaiji.cjpan.dao.InitDao;
-import com.sucaiji.cjpan.file.FileOperate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -24,15 +23,15 @@ public class InitRunner implements ApplicationRunner {
     public void run(ApplicationArguments applicationArguments) throws Exception {
 
         initPath=System.getProperty("user.dir");
-        File file=new File(initPath+File.separator+ FileOperate.APP_NAME_EN);
+        File file=new File(initPath+File.separator+ APP_NAME_EN);
         if(!file.exists()){
             file.mkdir();
         }
-        File data=new File(file.getAbsolutePath()+File.separator+FileOperate.DATA_DIR);
+        File data=new File(file.getAbsolutePath()+File.separator+DATA_DIR);
         if(!data.exists()){
             data.mkdir();
         }
-        File temp=new File(file.getAbsolutePath()+File.separator+FileOperate.TEMP_DIR);
+        File temp=new File(file.getAbsolutePath()+File.separator+TEMP_DIR);
         if(!temp.exists()){
             temp.mkdir();
         }

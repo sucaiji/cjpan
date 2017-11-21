@@ -21,15 +21,16 @@ public class MainController {
 
 
 
-    @RequestMapping("/")
-    public String index(Response response,Request request,Model model){
+    @RequestMapping("/upload")
+    public String upload(Response response,Request request,Model model){
         return "index";
     }
 
-    @RequestMapping("/download")
-    public String download(){
-        return "download";
+    @RequestMapping("/")
+    public String index(){
+        return "index";
     }
+
 
 
 

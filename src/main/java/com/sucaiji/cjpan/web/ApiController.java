@@ -1,7 +1,6 @@
 package com.sucaiji.cjpan.web;
 
 
-import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,18 +127,41 @@ public class ApiController {
 
 
     }
+
+    /**
+     * 根据传入的uuid，删除该文件或者文件夹，如果是文件夹的话，则删除文件夹下所有文件
+     * 注意，删除决定的确定应该在客户端上完成，这里只负责完成删除
+     * @param uuid
+     * @return
+     */
+    @RequestMapping("/delete")
+    public String delete(@RequestParam("uuid")String uuid){
+        return "123123";
+    }
+
     @RequestMapping("/download")
     @ResponseBody
     public String download(HttpServletRequest request, HttpServletResponse response){
         String uuid=request.getParameter("uuid");
-
+        System.out.println(uuid);
         File file=indexService.getFileByUuid(uuid);
         if(file==null) {
             return "error:没有这个文件";
         }
-
+        //通过uuid获取一个index实例，并通过这个实例获取文件名
+        Index index=indexService.getIndexByUuid(uuid);
+        if(index==null){
+            return "error:获取文件名失败";
+        }
+        String fileName=index.getName();
+        System.out.println("filename="+fileName);
         response.setContentType("application/force-download");
-        response.addHeader("Content-Disposition","attachment;filename=123.zip");
+        try {
+            response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileName, "UTF-8"));//url这个是将文件名转码
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("fuck出错了");
+            e.printStackTrace();
+        }
 
         byte[] buffer=new byte[1024];
         FileInputStream fis = null;

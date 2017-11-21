@@ -1,6 +1,6 @@
-package com.sucaiji.cjpan.service.impl;
+package com.sucaiji.cjpan.util.impl;
 
-import com.sucaiji.cjpan.service.Md5Service;
+import com.sucaiji.cjpan.util.Md5Util;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -11,7 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Service
-public class Md5ServiceImpl implements Md5Service{
+public class Md5UtilImpl implements Md5Util {
 
 
     @Override

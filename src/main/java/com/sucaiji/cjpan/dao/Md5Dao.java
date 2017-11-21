@@ -14,6 +14,10 @@ public interface Md5Dao {
     void insert(@Param("md5") String md5,@Param("uuid") String uuid);
 
     @Select("SELECT uuid FROM MD5 WHERE md5=#{md5}")
-    List<String> selectByMd5(@Param("md5") String md5);
+    List<String> selectUuidByMd5(@Param("md5") String md5);
+
+    @Select("SELECT md5 FROM MD5 WHERE uuid=#{uuid}")
+    String selectMd5ByUuid(@Param("uuid")String uuid);
+
 
 }

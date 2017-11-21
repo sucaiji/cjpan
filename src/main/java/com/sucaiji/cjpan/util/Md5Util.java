@@ -1,11 +1,11 @@
-package com.sucaiji.cjpan.service;
+package com.sucaiji.cjpan.util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 
-public interface Md5Service {
+public interface Md5Util {
 
     /**
      * 获取该输入流的MD5值
