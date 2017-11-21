@@ -66,7 +66,7 @@ function isUpload (file) {
 
             },error: function(XMLHttpRequest, errorThrown) {
 
-                alert("服务器出错!");
+                alert("服务器出1错!");
 
             }
 
@@ -198,7 +198,7 @@ function upload (file,filemd5) {
                     }
                 }
             },error: function(XMLHttpRequest, errorThrown) {
-                alert("服务器出错!");
+                alert("服务器出2错!");
             }
         });
     })
