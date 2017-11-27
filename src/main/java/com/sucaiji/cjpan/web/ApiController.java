@@ -139,27 +139,35 @@ public class ApiController {
         return "123123";
     }
 
+
+
+
+
     @RequestMapping("/download")
     @ResponseBody
-    public String download(HttpServletRequest request, HttpServletResponse response){
+    public void download(HttpServletRequest request, HttpServletResponse response){
         String uuid=request.getParameter("uuid");
         System.out.println(uuid);
         File file=indexService.getFileByUuid(uuid);
         if(file==null) {
-            return "error:没有这个文件";
+            return;
+            //return "error没有这个文件";
         }
         //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index=indexService.getIndexByUuid(uuid);
         if(index==null){
-            return "error:获取文件名失败";
+            return;
+            //return "error获取文件名失败";
         }
         String fileName=index.getName();
         System.out.println("filename="+fileName);
+        System.out.println("filesize="+file.length());
+
         response.setContentType("application/force-download");
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileName, "UTF-8"));//url这个是将文件名转码
+            response.setHeader("Content-Length", String.valueOf(file.length()));
         } catch (UnsupportedEncodingException e) {
-            System.out.println("fuck出错了");
             e.printStackTrace();
         }
 
@@ -172,10 +180,9 @@ public class ApiController {
             OutputStream os = response.getOutputStream();
             int i = bis.read(buffer);
             while (i != -1) {
-                os.write(buffer);
+                os.write(buffer,0,i);
                 i = bis.read(buffer);
             }
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -188,10 +195,8 @@ public class ApiController {
                 e.printStackTrace();
             }
         }
-        return null;
 
     }
-
 
 }
 
