@@ -1,9 +1,6 @@
 package com.sucaiji.cjpan.dao;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -18,6 +15,9 @@ public interface Md5Dao {
 
     @Select("SELECT md5 FROM MD5 WHERE uuid=#{uuid}")
     String selectMd5ByUuid(@Param("uuid")String uuid);
+
+    @Delete("DELETE FROM MD5 WHERE uuid=#{uuid}")
+    void deleteByUuid(@Param("uuid")String uuid);
 
 
 }

@@ -112,7 +112,6 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public File getFileByUuid(String uuid) {
         String md5=md5Dao.selectMd5ByUuid(uuid);
-        System.out.println(md5);
         if(md5==null){
             return null;
         }
@@ -132,6 +131,51 @@ public class IndexServiceImpl implements IndexService {
         return true;
     }
 
+    @Override
+    public void deleteByUuid(String uuid) {
+        Map<String,Object> map=new HashMap();
+        map.put("uuid",uuid);
+        List<Index> list=indexDao.selectIndex(map);
+        if(list.size()==0){
+            return;
+        }
+
+        Index index=list.get(0);
+
+        //如果index是一个文件夹的话，递归删除文件夹下所有文件
+        if(index.getWasDir()){
+            System.out.println("是文件夹，递归删除");
+            Map<String,Object> map1=new HashMap();
+            map1.put("parentUuid",index.getUuid());
+            List<Index> childUuidList=indexDao.selectIndex(map1);
+            for (Index index1:childUuidList){
+                deleteByUuid(index1.getUuid());
+            }
+        }else {
+            //如果不是文件夹 则执行删除数据库信息，判断md5表中是否还有该md5记录，如果没有了，则删除该文件
+            String md5=md5Dao.selectMd5ByUuid(uuid);
+
+            md5Dao.deleteByUuid(uuid);
+
+            Map<String,Object> map2=new HashMap<>();
+            map2.put("uuid",uuid);
+            indexDao.deleteIndex(map2);
+
+            //查询md5表中是否还有该md5的记录,如果没有的话，删除文件
+            List<String> list1=md5Dao.selectUuidByMd5(md5);
+            if(list1.size()==0){
+                deleteFile(md5);
+                System.out.println("文件删除");
+                return;
+            }
+
+
+
+
+        }
+
+    }
+
     /**
      *根据name解析出文件的类型
      * @param name
@@ -147,6 +191,34 @@ public class IndexServiceImpl implements IndexService {
     }
     private Timestamp time(){
         return new Timestamp(System.currentTimeMillis());
+    }
+
+    /**
+     * 根据md5值删除文件
+     * @param fileMd5
+     */
+    private void deleteFile(String fileMd5){
+        File file=new File(getMd5SubString(fileMd5));
+        System.out.println(file.getAbsolutePath());
+        if(!file.exists()){
+            return;
+        }
+
+        //回头把这个复制的封装成一个方法
+        try{
+            //先删除文件夹下所有东西
+            String[] children = file.list();
+            for (String str:children) {
+                Files.delete(Paths.get(file.getAbsolutePath()+File.separator+str));
+            }
+            //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
+            Files.delete(Paths.get(file.getAbsolutePath()));
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
     }
 
     /**

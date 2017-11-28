@@ -59,4 +59,10 @@ public interface IndexService {
      */
     boolean md5Exist(String md5);
 
+    /**
+     * 删除某个文件，如果该uuid指向一个文件夹的话，则删除该文件夹下所有文件
+     * @param uuid
+     */
+    void deleteByUuid(String uuid);
+
 }

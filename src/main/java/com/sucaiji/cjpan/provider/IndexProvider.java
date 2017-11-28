@@ -53,4 +53,16 @@ public class IndexProvider {
             }
         }.toString();
     }
+
+    public String deleteIndex(Map<String,Object> index){
+        return new SQL(){
+            {
+                DELETE_FROM("INDEXS");
+                if(index.get("uuid")!=null){
+                    WHERE("uuid=#{uuid}");
+                }
+
+            }
+        }.toString();
+    }
 }

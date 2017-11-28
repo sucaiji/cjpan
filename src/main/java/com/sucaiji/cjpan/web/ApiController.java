@@ -135,8 +135,11 @@ public class ApiController {
      * @return
      */
     @RequestMapping("/delete")
+    @ResponseBody
     public String delete(@RequestParam("uuid")String uuid){
-        return "123123";
+        indexService.deleteByUuid(uuid);
+
+        return "删完了";
     }
 
 

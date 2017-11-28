@@ -18,4 +18,7 @@ public interface IndexDao {
             @Result(column = "l_update",property = "lastUpdate")
     })
     List<Index> selectIndex(Map<String,Object> index);
+
+    @DeleteProvider(type = com.sucaiji.cjpan.provider.IndexProvider.class,method = "deleteIndex")
+    void deleteIndex(Map<String,Object> map);
 }
