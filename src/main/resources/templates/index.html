@@ -81,6 +81,14 @@
       <div class="am-cf am-padding am-padding-bottom-0">
         <div class="am-fl am-cf">
           <strong class="am-text-primary am-text-lg">全部文件</strong> / <small>根目录</small>
+          <!--上传用的-->
+          <input type="file" id="file" />
+
+          <button id="upload">上传</button>
+          <span id="output" style="font-size:12px">等待</span>
+          <span id="usetime" style="font-size:12px;margin-left:20px;">用时</span>
+          <span id="param" style="font-size:12px;margin-left:20px;">param==</span>
+          <!--上传用的完-->
         </div>
       </div>
 
@@ -129,10 +137,13 @@
 <![endif]-->
 
 <!--[if (gte IE 9)|!(IE)]><!-->
-<script src="assets/js/jquery.min.js"></script>
+<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+
 <!--<![endif]-->
 <script src="assets/js/amazeui.min.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="js/test.js"></script>
+<script src="js/md5.js"></script>
+<script src="js/upload.js"></script>
 </body>
 </html>

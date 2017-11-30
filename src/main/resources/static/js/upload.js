@@ -1,9 +1,17 @@
+function getQueryString(name) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return unescape(r[2]); return null;
+}
+var parent_uuid=getQueryString("uuid");
+
 
 var i = -1;
 var succeed = 0;
 var databgein;  //开始时间
 var dataend;    //结束时间
 var action=false;    //false检验分片是否上传过(默认); true上传文件
+
 
 var page = {
     init: function(){
@@ -133,6 +141,9 @@ function upload (file,filemd5) {
         }
     }
 
+    if(parent_uuid!=null){
+        form.append("parent_uuid",parent_uuid);
+    }
 
     form.append("filemd5", filemd5);
     form.append("name", name);
@@ -190,6 +201,8 @@ function upload (file,filemd5) {
                         //是否上传完毕
                         dataend=new Date();
                         $("#usetime").append(dataend.getTime()-databgein.getTime());
+                        //刷新页面
+                        location.reload(true);
                     } else {
                         //已上传成功,然后检测下一个分片
                         action = false;

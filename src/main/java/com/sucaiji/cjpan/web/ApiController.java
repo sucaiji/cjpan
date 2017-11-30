@@ -73,7 +73,6 @@ public class ApiController {
     @RequestMapping(value = "/is_upload")
     @ResponseBody
     public Map<String,Object> isUpload(@RequestParam("md5")String md5){
-        System.out.println(md5);
         if(indexService.md5Exist(md5)){
             Map<String,Object> map=new HashMap<>();
             map.put("flag",MD5_EXIST);
@@ -108,12 +107,10 @@ public class ApiController {
             if(finish){
                 boolean success=indexService.saveFile(parentUuid, fileMd5,name,total);
                 if(success) {
-                    System.out.println("文件md5校验：" + success);
                     Map<String,Object> map=new HashMap<>();
                     map.put("flag",123123123);
                     return map;
                 }else {
-                    System.out.println("文件md5校验："+success);
                     Map<String,Object> map=new HashMap<>();
                     map.put("flag",123188883);
                     return map;
@@ -150,7 +147,6 @@ public class ApiController {
     @ResponseBody
     public void download(HttpServletRequest request, HttpServletResponse response){
         String uuid=request.getParameter("uuid");
-        System.out.println(uuid);
         File file=indexService.getFileByUuid(uuid);
         if(file==null) {
             return;
@@ -163,8 +159,7 @@ public class ApiController {
             //return "error获取文件名失败";
         }
         String fileName=index.getName();
-        System.out.println("filename="+fileName);
-        System.out.println("filesize="+file.length());
+
 
         response.setContentType("application/force-download");
         try {

@@ -22,7 +22,7 @@ $.ajax({
             if(dataObj[i].wasDir){
                 content+="'?uuid="+dataObj[i].uuid+"'";
             }else {
-                content+="'download?uuid="+dataObj[i].uuid+"'";
+                content+="'api/download?uuid="+dataObj[i].uuid+"'";
             }
             content+="><img class='am-img-thumbnail am-img-bdrs' src=";
             if(dataObj[i].wasDir){
