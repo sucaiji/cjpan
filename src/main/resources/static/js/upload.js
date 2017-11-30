@@ -47,6 +47,8 @@ function isUpload (file) {
         var md5 = hex_md5(bolb);
         form.append("md5", md5);
 
+        form.append("parent_uuid",parent_uuid);
+
 
         //Ajax提交
 

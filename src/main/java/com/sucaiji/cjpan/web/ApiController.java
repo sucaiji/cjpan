@@ -70,10 +70,19 @@ public class ApiController {
         return "success";
     }
 
+    /**
+     * 如果已经有该md5值对应的文件了，则告诉客户端已经存在，同时数据库里面添加文件记录
+     * @param md5
+     * @return
+     */
     @RequestMapping(value = "/is_upload")
     @ResponseBody
-    public Map<String,Object> isUpload(@RequestParam("md5")String md5){
+    public Map<String,Object> isUpload(@RequestParam("md5")String md5,
+                                       @RequestParam(value = "parent_uuid",required = false)String parentUuid,
+                                       @RequestParam(value = "name")String name){
         if(indexService.md5Exist(md5)){
+            indexService.saveByMd5(md5,parentUuid,name);
+
             Map<String,Object> map=new HashMap<>();
             map.put("flag",MD5_EXIST);
             return map;

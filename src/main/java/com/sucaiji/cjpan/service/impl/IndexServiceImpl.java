@@ -108,6 +108,21 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
+    public void saveByMd5(String md5,String parentUuid,String name) {
+        String uuid=UUID();
+        //根据该md5获取一个uuid列表
+        List<String> list=md5Dao.selectUuidByMd5(md5);
+        //根据任意一个uuid获取该index实例
+        Index anotherIndex=getIndexByUuid(list.get(0));
+
+        //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
+        Index index=new Index(uuid,parentUuid,name,getType(name),false,time(),anotherIndex.getSize());
+        indexDao.insertIndex(index);
+
+        md5Dao.insert(md5,uuid);
+    }
+
+    @Override
     public File getFileByUuid(String uuid) {
         String md5=md5Dao.selectMd5ByUuid(uuid);
         if(md5==null){
@@ -166,9 +181,6 @@ public class IndexServiceImpl implements IndexService {
                 System.out.println("文件删除");
                 return;
             }
-
-
-
 
         }
 

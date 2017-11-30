@@ -46,6 +46,14 @@ public interface IndexService {
     void saveTemp(MultipartFile multipartFile,String fileMd5,String md5,Integer index);
 
     /**
+     * 当服务器中有该文件时，通过md5值秒存（在数据库index表中添加一条新纪录）
+     * @param md5
+     * @param parentUuid
+     * @param name
+     */
+    void saveByMd5(String md5,String parentUuid,String name);
+
+    /**
      * 通过uuid获取文件实际所在位置，如果文件不存在则返回null
      * @param uuid
      * @return
