@@ -52,10 +52,10 @@ public class ApiController {
 
     @RequestMapping("/visit")
     @ResponseBody
-    public List<Index> visit(@RequestParam(value = "parent_uuid",required = false)String parentUuid){//带参数uuid就访问那个文件夹 不带的话就主页
+    public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid){//带参数uuid就访问那个文件夹 不带的话就主页
         List<Index> list;
 
-        list=indexService.visitDir(parentUuid);
+        list=indexService.visitDir(uuid);
 
         return list;
     }

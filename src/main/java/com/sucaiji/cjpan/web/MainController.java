@@ -23,12 +23,17 @@ public class MainController {
 
     @RequestMapping("/upload")
     public String upload(Response response,Request request,Model model){
-        return "index";
+        return "upload";
     }
 
     @RequestMapping("/")
-    public String index(){
+    public String index(@RequestParam(value = "parent_uuid",required = false)String parentUuid){
         return "index";
+    }
+
+    @RequestMapping("/download")
+    public String download(){
+        return "download";
     }
 
 

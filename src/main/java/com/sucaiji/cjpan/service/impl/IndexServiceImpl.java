@@ -105,8 +105,6 @@ public class IndexServiceImpl implements IndexService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
