@@ -6,6 +6,7 @@ public class Index {
     private String uuid;
     private String parentUuid;
     private String name;
+    private String suffix;
     private String type;
     private boolean wasDir;
     private Timestamp lastUpdate;
@@ -14,25 +15,37 @@ public class Index {
     public Index() {
     }
 
-    public Index(String uuid, String parentUuid, String name, String type, boolean wasDir, Timestamp lastUpdate, int size) {
+    /**
+     * 一般是文件的构造方法
+     * @param uuid
+     * @param parentUuid
+     * @param name
+     * @param suffix
+     * @param type
+     * @param wasDir
+     * @param lastUpdate
+     * @param size
+     */
+    public Index(String uuid, String parentUuid, String name,String suffix ,String type, boolean wasDir, Timestamp lastUpdate, int size) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;
+        this.suffix = suffix;
         this.type = type;
         this.wasDir = wasDir;
         this.lastUpdate = lastUpdate;
         this.size = size;
     }
 
-    public Index(String uuid, String name, String type, boolean wasDir, Timestamp lastUpdate, int size) {
-        this.uuid = uuid;
-        this.name = name;
-        this.type = type;
-        this.wasDir = wasDir;
-        this.lastUpdate = lastUpdate;
-        this.size = size;
-    }
 
+    /**
+     * 一般是创建文件夹时用到
+     * @param uuid
+     * @param parentUuid
+     * @param name
+     * @param wasDir
+     * @param lastUpdate
+     */
     public Index(String uuid, String parentUuid, String name, boolean wasDir, Timestamp lastUpdate) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
@@ -41,12 +54,6 @@ public class Index {
         this.lastUpdate = lastUpdate;
     }
 
-    public Index(String uuid, String name, boolean wasDir, Timestamp lastUpdate) {
-        this.uuid = uuid;
-        this.name = name;
-        this.wasDir = wasDir;
-        this.lastUpdate = lastUpdate;
-    }
 
     public String getUuid() {
         return uuid;
@@ -70,6 +77,14 @@ public class Index {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
     }
 
     public String getType() {

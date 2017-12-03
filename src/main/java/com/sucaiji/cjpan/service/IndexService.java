@@ -5,6 +5,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 
@@ -25,6 +28,20 @@ public interface IndexService {
      * @return
      */
     Index getIndexByUuid(String uuid);
+
+    /**
+     * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
+     * @param uuid
+     * @param os
+     */
+    void writeInOutputStream(String uuid, OutputStream os) throws IOException;
+
+    /**
+     * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
+     * @param index
+     * @param os
+     */
+    void writeInOutputStream(Index index, OutputStream os ) throws IOException;
 
     /**
      * 文件合并和保存到数据库

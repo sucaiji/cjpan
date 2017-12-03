@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 public class ApiController {
     @Autowired
@@ -51,7 +51,6 @@ public class ApiController {
 
 
     @RequestMapping("/visit")
-    @ResponseBody
     public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid){//带参数uuid就访问那个文件夹 不带的话就主页
         List<Index> list;
 
@@ -61,7 +60,6 @@ public class ApiController {
     }
 
     @RequestMapping("/mkdir")
-    @ResponseBody
     public String createDir(@RequestParam("name")String name,
                             @RequestParam(value = "parent_uuid",required = false)String parentUuid){
         //不对parent_uuid是否为空做判断 因为mybatis里面有动态sql的判断
@@ -76,7 +74,6 @@ public class ApiController {
      * @return
      */
     @RequestMapping(value = "/is_upload")
-    @ResponseBody
     public Map<String,Object> isUpload(@RequestParam("md5")String md5,
                                        @RequestParam(value = "parent_uuid",required = false)String parentUuid,
                                        @RequestParam(value = "name")String name){
@@ -93,7 +90,6 @@ public class ApiController {
     }
 
     @RequestMapping(value = "/upload")
-    @ResponseBody
     public Map<String,Object> upload(HttpServletRequest request,
                       @RequestParam(value = "file",required = false)MultipartFile multipartFile,
                       @RequestParam("action")String action,
@@ -141,66 +137,76 @@ public class ApiController {
      * @return
      */
     @RequestMapping("/delete")
-    @ResponseBody
     public String delete(@RequestParam("uuid")String uuid){
         indexService.deleteByUuid(uuid);
 
         return "删完了";
     }
 
+    @RequestMapping("/image")
+    public void image(@RequestParam("uuid")String uuid,
+                      HttpServletRequest request,HttpServletResponse response){
+        Index index=indexService.getIndexByUuid(uuid);
+        //测试用，测试完删掉
+        response.setContentType("image/jpeg");//+index.getSuffix());
+        try {
+            response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        try {
+            OutputStream os=response.getOutputStream();
+            indexService.writeInOutputStream(index,os);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    @RequestMapping("/video")
+    public void video(@RequestParam("uuid")String uuid,
+                      HttpServletRequest request,HttpServletResponse response){
+        Index index=indexService.getIndexByUuid(uuid);
+        response.setContentType("video/"+index.getSuffix());
+        try {
+            response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        //response.setHeader("Accept-Ranges","bytes");
+        try {
+            OutputStream os=response.getOutputStream();
+            indexService.writeInOutputStream(index,os);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 
     @RequestMapping("/download")
-    @ResponseBody
     public void download(HttpServletRequest request, HttpServletResponse response){
         String uuid=request.getParameter("uuid");
-        File file=indexService.getFileByUuid(uuid);
-        if(file==null) {
+        if(uuid==null){
             return;
-            //return "error没有这个文件";
         }
-        //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index=indexService.getIndexByUuid(uuid);
-        if(index==null){
-            return;
-            //return "error获取文件名失败";
-        }
         String fileName=index.getName();
-
-
+        Integer fileLength=index.getSize();
         response.setContentType("application/force-download");
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileName, "UTF-8"));//url这个是将文件名转码
-            response.setHeader("Content-Length", String.valueOf(file.length()));
+            //这句话有坑，数据库里面我记录的都是6 如果设置长度了的话 文件只会下载6b  等文件大小那里没问题了再加上这行代码
+            //response.setHeader("Content-Length", String.valueOf(fileLength));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        byte[] buffer=new byte[1024];
-        FileInputStream fis = null;
-        BufferedInputStream bis =null;
         try {
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
-            OutputStream os = response.getOutputStream();
-            int i = bis.read(buffer);
-            while (i != -1) {
-                os.write(buffer,0,i);
-                i = bis.read(buffer);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            OutputStream os=response.getOutputStream();
+            indexService.writeInOutputStream(uuid,os);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                bis.close();
-                fis.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
     }

@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js">
+<html xmlns:th="http://www.thymeleaf.org" class="no-js">
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -21,7 +21,7 @@
   以获得更好的体验！</p>
 <![endif]-->
 
-<header class="am-topbar am-topbar-inverse admin-header">
+<header class="am-topbar am-topbar-inverse">
   <div class="am-topbar-brand">
     <strong>CJPAN</strong> <small>私有云存储系统</small>
   </div>
@@ -94,9 +94,44 @@
 
       <hr>
 
-      <ul id="file-list" class="am-avg-sm-2 am-avg-md-4 am-avg-lg-6 am-margin gallery-list">
+      <ul class="am-gallery am-avg-sm-2
+  am-avg-md-3 am-avg-lg-5 am-gallery-default" >
+        <li th:each="index:${indexList}" th:if="${index.wasDir}">
+          <a th:href="@{'/index?parent_uuid='+${index.uuid}}">
+            <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/folder.png' alt=''/>
+            <div class='gallery-title' th:text="${index.name}">name</div>
+            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+          </a>
+        </li>
+        <li th:each="index:${indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
+          <a th:case="'video'" th:href="@{'/video/'+${index.uuid}}">
+            <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/videos.png' alt=''/>
+            <div class='gallery-title' th:text="${index.name}">name</div>
+            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+          </a>
+
+
+          <figure th:case="'image'" th:href="@{'/api/image?uuid='+${index.uuid}}" data-am-widget="figure" class="am am-figure am-figure-default "   data-am-figure="{  pureview: 'true' }">
+            <img th:alt="${index.name}" th:src="@{'/api/image?uuid='+${index.uuid}}" th:href="@{'/api/image?uuid='+${index.uuid}}" />
+
+            <div class='gallery-title' th:text="${index.name}">name</div>
+            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+
+          </figure>
+          <a th:case="'image'" th:href="@{'/api/image?uuid='+${index.uuid}}">
+            <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/photos.png' alt=''/>
+
+          </a>
+          <a th:case="*" th:href="@{'/api/download?uuid='+${index.uuid}}">
+            <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/documents.png' alt=''/>
+            <div class='gallery-title' th:text="${index.name}">name</div>
+            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+          </a>
+        </li>
 
       </ul>
+
+
 
       <div class="am-margin am-cf">
         <hr/>
@@ -142,7 +177,6 @@
 <!--<![endif]-->
 <script src="assets/js/amazeui.min.js"></script>
 <script src="assets/js/app.js"></script>
-<script src="js/test.js"></script>
 <script src="js/md5.js"></script>
 <script src="js/upload.js"></script>
 </body>

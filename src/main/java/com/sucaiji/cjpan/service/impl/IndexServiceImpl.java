@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.sucaiji.cjpan.init.InitRunner.APP_NAME_EN;
 import static com.sucaiji.cjpan.init.InitRunner.DATA_DIR;
@@ -74,13 +76,51 @@ public class IndexServiceImpl implements IndexService {
         return index;
     }
 
+    @Override
+    public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
+        //通过uuid获取一个index实例，并通过这个实例获取文件名
+        Index index=getIndexByUuid(uuid);
+        if(index==null){
+            return;
+            //return "error获取文件名失败";
+        }
+        writeInOutputStream(index,os);
+
+    }
+
+    @Override
+    public void writeInOutputStream(Index index, OutputStream os) throws IOException {
+        String uuid=index.getUuid();
+        File file=getFileByUuid(uuid);
+        if(file==null) {
+            throw new FileNotFoundException();
+        }
+
+        byte[] buffer=new byte[1024];
+        FileInputStream fis = null;
+        BufferedInputStream bis =null;
+        try {
+            fis = new FileInputStream(file);
+            bis = new BufferedInputStream(fis);
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = bis.read(buffer);
+            }
+        }finally {
+            bis.close();
+            fis.close();
+        }
+    }
+
 
     @Override
     public boolean saveFile(String parentUuid, String fileMd5,String name,int total) {
         String uuid=UUID();
         Timestamp time=time();
+        String suffix=getSuffix(name);
         String type=getType(name);
-        Index index=new Index(uuid,parentUuid,name,type,false,time,6);
+        Index index=new Index(uuid,parentUuid,name,suffix,type,false,time,6);
         //先文件的合并,与校验
         boolean checkSuccess=saveFile(fileMd5,total);
         if(!checkSuccess){
@@ -116,7 +156,7 @@ public class IndexServiceImpl implements IndexService {
         Index anotherIndex=getIndexByUuid(list.get(0));
 
         //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
-        Index index=new Index(uuid,parentUuid,name,getType(name),false,time(),anotherIndex.getSize());
+        Index index=new Index(uuid,parentUuid,name,getSuffix(name),getType(name),false,time(),anotherIndex.getSize());
         indexDao.insertIndex(index);
 
         md5Dao.insert(md5,uuid);
@@ -186,14 +226,7 @@ public class IndexServiceImpl implements IndexService {
 
     }
 
-    /**
-     *根据name解析出文件的类型
-     * @param name
-     * @return
-     */
-    private String getType(String name){
-        return "mp3";
-    }
+
 
 
     private String UUID(){
@@ -231,6 +264,47 @@ public class IndexServiceImpl implements IndexService {
 
     }
 
+    /**
+     *根据name解析出文件的类型
+     * @param name
+     * @return
+     */
+    private String getType(String name){
+        //去掉点
+        String suffix=getSuffix(name).replaceAll("\\.","");
+        //支持的文件类型
+        Pattern videoPattern = Pattern.compile("(mp4|rm|rmvb|wmv|avi|3gp|mkv)");
+        Pattern imagePattern = Pattern.compile("(jpg|jpeg|png|gif)");
+        Pattern musicPattern = Pattern.compile("(mp3|wav|wma)");
+        Pattern docPattern = Pattern.compile("txt|pdf");
+        Matcher videoMatcher = videoPattern.matcher(suffix);
+        if(videoMatcher.matches()){
+            return "video";
+        }
+        Matcher imageMatcher = imagePattern.matcher(suffix);
+        if(imageMatcher.matches()){
+            return "image";
+        }
+        Matcher musicMatcher = musicPattern.matcher(suffix);
+        if(musicMatcher.matches()){
+            return "music";
+        }
+        Matcher docMatcher = docPattern.matcher(suffix);
+        if(docMatcher.matches()){
+            return "doc";
+        }
+        return "other";
+    }
+
+    private String getSuffix(String name){
+        Pattern p = Pattern.compile("\\.\\w+$");
+        Matcher m = p.matcher(name);
+        System.out.println(name);
+        if(m.find()){
+            return m.group();
+        }
+        return null;
+    }
     /**
      * 返回该文件的路径 文件的存放路径是以该文件md5值的前4位作为文件夹路径存放的
      * @param fileMd5

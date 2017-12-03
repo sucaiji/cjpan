@@ -20,6 +20,7 @@ public interface InitDao{
             "  parent_uuid CHAR(32) REFERENCES INDEXS (uuid)," +
             "  name VARCHAR (254) NOT NULL," +
             "  type VARCHAR(10)," +
+            "  suffix VARCHAR(10)," +
             "  is_dir BOOLEAN NOT NULL," +
             "  l_update DATETIME NOT NULL," +
             "  size INT," +

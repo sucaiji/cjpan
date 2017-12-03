@@ -14,6 +14,9 @@ public class IndexProvider {
                 if(index.getType()!=null) {
                     VALUES("type", "#{type}");
                 }
+                if(index.getSuffix()!=null){
+                    VALUES("suffix","#{suffix}");
+                }
                 VALUES("name","#{name}");
                 VALUES("is_dir","#{wasDir}");
                 VALUES("l_update","#{lastUpdate}");

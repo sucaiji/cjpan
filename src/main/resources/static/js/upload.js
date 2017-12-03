@@ -70,8 +70,8 @@ function isUpload (file) {
 
                 } */else if(dataObj.flag == "1") {
                     //文件已经上传过
-                    alert("文件已经上传过,秒传了！！");
-
+                    //alert("文件已经上传过,秒传了！！");
+                    location.reload(true);
                 }
 
             },error: function(XMLHttpRequest, errorThrown) {

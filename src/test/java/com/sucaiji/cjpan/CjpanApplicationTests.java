@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @RunWith(SpringRunner.class)
@@ -31,12 +33,30 @@ public class CjpanApplicationTests {
 	private IndexService indexService;
 	@Test
 	public void contextLoads() {
-
-		List<String> list1=md5Dao.selectUuidByMd5("asfasg");
-		if(list1==null){
-			System.out.println("123123");
+		String suffix=".txt".replaceAll("\\.","");
+		//回头扩充一下
+		Pattern videoPattern = Pattern.compile("(mp4|rm|rmvb|wmv|avi|3gp|mkv)");
+		Pattern imagePattern = Pattern.compile("(mp3|wav|wma)");
+		Pattern docPattern = Pattern.compile("txt|pdf");
+		Matcher videoMatcher = videoPattern.matcher(suffix);
+		if(videoMatcher.matches()){
+			System.out.println("是视频");
+			return;
 		}
-		System.out.println(list1.size());
+		Matcher imageMatcher = imagePattern.matcher(suffix);
+		if(imageMatcher.matches()){
+			System.out.println("是图片");
+			return;
+		}
+		Matcher docMatcher = docPattern.matcher(suffix);
+		if(docMatcher.matches()){
+			System.out.println("是文档");
+			return;
+		}
+
+
+
+
 	}
 
 
