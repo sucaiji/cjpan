@@ -51,6 +51,7 @@ public class MainController {
 
     @RequestMapping("/test")
     public String test(HttpServletRequest request,Model model){
+
         String parentUuid=request.getParameter("parent_uuid");
         List<Index> list;
         list=indexService.visitDir(parentUuid);

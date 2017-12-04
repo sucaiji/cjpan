@@ -17,6 +17,7 @@ public class InitRunner implements ApplicationRunner {
     public static final String APP_NAME_EN="cjpan";
     public static final String DATA_DIR="data";
     public static final String TEMP_DIR="temp";
+    public static final String THUMBNAIL_DIR="thumbnail";
     private String  initPath;
 
     @Override
@@ -34,6 +35,10 @@ public class InitRunner implements ApplicationRunner {
         File temp=new File(file.getAbsolutePath()+File.separator+TEMP_DIR);
         if(!temp.exists()){
             temp.mkdir();
+        }
+        File thumbnail=new File(file.getAbsolutePath()+File.separator+THUMBNAIL_DIR);
+        if(!thumbnail.exists()){
+            thumbnail.mkdir();
         }
         initTable();
     }

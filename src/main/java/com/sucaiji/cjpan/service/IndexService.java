@@ -12,6 +12,7 @@ import java.util.List;
 
 
 public interface IndexService {
+
     /**
      * 创建文件夹，如果parentUuid为空，则在根目录创建文件夹
      * @param name
@@ -30,6 +31,20 @@ public interface IndexService {
     Index getIndexByUuid(String uuid);
 
     /**
+     * 通过uuid获取到md5值,如果不存在则返回null
+     * @param uuid
+     * @return
+     */
+    String getMd5ByUuid(String uuid);
+
+    /**
+     * 根据md5获取到缩略图文件,如果缩略图不存在则返回null
+     * @param md5
+     * @return
+     */
+    File getThumbnailByMd5(String md5);
+
+    /**
      * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
      * @param uuid
      * @param os
@@ -37,14 +52,22 @@ public interface IndexService {
     void writeInOutputStream(String uuid, OutputStream os) throws IOException;
 
     /**
-     * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
+     * 根据传入的index获取到文件，并写入到传入的outputstream里面
      * @param index
      * @param os
      */
     void writeInOutputStream(Index index, OutputStream os ) throws IOException;
 
     /**
-     * 文件合并和保存到数据库
+     * 将传入的file写入到outputStream里面
+     * @param file
+     * @param os
+     * @throws IOException
+     */
+    void writeInOutputStream(File file,OutputStream os) throws IOException;
+
+    /**
+     * 文件合并和保存到数据库,并生成缩略图
      * @param parentUuid
      * @param fileMd5
      * @param name

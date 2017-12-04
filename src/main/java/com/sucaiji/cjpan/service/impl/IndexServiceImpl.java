@@ -6,10 +6,14 @@ import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.util.Md5Util;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -21,9 +25,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.sucaiji.cjpan.init.InitRunner.APP_NAME_EN;
-import static com.sucaiji.cjpan.init.InitRunner.DATA_DIR;
-import static com.sucaiji.cjpan.init.InitRunner.TEMP_DIR;
+import static com.sucaiji.cjpan.init.InitRunner.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -38,14 +40,22 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     private Md5Util md5Util;
 
+    private static final String VIDEO="video";
+    private static final String IMAGE ="image";
+    private static final String MUSIC="music";
+    private static final String DOCUMENT="doc";
+    private static final String OTHER="other";
+
     private Path basePath;
     private Path dataPath;
     private Path tempPath;
+    private Path thumbnailPath;
 
     public IndexServiceImpl(){
         basePath= Paths.get(System.getProperty("user.dir")+File.separator+APP_NAME_EN);
         dataPath=Paths.get(basePath.toString()+File.separator+DATA_DIR);
         tempPath=Paths.get(basePath.toString()+File.separator+TEMP_DIR);
+        thumbnailPath=Paths.get(basePath.toString()+File.separator+THUMBNAIL_DIR);
     }
 
     @Override
@@ -77,6 +87,16 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
+    public String getMd5ByUuid(String uuid) {
+        return md5Dao.selectMd5ByUuid(uuid);
+    }
+
+    @Override
+    public File getThumbnailByMd5(String md5) {
+        return getFileThumbnailPath(md5).toFile();
+    }
+
+    @Override
     public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
         //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index=getIndexByUuid(uuid);
@@ -92,7 +112,15 @@ public class IndexServiceImpl implements IndexService {
     public void writeInOutputStream(Index index, OutputStream os) throws IOException {
         String uuid=index.getUuid();
         File file=getFileByUuid(uuid);
+        writeInOutputStream(file,os);
+    }
+
+    @Override
+    public void writeInOutputStream(File file, OutputStream os) throws IOException {
         if(file==null) {
+            throw new FileNotFoundException();
+        }
+        if(!file.exists()){
             throw new FileNotFoundException();
         }
 
@@ -120,9 +148,9 @@ public class IndexServiceImpl implements IndexService {
         Timestamp time=time();
         String suffix=getSuffix(name);
         String type=getType(name);
-        Index index=new Index(uuid,parentUuid,name,suffix,type,false,time,6);
+        Index index=new Index(uuid,parentUuid,name,suffix,type,false,time,0);
         //先文件的合并,与校验
-        boolean checkSuccess=saveFile(fileMd5,total);
+        boolean checkSuccess= saveFile2(fileMd5,total);
         if(!checkSuccess){
             return false;
         }
@@ -130,6 +158,17 @@ public class IndexServiceImpl implements IndexService {
         indexDao.insertIndex(index);
         //md5表中添加记录
         md5Dao.insert(fileMd5,uuid);
+        //生成缩略图
+        switch (type){
+            case VIDEO:
+                //balabala
+                break;
+            case IMAGE:
+                generateImageThumbnail(fileMd5);
+                break;
+            default:
+                break;
+        }
         return true;
     }
 
@@ -168,7 +207,7 @@ public class IndexServiceImpl implements IndexService {
         if(md5==null){
             return null;
         }
-        File file=new File(getMd5SubString(md5)+File.separator+md5);
+        File file=new File(getFilePath(md5).toString());
         if(!file.exists()){
             return null;
         }
@@ -197,7 +236,6 @@ public class IndexServiceImpl implements IndexService {
 
         //如果index是一个文件夹的话，递归删除文件夹下所有文件
         if(index.getWasDir()){
-            System.out.println("是文件夹，递归删除");
             Map<String,Object> map1=new HashMap();
             map1.put("parentUuid",index.getUuid());
             List<Index> childUuidList=indexDao.selectIndex(map1);
@@ -241,21 +279,21 @@ public class IndexServiceImpl implements IndexService {
      * @param fileMd5
      */
     private void deleteFile(String fileMd5){
-        File file=new File(getMd5SubString(fileMd5));
-        System.out.println(file.getAbsolutePath());
-        if(!file.exists()){
+        File parentFile=new File(getFileParentPath(fileMd5).toString());
+        System.out.println(parentFile.getAbsolutePath());
+        if(!parentFile.exists()){
             return;
         }
 
         //回头把这个复制的封装成一个方法
         try{
             //先删除文件夹下所有东西
-            String[] children = file.list();
+            String[] children = parentFile.list();
             for (String str:children) {
-                Files.delete(Paths.get(file.getAbsolutePath()+File.separator+str));
+                Files.delete(Paths.get(parentFile.getAbsolutePath()+File.separator+str));
             }
             //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-            Files.delete(Paths.get(file.getAbsolutePath()));
+            Files.delete(Paths.get(parentFile.getAbsolutePath()));
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -279,43 +317,73 @@ public class IndexServiceImpl implements IndexService {
         Pattern docPattern = Pattern.compile("txt|pdf");
         Matcher videoMatcher = videoPattern.matcher(suffix);
         if(videoMatcher.matches()){
-            return "video";
+            return VIDEO;
         }
         Matcher imageMatcher = imagePattern.matcher(suffix);
         if(imageMatcher.matches()){
-            return "image";
+            return IMAGE;
         }
         Matcher musicMatcher = musicPattern.matcher(suffix);
         if(musicMatcher.matches()){
-            return "music";
+            return MUSIC;
         }
         Matcher docMatcher = docPattern.matcher(suffix);
         if(docMatcher.matches()){
-            return "doc";
+            return DOCUMENT;
         }
-        return "other";
+        return OTHER;
     }
 
+    /**
+     * 获取文件的后缀名
+     * @param name
+     * @return
+     */
     private String getSuffix(String name){
         Pattern p = Pattern.compile("\\.\\w+$");
         Matcher m = p.matcher(name);
-        System.out.println(name);
         if(m.find()){
             return m.group();
         }
         return null;
     }
     /**
-     * 返回该文件的路径 文件的存放路径是以该文件md5值的前4位作为文件夹路径存放的
+     * 通过md5返回该文件的父路径的路径 文件的父路径是以该文件md5值的前4位作为文件夹路径存放的
      * @param fileMd5
      * @return
      */
-    private String getMd5SubString(String fileMd5){
+    private Path getFileParentPath(String fileMd5){
         Path path=Paths.get(dataPath.toString()+File.separator+fileMd5.substring(0,4));
-        return path.toString();
+        return path;
     }
 
-    private boolean saveFile(String fileMd5,int total) {
+    /**
+     * 通过md5返回该文件的路径
+     * @param fileMd5
+     * @return
+     */
+    private Path getFilePath(String fileMd5){
+        Path path=Paths.get(getFileParentPath(fileMd5).toString()+File.separator+fileMd5);
+        return path;
+    }
+
+    /**
+     * 通过md5返回该文件的缩略图的路径
+     * @param md5
+     * @return
+     */
+    private Path getFileThumbnailPath(String md5){
+        Path path=Paths.get(thumbnailPath+File.separator+md5.substring(0,4)+File.separator+md5+".jpg");
+        return path;
+    }
+
+    /**
+     * 和上面的saveFile重名了。。想不出好名字。先起saveFile2回头再说,或者把俩个方法合一起
+     * @param fileMd5
+     * @param total
+     * @return
+     */
+    private boolean saveFile2(String fileMd5, int total) {
         //回头重写一遍可读性高的
         File file=new File(tempPath.toString()+File.separator+fileMd5+File.separator+fileMd5);
         if(!file.getParentFile().exists()){
@@ -339,7 +407,7 @@ public class IndexServiceImpl implements IndexService {
 
             boolean checkMd5= md5Util.md5CheckSum(file,fileMd5);
             if(checkMd5){
-                File dirFile=new File(getMd5SubString(fileMd5));
+                File dirFile=new File(getFileParentPath(fileMd5).toString());
                 if(!dirFile.exists()){
                     dirFile.mkdir();
                 }
@@ -373,4 +441,36 @@ public class IndexServiceImpl implements IndexService {
 
         return false;
     }
+
+    /**
+     * 生成缩略图并存储
+     */
+    private void generateImageThumbnail(String md5){
+        //创建路径
+        File thumbnailFile=getFileThumbnailPath(md5).toFile();
+        if(!thumbnailFile.exists()){
+            thumbnailFile.getParentFile().mkdirs();
+        }
+        Thumbnails.Builder<BufferedImage> builder = null;
+        try {
+            BufferedImage image = ImageIO.read(getFilePath(md5).toFile());
+            int height=image.getHeight();
+            int width=image.getWidth();
+            if(height>width){
+                image=Thumbnails.of(image)
+                        .width(256)
+                        .asBufferedImage();
+            }else{
+                image=Thumbnails.of(image)
+                        .height(256)
+                        .asBufferedImage();
+            }
+            builder=Thumbnails.of(image).sourceRegion(Positions.CENTER,256,256).size(256,256);
+            builder.outputFormat("jpg").toFile(getFileThumbnailPath(md5).toFile());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -5,7 +5,7 @@
 
 	<groupId>com.sucaiji</groupId>
 	<artifactId>cjpan</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cjpan</name>
@@ -70,6 +70,14 @@
 			<artifactId>nekohtml</artifactId>
 			<version>1.9.22</version>
 		</dependency>
+
+		<!--缩略图生成-->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.8</version>
+		</dependency>
+
 
 	</dependencies>
 

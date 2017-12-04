@@ -142,6 +142,25 @@ public class ApiController {
 
         return "删完了";
     }
+    @RequestMapping("/thumbnail")
+    public void thumbnail(@RequestParam("uuid")String uuid,HttpServletResponse response){
+        String md5=indexService.getMd5ByUuid(uuid);
+        if(md5==null){
+            return;
+        }
+        response.setContentType("image/jpeg");
+        response.addHeader("Content-Disposition","attachment;filename="+md5+".jpg");
+        File file=indexService.getThumbnailByMd5(md5);
+        if(file==null){
+            return;
+        }
+        try {
+            OutputStream os=response.getOutputStream();
+            indexService.writeInOutputStream(file,os);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @RequestMapping("/image")
     public void image(@RequestParam("uuid")String uuid,
@@ -203,6 +222,8 @@ public class ApiController {
         }
 
         try {
+            //文件丢失时，这里会下载0kb的空文件
+            //下次将writeInoutputStream函数修改一下
             OutputStream os=response.getOutputStream();
             indexService.writeInOutputStream(uuid,os);
         } catch (IOException e) {
