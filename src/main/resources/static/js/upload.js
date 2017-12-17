@@ -3,7 +3,7 @@ function getQueryString(name) {
     var r = window.location.search.substr(1).match(reg);
     if (r != null) return unescape(r[2]); return null;
 }
-var parent_uuid=getQueryString("uuid");
+var parent_uuid=getQueryString("parent_uuid");
 
 
 var i = -1;
