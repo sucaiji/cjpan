@@ -1,6 +1,6 @@
 package com.sucaiji.cjpan.dao;
 
-import org.apache.ibatis.annotations.Insert;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Update;
 
@@ -11,7 +11,7 @@ public interface InitDao{
             "  count varchar(32)," +
             "  password varchar(32)," +
             "  name varchar(20)," +
-            "  authorization int" +
+            "  role varchar(10)" +
             ")")
     void createTableUsers();
 
@@ -34,6 +34,7 @@ public interface InitDao{
             "  CONSTRAINT fk FOREIGN KEY(uuid) REFERENCES INDEXS(uuid)" +
             ")")
     void createTableMd5();
+
 
 
 
