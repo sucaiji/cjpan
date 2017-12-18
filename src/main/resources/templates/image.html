@@ -21,7 +21,7 @@
     以获得更好的体验！</p>
 <![endif]-->
 
-<header class="am-topbar am-topbar-inverse admin-header">
+<header class="am-topbar am-topbar-inverse ">
     <a href="/index">
         <div class="am-topbar-brand">
             <strong>CJPAN</strong>
@@ -97,9 +97,7 @@
                         <a th:unless="${parentIndex.parentUuid}" th:href="@{'/index'}">
                             <strong class="am-text-primary am-text-lg">返回上一级</strong>
                         </a>
-                        /
-                        <small>目前位于：</small>
-                        <small th:text="${parentIndex.name}"></small>
+                        /<small>目前位于：</small><small th:text="${parentIndex.name}"></small>
                     </div>
                     <div th:unless="${parentIndex}">
                         <strong class="am-text-primary am-text-lg">根目录</strong>
@@ -160,34 +158,44 @@
 
             <hr>
 
-            <ul class="am-gallery am-avg-sm-2
-  am-avg-md-3 am-avg-lg-5 am-gallery-default">
-                <li th:each="index:${indexList}" th:if="${index.wasDir}">
-                    <a th:href="@{'/index?parent_uuid='+${index.uuid}}">
-                        <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/folder.png' alt=''/>
-                        <div class='gallery-title' th:text="${index.name}">name</div>
-                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                    </a>
+            <ul data-am-widget="gallery" class="am-gallery am-avg-sm-3
+  am-avg-md-3 am-avg-lg-4 am-gallery-default" data-am-gallery="{ pureview: true }" >
+                <li>
+                    <div class="am-gallery-item">
+                        <a href="http://s.amazeui.org/media/i/demos/bing-1.jpg" class="">
+                            <img src="http://s.amazeui.org/media/i/demos/bing-1.jpg"  alt="远方 有一个地方 那里种有我们的梦想"/>
+                            <h3 class="am-gallery-title">远方 有一个地方 那里种有我们的梦想</h3>
+                            <div class="am-gallery-desc">2375-09-26</div>
+                        </a>
+                    </div>
                 </li>
-                <li th:each="index:${indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
-                    <a th:case="'video'" th:href="@{'/video/'+${index.uuid}}">
-                        <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/videos.png' alt=''/>
-                        <div class='gallery-title' th:text="${index.name}">name</div>
-                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                    </a>
-                    <a th:case="'image'" th:href="@{'/api/image?uuid='+${index.uuid}}">
-                        <img th:src="@{'/api/thumbnail?uuid='+${index.uuid}}" class='am-img-thumbnail am-img-bdrs'
-                             alt=''/>
-                        <div class='gallery-title' th:text="${index.name}">name</div>
-                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                    </a>
-                    <a th:case="*" th:href="@{'/api/download?uuid='+${index.uuid}}">
-                        <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/documents.png' alt=''/>
-                        <div class='gallery-title' th:text="${index.name}">name</div>
-                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                    </a>
+                <li>
+                    <div class="am-gallery-item">
+                        <a href="http://s.amazeui.org/media/i/demos/bing-2.jpg" class="">
+                            <img src="http://s.amazeui.org/media/i/demos/bing-2.jpg"  alt="某天 也许会相遇 相遇在这个好地方"/>
+                            <h3 class="am-gallery-title">某天 也许会相遇 相遇在这个好地方</h3>
+                            <div class="am-gallery-desc">2375-09-26</div>
+                        </a>
+                    </div>
                 </li>
-
+                <li>
+                    <div class="am-gallery-item">
+                        <a href="http://s.amazeui.org/media/i/demos/bing-3.jpg" class="">
+                            <img src="http://s.amazeui.org/media/i/demos/bing-3.jpg"  alt="不要太担心 只因为我相信"/>
+                            <h3 class="am-gallery-title">不要太担心 只因为我相信</h3>
+                            <div class="am-gallery-desc">2375-09-26</div>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="am-gallery-item">
+                        <a href="http://s.amazeui.org/media/i/demos/bing-4.jpg" class="">
+                            <img src="http://s.amazeui.org/media/i/demos/bing-4.jpg"  alt="终会走过这条遥远的道路"/>
+                            <h3 class="am-gallery-title">终会走过这条遥远的道路</h3>
+                            <div class="am-gallery-desc">2375-09-26</div>
+                        </a>
+                    </div>
+                </li>
             </ul>
 
 
@@ -272,7 +280,6 @@
                         success: function (data) {
                             var dataObj = eval(data);
                             var flag = dataObj.flag;
-                            location.reload(true);
 
                         }, error: function (XMLHttpRequest, errorThrown) {
                             alert("服务器出错!");

@@ -1,10 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <title>Title</title>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Login Page | Amaze UI Example</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link rel="alternate icon" type="image/png" href="/assets/i/favicon.png">
+    <link rel="stylesheet" href="/assets/css/amazeui.min.css"/>
+    <style>
+        .header {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 200%;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .header p {
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-登陆
+<div class="header">
+    <div class="am-g">
+        <h1>CJPAN</h1>
+        <p>填一句有b格的英语<br/>私有云服务</p>
+    </div>
+    <hr/>
+</div>
+<div class="am-g">
+    <div class="am-u-lg-6 am-u-md-8 am-u-sm-centered">
+        <h3>登录</h3>
+        <hr>
+        <br>
+
+        <form action="/api/login" method="post" class="am-form">
+            <label for="email">邮箱:</label>
+            <input type="email" name="email" id="email" value="">
+            <br>
+            <label for="password">密码:</label>
+            <input type="password" name="password" id="password" value="">
+            <br>
+            <label for="remember-me">
+                <input id="remember-me" type="checkbox">
+                记住密码
+            </label>
+            <br/>
+            <div class="am-cf">
+                <button type="button"
+                        class="am-btn am-btn-primary am-btn-sm am-fl"
+                        id="doc-prompt-toggle">
+                    登录
+                </button>
+            </div>
+        </form>
+        <hr>
+        <p>© 2014 AllMobilize, Inc. Licensed under MIT license.</p>
+    </div>
+</div>
+
+<!--[if lt IE 9]>
+<script src="http://libs.baidu.com/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdn.staticfile.org/modernizr/2.8.3/modernizr.js"></script>
+<script src="/assets/js/amazeui.ie8polyfill.min.js"></script>
+<![endif]-->
+
+<!--[if (gte IE 9)|!(IE)]><!-->
+<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+
+<script>
+
+    $(function () {
+
+        $('#doc-prompt-toggle').on('click', function () {
+
+            var email = $('#email').val();
+            var password = $('#password').val();
+            var form = new FormData();
+            form.append("email", email);
+            form.append("password", password);
+
+            $.ajax({
+                url: "/api/login",
+                type: "POST",
+                data: form,
+                async: true,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data == "\"success\"") {
+                        window.location.href="/index";
+
+                    } else {
+                        alert("密码错误");
+                    }
+                },
+                error: function (XMLHttpRequest, errorThrown) {
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

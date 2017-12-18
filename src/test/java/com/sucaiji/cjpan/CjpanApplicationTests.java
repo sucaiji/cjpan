@@ -3,6 +3,7 @@ package com.sucaiji.cjpan;
 
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.Md5Dao;
+import com.sucaiji.cjpan.dao.UserDao;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import net.coobird.thumbnailator.Thumbnailator;
@@ -34,32 +35,18 @@ public class CjpanApplicationTests {
 	@Autowired
 	private Md5Dao md5Dao;
 	@Autowired
+	private UserDao userDao;
+	@Autowired
 	private IndexDao indexDao;
 	@Autowired
 	private IndexService indexService;
 	@Test
 	public void contextLoads() {
-		Thumbnails.Builder<BufferedImage> builder = null;
-		try {
-			BufferedImage image = ImageIO.read(new File("C:\\Users\\sufchick\\Desktop\\IMG_1897.JPG"));
-			int height=image.getHeight();
-			int width=image.getWidth();
-			if(height>width){
-				image=Thumbnails.of(image)
-						.width(256)
-						.asBufferedImage();
-			}else{
-				image=Thumbnails.of(image)
-						.height(256)
-						.asBufferedImage();
-			}
-			builder=Thumbnails.of(image).sourceRegion(Positions.CENTER,256,256).size(256,256);
-			builder.outputFormat("jpg").toFile("E:\\1");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		String count="352";
+		Map<String,Object> user=new HashMap<>();
+		user.put("count",count);
+		List list=userDao.select(user);
+		System.out.println(list);
 	}
 
 

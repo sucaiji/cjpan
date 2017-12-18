@@ -3,6 +3,10 @@ package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
+import com.sucaiji.cjpan.service.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -21,6 +26,8 @@ import java.util.Map;
 public class ApiController {
     @Autowired
     private IndexService indexService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 相同文件已经存在，返回值告诉客户端秒传
@@ -167,18 +174,53 @@ public class ApiController {
                       HttpServletRequest request,HttpServletResponse response){
         Index index=indexService.getIndexByUuid(uuid);
         //测试用，测试完删掉
-        response.setContentType("image/jpeg");//+index.getSuffix());
+        /*response.setContentType("image/jpeg");//+index.getSuffix());
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        }
+        }*/
         try {
             OutputStream os=response.getOutputStream();
             indexService.writeInOutputStream(index,os);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @RequestMapping("/login")
+    public String login(HttpSession session,
+                        @RequestParam("email")String email,
+                        @RequestParam("password")String password){
+        Subject subject=SecurityUtils.getSubject();
+        UsernamePasswordToken token=new UsernamePasswordToken(email,password);
+        try {
+            subject.login(token);
+        } catch (Exception e){
+            return "failure";
+        }
+        return "success";
+
+        /*if(userService.login(email,password)){
+            session.setAttribute("user",email);
+            return "success";
+        }else {
+            return "failure";
+        }*/
+
+    }
+
+    @RequestMapping("/init_regist")
+    public String initRegister(@RequestParam("email")String email,
+                             @RequestParam("password")String password,
+                             @RequestParam("name")String name){
+        if(!userService.isEmpty()){
+            //如果user表不是空的则什么也不做
+            return "321321";
+        }
+        //魔法值admin后期改
+        userService.regist(email,password,name,"admin");
+        return "123123";
     }
 
     @RequestMapping("/video")

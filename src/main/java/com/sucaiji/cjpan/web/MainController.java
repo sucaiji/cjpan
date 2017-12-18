@@ -2,6 +2,7 @@ package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
+import com.sucaiji.cjpan.service.UserService;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,21 @@ import java.util.List;
 public class MainController {
     @Autowired
     private IndexService indexService;
+    @Autowired
+    private UserService userService;
 
+    @RequestMapping("/login")
+    public String login(){
+        if(userService.isEmpty()){
+            return "init";
+        }
+        return "login";
+    }
 
+    @RequestMapping("/init")
+    public String init(){
+        return "init";
+    }
 
     @RequestMapping("/upload")
     public String upload(Response response,Request request,Model model){
@@ -34,6 +48,13 @@ public class MainController {
         List<Index> list;
         list=indexService.visitDir(parentUuid);
         model.addAttribute("indexList",list);
+
+        if(parentUuid==null){
+            model.addAttribute("parentIndex",null);
+            return "index";
+        }
+        Index index=indexService.getIndexByUuid(parentUuid);
+        model.addAttribute("parentIndex",index);
         return "index";
     }
 
@@ -45,9 +66,20 @@ public class MainController {
     @RequestMapping("/video/{uuid}")
     public String video(@PathVariable("uuid")String uuid,
                         Model model){
-        model.addAttribute("uuid",uuid);
+        Index index=indexService.getIndexByUuid(uuid);
+        model.addAttribute("index",index);
         return "video";
     }
+
+    /**
+     * 画廊
+     * @return
+     */
+    @RequestMapping("/image")
+    public String image(){
+        return "image";
+    }
+
 
     @RequestMapping("/test")
     public String test(HttpServletRequest request,Model model){
@@ -56,6 +88,8 @@ public class MainController {
         List<Index> list;
         list=indexService.visitDir(parentUuid);
         model.addAttribute("indexList",list);
+
+
         return "test";
     }
 

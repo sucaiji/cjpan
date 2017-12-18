@@ -47,5 +47,6 @@ public class InitRunner implements ApplicationRunner {
         initDao.createTableUsers();
         initDao.createTableIndexs();
         initDao.createTableMd5();
+
     }
 }

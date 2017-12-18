@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Update;
 public interface InitDao{
     @Update("CREATE TABLE IF NOT EXISTS USERS(" +
             "  id int PRIMARY KEY AUTO_INCREMENT," +
-            "  count varchar(32)," +
+            "  count varchar(32) UNIQUE," +
             "  password varchar(32)," +
             "  name varchar(20)," +
             "  role varchar(10)" +

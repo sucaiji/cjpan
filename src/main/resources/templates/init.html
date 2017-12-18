@@ -1,0 +1,93 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" class="no-js">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>CJPAN私有云存储系统</title>
+    <meta name="description" content="这是一个 gallery 页面"/>
+    <meta name="keywords" content="gallery"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link rel="icon" type="image/png" href="assets/i/favicon.png"/>
+    <link rel="apple-touch-icon-precomposed" href="assets/i/app-icon72x72@2x.png"/>
+    <meta name="apple-mobile-web-app-title" content="Amaze UI"/>
+    <link rel="stylesheet" href="assets/css/amazeui.min.css"/>
+    <link rel="stylesheet" href="assets/css/admin.css"/>
+</head>
+<body>
+<!--[if lte IE 9]>
+<p class="browsehappy">你正在使用<strong>过时</strong>的浏览器，Amaze UI 暂不支持。 请 <a href="http://browsehappy.com/" target="_blank">升级浏览器</a>
+    以获得更好的体验！</p>
+<![endif]-->
+
+<header class="am-topbar am-topbar-inverse admin-header">
+    <a href="/index">
+        <div class="am-topbar-brand">
+            <strong>CJPAN</strong>
+            <small>私有云存储系统</small>
+        </div>
+    </a>
+
+</header>
+<div class="am-cf admin-main">
+    <!-- content start -->
+    <div class="admin-content">
+        <div class="admin-content-body am-u-lg-6 am-u-lg-centered">
+            <br/>
+            <form action="/api/init_regist" class="am-form">
+                <fieldset>
+                    <legend>初始化设置</legend>
+                    <div class="am-form-group">
+                        <label for="doc-ipt-count-1">邮件</label>
+                        <input name="email" type="email" class="" id="doc-ipt-count-1" placeholder="输入电子邮件">
+                    </div>
+
+                    <div class="am-form-group">
+                        <label for="doc-ipt-pwd-1">密码</label>
+                        <input name="password" type="password" class="" id="doc-ipt-pwd-1" placeholder="设置个密码吧">
+                    </div>
+
+                    <div class="am-form-group">
+                        <label for="doc-ipt-name-1">姓名</label>
+                        <input name="name" type="text" class="" id="doc-ipt-name-1" placeholder="输入姓名">
+                    </div>
+
+                    <p>
+                        <button type="submit" class="am-btn am-btn-default">提交</button>
+                    </p>
+                </fieldset>
+            </form>
+        </div>
+
+        <footer class="admin-content-footer">
+            <hr>
+            <p class="am-padding-left">© 2014 AllMobilize, Inc. Licensed under MIT license.</p>
+        </footer>
+    </div>
+    <!-- content end -->
+</div>
+
+
+<footer>
+    <hr>
+    <p class="am-padding-left">© 2014 AllMobilize, Inc. Licensed under MIT license.</p>
+</footer>
+
+<!--[if lt IE 9]>
+<script src="http://libs.baidu.com/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://cdn.staticfile.org/modernizr/2.8.3/modernizr.js"></script>
+<script src="/assets/js/amazeui.ie8polyfill.min.js"></script>
+<![endif]-->
+
+<!--[if (gte IE 9)|!(IE)]><!-->
+<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+
+<!--<![endif]-->
+<script src="/assets/js/amazeui.min.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/js/md5.js"></script>
+<script src="/js/upload.js"></script>
+
+</body>
+</html>
