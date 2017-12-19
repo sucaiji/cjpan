@@ -42,11 +42,17 @@ public class CjpanApplicationTests {
 	private IndexService indexService;
 	@Test
 	public void contextLoads() {
-		String count="352";
-		Map<String,Object> user=new HashMap<>();
-		user.put("count",count);
-		List list=userDao.select(user);
-		System.out.println(list);
+		String rangeStr="0-4310393";
+		Long range;
+		Pattern pattern3 = Pattern.compile("\\d+-\\d+");
+		Matcher matcher3 = pattern3.matcher(rangeStr);
+		if (matcher3.matches()) {
+			System.out.println(rangeStr);
+			rangeStr=rangeStr.replaceAll("-\\d+$","");
+			System.out.println(rangeStr);
+			range = Long.valueOf(rangeStr);
+		}
+
 	}
 
 

@@ -10,7 +10,7 @@ public class Index {
     private String type;
     private boolean wasDir;
     private Timestamp lastUpdate;
-    private int size;
+    private Long size;
 
     public Index() {
     }
@@ -26,7 +26,7 @@ public class Index {
      * @param lastUpdate
      * @param size
      */
-    public Index(String uuid, String parentUuid, String name,String suffix ,String type, boolean wasDir, Timestamp lastUpdate, int size) {
+    public Index(String uuid, String parentUuid, String name,String suffix ,String type, boolean wasDir, Timestamp lastUpdate, Long size) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;
@@ -111,11 +111,11 @@ public class Index {
         this.lastUpdate = lastUpdate;
     }
 
-    public int getSize() {
+    public Long getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(Long size) {
         this.size = size;
     }
 

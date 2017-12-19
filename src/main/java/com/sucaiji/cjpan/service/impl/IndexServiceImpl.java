@@ -141,19 +141,151 @@ public class IndexServiceImpl implements IndexService {
         }
     }
 
+    @Override
+    public void writeInOutputStream(String uuid, OutputStream os, String rangeStr) throws IOException {
+        Index index=getIndexByUuid(uuid);
+        if(index==null){
+            return;
+        }
+        writeInOutputStream(index,os);
+    }
+
+    @Override
+    public void writeInOutputStream(Index index, OutputStream os, String rangeStr) throws IOException {
+        String uuid=index.getUuid();
+        File file=getFileByUuid(uuid);
+        writeInOutputStream(file,os,rangeStr);
+    }
+
+    @Override
+    public void writeInOutputStream(File file, OutputStream os,String rangeStr) throws IOException {
+        Long fileSize=file.length();
+
+        Long range=getRange(rangeStr,fileSize);
+        if(file==null) {
+            throw new FileNotFoundException();
+        }
+        if(!file.exists()){
+            throw new FileNotFoundException();
+        }
+
+        RandomAccessFile randomAccessFile=new RandomAccessFile(file,"r");
+
+        System.out.println(range+"");
+        randomAccessFile.seek(range);
+
+        byte[] buffer=new byte[1024];
+        int i = randomAccessFile.read(buffer);
+        while (i != -1) {
+            os.write(buffer, 0, i);
+            i = randomAccessFile.read(buffer);
+        }
+        randomAccessFile.close();
+    }
+
+    private Long getRange(String rangeStr,Long fileSize){
+        rangeStr=rangeStr.replaceAll("bytes=","");
+        Long range=null;
+
+        Pattern pattern1 = Pattern.compile("\\d+");
+        Matcher matcher1 = pattern1.matcher(rangeStr);
+        if (matcher1.matches()) {
+            range = Long.valueOf(rangeStr);
+            return range;
+        }
+
+
+        Pattern pattern2 = Pattern.compile("\\d+-");
+        Matcher matcher2 = pattern2.matcher(rangeStr);
+        if (matcher2.matches()) {
+            range = Long.valueOf(rangeStr.replaceAll("-",""));
+            return range;
+        }
+
+        Pattern pattern3 = Pattern.compile("\\d+-\\d+");
+        Matcher matcher3 = pattern3.matcher(rangeStr);
+        if (matcher3.matches()) {
+            rangeStr=rangeStr.replaceAll("-.*","");
+            range = Long.valueOf(rangeStr);
+            System.out.println("123");
+            return range;
+        }
+
+        Pattern pattern4 = Pattern.compile("-\\d+");
+        Matcher matcher4 = pattern4.matcher(rangeStr);
+        if (matcher4.matches()) {
+            range=fileSize-Long.valueOf(rangeStr.replaceAll("-",""));
+            return range;
+        }
+
+        return null;
+    }
+
+
+
 
     @Override
     public boolean saveFile(String parentUuid, String fileMd5,String name,int total) {
+        File file=new File(tempPath.toString()+File.separator+fileMd5+File.separator+fileMd5);
+        if(!file.getParentFile().exists()){
+            return false;
+        }
+        try {
+            FileOutputStream fos=new FileOutputStream(file);
+            FileChannel outFileChannel=fos.getChannel();
+
+            List<File> files=new ArrayList<>();
+            for(int i=1;i<=total;i++){
+                files.add(new File(tempPath.toString()+File.separator+fileMd5+File.separator+i));
+            }
+            for(File file1:files){
+                FileInputStream fis=new FileInputStream(file1);
+                FileChannel inFileChannel=fis.getChannel();
+                inFileChannel.transferTo(0,file1.length(),outFileChannel);
+                inFileChannel.close();
+            }
+            outFileChannel.close();
+
+            boolean checkMd5= md5Util.md5CheckSum(file,fileMd5);
+            if(checkMd5){
+                File dirFile=new File(getFileParentPath(fileMd5).toString());
+                if(!dirFile.exists()){
+                    dirFile.mkdir();
+                }
+
+                Path from= Paths.get(file.getAbsolutePath());
+                Path to=Paths.get(dirFile.getAbsolutePath()+File.separator+fileMd5);
+                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
+                //删除temp里面的文件
+
+                //先删除文件夹下所有东西
+                String[] children = file.getParentFile().list();
+                for (String str:children) {
+                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath()+File.separator+str));
+
+                }
+
+                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
+                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        //获得文件的大小
+        Long size=getFilePath(fileMd5).toFile().length();
+
         String uuid=UUID();
         Timestamp time=time();
         String suffix=getSuffix(name);
         String type=getType(name);
-        Index index=new Index(uuid,parentUuid,name,suffix,type,false,time,0);
+        Index index=new Index(uuid,parentUuid,name,suffix,type,false,time,size);
         //先文件的合并,与校验
-        boolean checkSuccess= saveFile2(fileMd5,total);
-        if(!checkSuccess){
-            return false;
-        }
+
         //在文件树表中添加记录
         indexDao.insertIndex(index);
         //md5表中添加记录
@@ -377,70 +509,6 @@ public class IndexServiceImpl implements IndexService {
         return path;
     }
 
-    /**
-     * 和上面的saveFile重名了。。想不出好名字。先起saveFile2回头再说,或者把俩个方法合一起
-     * @param fileMd5
-     * @param total
-     * @return
-     */
-    private boolean saveFile2(String fileMd5, int total) {
-        //回头重写一遍可读性高的
-        File file=new File(tempPath.toString()+File.separator+fileMd5+File.separator+fileMd5);
-        if(!file.getParentFile().exists()){
-            return false;
-        }
-        try {
-            FileOutputStream fos=new FileOutputStream(file);
-            FileChannel outFileChannel=fos.getChannel();
-
-            List<File> files=new ArrayList<>();
-            for(int i=1;i<=total;i++){
-                files.add(new File(tempPath.toString()+File.separator+fileMd5+File.separator+i));
-            }
-            for(File file1:files){
-                FileInputStream fis=new FileInputStream(file1);
-                FileChannel inFileChannel=fis.getChannel();
-                inFileChannel.transferTo(0,file1.length(),outFileChannel);
-                inFileChannel.close();
-            }
-            outFileChannel.close();
-
-            boolean checkMd5= md5Util.md5CheckSum(file,fileMd5);
-            if(checkMd5){
-                File dirFile=new File(getFileParentPath(fileMd5).toString());
-                if(!dirFile.exists()){
-                    dirFile.mkdir();
-                }
-
-                Path from= Paths.get(file.getAbsolutePath());
-                Path to=Paths.get(dirFile.getAbsolutePath()+File.separator+fileMd5);
-                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-                //删除temp里面的文件
-
-                //先删除文件夹下所有东西
-                String[] children = file.getParentFile().list();
-                for (String str:children) {
-                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath()+File.separator+str));
-
-                }
-
-                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
-                return true;
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("合并文件并校验md5，如果校验失败则返回false，如果成功就移动文件到data文件夹并删除源文件");
-
-        return false;
-    }
 
     /**
      * 生成缩略图并存储

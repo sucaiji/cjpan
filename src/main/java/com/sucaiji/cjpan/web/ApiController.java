@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,13 +231,17 @@ public class ApiController {
         response.setContentType("video/"+index.getSuffix());
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
+            response.setHeader("Content-Length", String.valueOf(index.getSize()));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        //response.setHeader("Accept-Ranges","bytes");
+        response.setHeader("Accept-Ranges","bytes");
+
+        String rangeStr=request.getHeader("range");
+        System.out.println("rangeStr="+rangeStr);
         try {
             OutputStream os=response.getOutputStream();
-            indexService.writeInOutputStream(index,os);
+            indexService.writeInOutputStream(index,os,rangeStr);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -253,12 +258,12 @@ public class ApiController {
         }
         Index index=indexService.getIndexByUuid(uuid);
         String fileName=index.getName();
-        Integer fileLength=index.getSize();
+        Long fileLength=index.getSize();
         response.setContentType("application/force-download");
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileName, "UTF-8"));//url这个是将文件名转码
             //这句话有坑，数据库里面我记录的都是6 如果设置长度了的话 文件只会下载6b  等文件大小那里没问题了再加上这行代码
-            //response.setHeader("Content-Length", String.valueOf(fileLength));
+            response.setHeader("Content-Length", String.valueOf(fileLength));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
