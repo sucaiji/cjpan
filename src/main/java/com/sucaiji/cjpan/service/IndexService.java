@@ -66,17 +66,19 @@ public interface IndexService {
      */
     void writeInOutputStream(File file,OutputStream os) throws IOException;
 
-    void writeInOutputStream(String uuid, OutputStream os,String rangeStr) throws IOException;
-    void writeInOutputStream(Index index, OutputStream os,String rangeStr) throws IOException;
+    void writeInOutputStream(String uuid, OutputStream os,Range range) throws IOException;
+    void writeInOutputStream(Index index, OutputStream os,Range range) throws IOException;
 
     /**
      * 根据偏移量将数据写入流中
      * @param file
      * @param os
-     * @param rangeStr 偏移量,bytes=4310394-这种形式类似的
+     * @param range 偏移量
      * @throws IOException
      */
-    void writeInOutputStream(File file, OutputStream os,String rangeStr) throws IOException;
+    void writeInOutputStream(File file, OutputStream os,Range range) throws IOException;
+
+    Range getRange(String rangeStr,Long fileSize);
 
     /**
      * 文件合并和保存到数据库,并生成缩略图
@@ -124,5 +126,18 @@ public interface IndexService {
      * @param uuid
      */
     void deleteByUuid(String uuid);
+
+    class Range{
+        public Long start;
+        public Long end;
+        public Long length;
+        public Long total;
+        public Range(Long start,Long end,Long total){
+            this.start=start;
+            this.end=end;
+            this.length=end-start+1;
+            this.total=total;
+        }
+    }
 
 }

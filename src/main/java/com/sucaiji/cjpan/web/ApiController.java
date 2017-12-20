@@ -228,23 +228,65 @@ public class ApiController {
     public void video(@RequestParam("uuid")String uuid,
                       HttpServletRequest request,HttpServletResponse response){
         Index index=indexService.getIndexByUuid(uuid);
-        response.setContentType("video/"+index.getSuffix());
+        response.setContentType("video/mp4");//+index.getSuffix());
+
+
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
-            response.setHeader("Content-Length", String.valueOf(index.getSize()));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         response.setHeader("Accept-Ranges","bytes");
 
+
+
         String rangeStr=request.getHeader("range");
-        System.out.println("rangeStr="+rangeStr);
-        try {
-            OutputStream os=response.getOutputStream();
-            indexService.writeInOutputStream(index,os,rangeStr);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(rangeStr!=null){
+            IndexService.Range range=indexService.getRange(rangeStr,index.getSize());
+            String total=String.valueOf(range.total);
+            String length=String.valueOf(range.length);
+            String start=String.valueOf(range.start);
+            String end=String.valueOf(range.end);
+
+            response.setHeader("Content-Range","bytes "+start+"-"+end+"/"+total);
+            response.setHeader("Content-Length",length);
+
+            System.out.println("range不为空");
+            System.out.println("rangeStr="+rangeStr);
+            System.out.println("start"+range.start);
+            System.out.println("end"+range.end);
+            System.out.println("length"+range.length);
+            System.out.println("total"+range.total);
+            response.setStatus(206);
+            try {
+                OutputStream os=response.getOutputStream();
+                indexService.writeInOutputStream(index,os,range);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else {
+            Long end=index.getSize()-1L;
+            IndexService.Range range=new IndexService.Range(0L,end,index.getSize());
+            String length=String.valueOf(index.getSize());
+            System.out.println("range为空!");
+            response.setStatus(200);
+            response.setHeader("Content-Range", "bytes 0-"+end+"/"+index.getSize());
+            response.setHeader("Content-Length", length);
+
+
+            try {
+                OutputStream os=response.getOutputStream();
+                indexService.writeInOutputStream(index,os,range);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        System.out.println(response.getHeader("Content-Range"));
+        System.out.println(response.getHeader("Content-Length"));
+
+
+
 
     }
 

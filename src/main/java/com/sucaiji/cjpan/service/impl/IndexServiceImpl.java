@@ -142,26 +142,24 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public void writeInOutputStream(String uuid, OutputStream os, String rangeStr) throws IOException {
+    public void writeInOutputStream(String uuid, OutputStream os, Range range) throws IOException {
         Index index=getIndexByUuid(uuid);
         if(index==null){
             return;
         }
-        writeInOutputStream(index,os);
+        writeInOutputStream(index,os,range);
     }
 
     @Override
-    public void writeInOutputStream(Index index, OutputStream os, String rangeStr) throws IOException {
+    public void writeInOutputStream(Index index, OutputStream os, Range range) throws IOException {
         String uuid=index.getUuid();
         File file=getFileByUuid(uuid);
-        writeInOutputStream(file,os,rangeStr);
+        writeInOutputStream(file,os,range);
     }
 
     @Override
-    public void writeInOutputStream(File file, OutputStream os,String rangeStr) throws IOException {
-        Long fileSize=file.length();
+    public void writeInOutputStream(File file, OutputStream os,Range range) throws IOException {
 
-        Long range=getRange(rangeStr,fileSize);
         if(file==null) {
             throw new FileNotFoundException();
         }
@@ -170,52 +168,58 @@ public class IndexServiceImpl implements IndexService {
         }
 
         RandomAccessFile randomAccessFile=new RandomAccessFile(file,"r");
+        try {
+            System.out.println("偏移量"+range+"");
+            randomAccessFile.seek(range.start);
 
-        System.out.println(range+"");
-        randomAccessFile.seek(range);
-
-        byte[] buffer=new byte[1024];
-        int i = randomAccessFile.read(buffer);
-        while (i != -1) {
-            os.write(buffer, 0, i);
-            i = randomAccessFile.read(buffer);
+            byte[] buffer=new byte[1024];
+            int i = randomAccessFile.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = randomAccessFile.read(buffer);
+            }
+        }finally {
+            randomAccessFile.close();
         }
-        randomAccessFile.close();
-    }
 
-    private Long getRange(String rangeStr,Long fileSize){
+
+    }
+    @Override
+    public Range getRange(String rangeStr,Long fileSize){
         rangeStr=rangeStr.replaceAll("bytes=","");
-        Long range=null;
+
 
         Pattern pattern1 = Pattern.compile("\\d+");
         Matcher matcher1 = pattern1.matcher(rangeStr);
         if (matcher1.matches()) {
-            range = Long.valueOf(rangeStr);
-            return range;
+            Long start = Long.valueOf(rangeStr);
+            return new Range(start,fileSize-1,fileSize);
         }
 
 
         Pattern pattern2 = Pattern.compile("\\d+-");
         Matcher matcher2 = pattern2.matcher(rangeStr);
         if (matcher2.matches()) {
-            range = Long.valueOf(rangeStr.replaceAll("-",""));
-            return range;
+
+            Long start= Long.valueOf(rangeStr.replaceAll("-",""));
+            return new Range(start,fileSize-1,fileSize);
         }
 
         Pattern pattern3 = Pattern.compile("\\d+-\\d+");
         Matcher matcher3 = pattern3.matcher(rangeStr);
         if (matcher3.matches()) {
-            rangeStr=rangeStr.replaceAll("-.*","");
-            range = Long.valueOf(rangeStr);
-            System.out.println("123");
-            return range;
+            String temp=rangeStr.replaceAll("-\\d*","");
+            Long start = Long.valueOf(temp);
+            temp=rangeStr.replaceAll("\\d*-","");
+            Long end = Long.valueOf(temp);
+            return new Range(start,end,fileSize);
         }
 
         Pattern pattern4 = Pattern.compile("-\\d+");
         Matcher matcher4 = pattern4.matcher(rangeStr);
         if (matcher4.matches()) {
-            range=fileSize-Long.valueOf(rangeStr.replaceAll("-",""));
-            return range;
+            Long start=fileSize-1-Long.valueOf(rangeStr.replaceAll("-",""));
+            return new Range(start,fileSize-1,fileSize);
         }
 
         return null;
@@ -277,6 +281,7 @@ public class IndexServiceImpl implements IndexService {
             e.printStackTrace();
         }
         //获得文件的大小
+        //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
         Long size=getFilePath(fileMd5).toFile().length();
 
         String uuid=UUID();

@@ -52,7 +52,6 @@ public class CjpanApplicationTests {
 			System.out.println(rangeStr);
 			range = Long.valueOf(rangeStr);
 		}
-
 	}
 
 
