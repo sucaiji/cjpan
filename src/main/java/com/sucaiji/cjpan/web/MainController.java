@@ -1,5 +1,6 @@
 package com.sucaiji.cjpan.web;
 
+import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
@@ -11,10 +12,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.sucaiji.cjpan.config.Property.*;
 
 
 @Controller
@@ -45,8 +49,12 @@ public class MainController {
     @RequestMapping(value = {"/","index","/index"})
     public String index(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
                         Model model){
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+
         List<Index> list;
-        list=indexService.visitDir(parentUuid);
+        list=indexService.getIndexList(parentUuid);
         model.addAttribute("indexList",list);
 
         if(parentUuid==null){
@@ -57,11 +65,53 @@ public class MainController {
         model.addAttribute("parentIndex",index);
         return "index";
     }
+    @RequestMapping("/file/{str}")
+    public String type(@PathVariable("str")String str,
+                       @RequestParam(value = "parent_uuid",required = false )String parentUuid,
+                       Model model){
+        String type;
+        switch (str){
+            case "gallery":
+                type=IMAGE;
+                break;
+            case "documents":
+                type=DOCUMENT;
+                break;
+            case "videos":
+                type=VIDEO;
+                break;
+            case "musics":
+                type=MUSIC;
+                break;
+            default:
+                type=OTHER;
+        }
+
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+
+        Map<String,Object> map=new HashMap<>();
+        map.put(PARENT_UUID,parentUuid);
+        map.put(TYPE, type);
+
+        List<Index> list;
+        list=indexService.getIndexList(0,map);
+        model.addAttribute("indexList",list);
+
+        return "type";
+
+    }
+
+
+
 
     @RequestMapping("/download")
     public String download(){
         return "download";
     }
+
+
 
     @RequestMapping("/video/{uuid}")
     public String video(@PathVariable("uuid")String uuid,
@@ -71,14 +121,11 @@ public class MainController {
         return "video";
     }
 
-    /**
-     * 画廊
-     * @return
-     */
-    @RequestMapping("/image")
-    public String image(){
-        return "image";
+    @RequestMapping("/settings")
+    public String settings(){
+        return "settings";
     }
+
 
 
     @RequestMapping("/test")
@@ -86,7 +133,7 @@ public class MainController {
 
         String parentUuid=request.getParameter("parent_uuid");
         List<Index> list;
-        list=indexService.visitDir(parentUuid);
+        list=indexService.getIndexList(parentUuid);
         model.addAttribute("indexList",list);
 
 

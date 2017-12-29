@@ -9,12 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="renderer" content="webkit"/>
     <meta http-equiv="Cache-Control" content="no-siteapp"/>
-    <link rel="icon" type="image/png" href="/assets/i/favicon.png"/>
+    <link rel="icon" type="/image/png" href="/assets/i/favicon.png"/>
     <link rel="apple-touch-icon-precomposed" href="/assets/i/app-icon72x72@2x.png"/>
     <meta name="apple-mobile-web-app-title" content="Amaze UI"/>
     <link rel="stylesheet" href="/assets/css/amazeui.min.css"/>
     <link rel="stylesheet" href="/assets/css/admin.css"/>
-    <link rel="stylesheet" href="/css/style.css"/>
 </head>
 <body>
 <!--[if lte IE 9]>
@@ -75,7 +74,7 @@
 
             <div class="am-panel am-panel-default admin-sidebar-panel">
                 <div class="am-panel-bd">
-                    <p><span class="am-icon-tag"></span> 欢迎访问我的github！</p>
+                    <p><span class="am-icon-tag"></span> cjpan</p>
                     <p><a href="https://github.com/sucaiji/cjpan">github</a></p>
                 </div>
             </div>
@@ -89,21 +88,6 @@
         <div class="admin-content-body">
             <div class="am-cf am-padding am-padding-bottom-0">
                 <div class="am-fl am-cf">
-                    <div th:if="${parentIndex}">
-                        <a th:if="${parentIndex.parentUuid}"
-                           th:href="@{'/index?parent_uuid='+${parentIndex.parentUuid}}">
-                            <strong class="am-text-primary am-text-lg">返回上一级</strong>
-                        </a>
-                        <a th:unless="${parentIndex.parentUuid}" th:href="@{'/index'}">
-                            <strong class="am-text-primary am-text-lg">返回上一级</strong>
-                        </a>
-                        /
-                        <small>目前位于：</small>
-                        <small th:text="${parentIndex.name}"></small>
-                    </div>
-                    <div th:unless="${parentIndex}">
-                        <strong class="am-text-primary am-text-lg">根目录</strong>
-                    </div>
 
                     <!--点击弹窗-->
                     <button
@@ -122,9 +106,9 @@
                             </div>
                             <div class="am-modal-bd">
                                 <!--上传用的-->
-                                <input class="am-btn-secondary" type="file" id="file"/>
+                                <input type="file" id="file"/>
 
-                                <button class="am-btn-secondary" id="upload">上传</button>
+                                <button id="upload">上传</button>
                                 <span id="output" style="font-size:12px">等待</span>
                                 <span id="usetime" style="font-size:12px;margin-left:20px;">用时</span>
                                 <span id="param" style="font-size:12px;margin-left:20px;">param==</span>
@@ -165,125 +149,30 @@
                 <li th:each="index:${indexList}" th:if="${index.wasDir}">
                     <a th:href="@{'/index?parent_uuid='+${index.uuid}}">
                         <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/folder.png' alt=''/>
-                        <div class="am-u-sm-10 am-u-md-10 am-u-lg-10">
-                            <div class='gallery-title text-omit' th:text="${index.name}">name</div>
-                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                        </div>
-                        <div class="am-u-sm-2 am-u-md-2 am-u-lg-2">
-                            <div class="am-dropdown" data-am-dropdown>
-                                <img src="/img/menu.png" class="am-dropdown-toggle menu-icon"/>
-                                <div class="am-dropdown-content">
-                                    <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="rename-btn">重命名</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-move', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="move-btn">移动</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-info', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="info-btn">详细信息</a>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
+                        <div class='gallery-title' th:text="${index.name}">name</div>
+                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
                     </a>
                 </li>
                 <li th:each="index:${indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
                     <a th:case="'video'" th:href="@{'/video/'+${index.uuid}}">
-                        <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/videos.png' alt=''/>
-                        <div class="am-u-sm-10 am-u-md-10 am-u-lg-10">
-                            <div class='gallery-title text-omit' th:text="${index.name}">name</div>
-                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                        </div>
-                        <div class="am-u-sm-2 am-u-md-2 am-u-lg-2">
-                            <div class="am-dropdown" data-am-dropdown>
-                                <img src="/img/menu.png" class="am-dropdown-toggle menu-icon"/>
-                                <div class="am-dropdown-content">
-                                    <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="rename-btn">重命名</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-move', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="move-btn">移动</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-info', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="info-btn">详细信息</a>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
+                        <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/videos.png' alt=''/>
+                        <div class='gallery-title' th:text="${index.name}">name</div>
+                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
                     </a>
                     <a th:case="'image'" th:href="@{'/api/image?uuid='+${index.uuid}}">
                         <img th:src="@{'/api/thumbnail?uuid='+${index.uuid}}" class='am-img-thumbnail am-img-bdrs'
                              alt=''/>
-                        <div class="am-u-sm-10 am-u-md-10 am-u-lg-10">
-                            <div class='gallery-title text-omit' th:text="${index.name}">name</div>
-                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                        </div>
-                        <div class="am-u-sm-2 am-u-md-2 am-u-lg-2">
-                            <div class="am-dropdown" data-am-dropdown>
-                                <img src="/img/menu.png" class="am-dropdown-toggle menu-icon"/>
-                                <div class="am-dropdown-content">
-                                    <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="rename-btn">重命名</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-move', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="move-btn">移动</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-info', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="info-btn">详细信息</a>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
+                        <div class='gallery-title' th:text="${index.name}">name</div>
+                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
                     </a>
                     <a th:case="*" th:href="@{'/api/download?uuid='+${index.uuid}}">
-                        <img class='am-img-thumbnail am-img-bdrs' src='img/tubiao/documents.png' alt=''/>
-                        <div class="am-u-sm-10 am-u-md-10 am-u-lg-10">
-                            <div class='gallery-title text-omit' th:text="${index.name}">name</div>
-                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
-                        </div>
-                        <div class="am-u-sm-2 am-u-md-2 am-u-lg-2">
-                            <div class="am-dropdown" data-am-dropdown>
-                                <img src="/img/menu.png" class="am-dropdown-toggle menu-icon"/>
-                                <div class="am-dropdown-content">
-                                    <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
-                                    <h5 type="button"
-                                            data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="rename-btn">重命名</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-move', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="move-btn">移动</a>
-                                    </h5>
-                                    <h5 type="button"
-                                        data-am-modal="{target: '#model-info', closeViaDimmer: 0, width: 400, height: 225}">
-                                        <a th:name="${index.uuid}" class="info-btn">详细信息</a>
-                                    </h5>
-                                </div>
-                            </div>
-                        </div>
-
+                        <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/documents.png' alt=''/>
+                        <div class='gallery-title' th:text="${index.name}">name</div>
+                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
                     </a>
-
-
-
-
                 </li>
 
-
             </ul>
-
 
 
             <div class="am-margin am-cf">
@@ -311,39 +200,6 @@
 
 </div>
 
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-move">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            move
-        </div>
-    </div>
-</div>
-
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-info">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            信息
-        </div>
-    </div>
-</div>
-
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-rename">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            重命名
-        </div>
-    </div>
-</div>
-
 <a href="#" class="am-icon-btn am-icon-th-list am-show-sm-only admin-menu"
    data-am-offcanvas="{target: '#admin-offcanvas'}"></a>
 
@@ -368,22 +224,6 @@
 <script src="/js/spark-md5.min.js"></script>
 <script src="/js/upload.js"></script>
 <script>
-    var del=function (uuid) {
-        $.ajax({
-            url: "/api/delete?uuid="+uuid,
-            type: "GET",
-            async: true,        //异步
-            processData: false,  //很重要，告诉jquery不要对form进行处理
-            contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-            success: function (data) {
-                alert("成功删除");
-                location.reload(true);
-            }, error: function (XMLHttpRequest, errorThrown) {
-                alert("服务器出错!");
-            }
-        });
-    };
-
 
     $(function () {
 
@@ -432,7 +272,7 @@
         });
 
         var $exitbtn = $('#exit-btn');
-        $exitbtn.on('click', function () {
+        $exitbtn.on('click', function() {
             $.ajax({
                 url: "/api/exit",
                 type: "GET",
@@ -441,31 +281,15 @@
                 contentType: false,  //很重要，指定为false才能形成正确的Content-Type
                 success: function (data) {
                     alert("成功退出");
-                    location.reload(true);
+
                 }, error: function (XMLHttpRequest, errorThrown) {
                     alert("服务器出错!");
                 }
             });
         });
-
-        var del=function (uuid) {
-            $.ajax({
-                url: "/api/delete?uuid="+uuid,
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("成功删除");
-
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        };
-
-
     });
+
+
 </script>
 </body>
 </html>

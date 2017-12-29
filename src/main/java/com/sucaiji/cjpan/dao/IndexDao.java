@@ -8,6 +8,7 @@ import java.util.Map;
 
 @Mapper
 public interface IndexDao {
+
     @InsertProvider(type=com.sucaiji.cjpan.provider.IndexProvider.class,method = "insertIndex")
     void insertIndex(Index index);
 

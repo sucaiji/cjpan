@@ -1,0 +1,11 @@
+.text-omit{
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.menu-icon{
+
+    height:auto;
+    width:27px;
+}

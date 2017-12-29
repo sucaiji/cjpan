@@ -17,7 +17,7 @@ public interface InitDao{
 
     @Update("CREATE TABLE IF NOT EXISTS INDEXS (" +
             "  uuid CHAR(32) PRIMARY KEY," +
-            "  parent_uuid CHAR(32) REFERENCES INDEXS (uuid)," +
+            "  parent_uuid CHAR(32)," +
             "  name VARCHAR (254) NOT NULL," +
             "  type VARCHAR(10)," +
             "  suffix VARCHAR(10)," +

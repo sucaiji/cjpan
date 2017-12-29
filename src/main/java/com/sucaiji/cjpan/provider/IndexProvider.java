@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class IndexProvider {
     public String insertIndex(Index index){
-        return new SQL(){
+        String str= new SQL(){
             {
                 INSERT_INTO("INDEXS");
                 VALUES("uuid","#{uuid}");
@@ -26,6 +26,8 @@ public class IndexProvider {
                 }
             }
         }.toString();
+        System.out.println(str);
+        return str;
     }
     public String selectIndex(Map<String,Object> index){
         return new SQL(){

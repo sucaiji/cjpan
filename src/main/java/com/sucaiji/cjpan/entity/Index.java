@@ -120,4 +120,17 @@ public class Index {
     }
 
 
+    @Override
+    public String toString() {
+        return "Index{" +
+                "uuid='" + uuid + '\'' +
+                ", parentUuid='" + parentUuid + '\'' +
+                ", name='" + name + '\'' +
+                ", suffix='" + suffix + '\'' +
+                ", type='" + type + '\'' +
+                ", wasDir=" + wasDir +
+                ", lastUpdate=" + lastUpdate +
+                ", size=" + size +
+                '}';
+    }
 }

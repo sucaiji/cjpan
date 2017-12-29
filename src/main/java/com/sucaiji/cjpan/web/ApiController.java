@@ -1,6 +1,7 @@
 package com.sucaiji.cjpan.web;
 
 
+import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
@@ -8,7 +9,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,10 +17,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.sucaiji.cjpan.config.Property.ROOT;
 
 @RestController
 @RequestMapping("/api")
@@ -29,6 +31,8 @@ public class ApiController {
     private IndexService indexService;
     @Autowired
     private UserService userService;
+
+
 
     /**
      * 相同文件已经存在，返回值告诉客户端秒传
@@ -56,21 +60,47 @@ public class ApiController {
     public static final int SUCCESS_ALL_SLICE_UPLOAD=999;
 
 
+    @RequestMapping("/exit")
+    public void exit(){
+        Subject subject=SecurityUtils.getSubject();
+        subject.logout();
+    }
+
 
 
     @RequestMapping("/visit")
     public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid){//带参数uuid就访问那个文件夹 不带的话就主页
+        if(uuid==null){
+            uuid= ROOT;
+        }
+
         List<Index> list;
 
-        list=indexService.visitDir(uuid);
+        list=indexService.getIndexList(uuid);
 
+        return list;
+    }
+
+    @RequestMapping("/image_list")
+    public List<Index> imageList(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
+                                 @RequestParam("type")String type){
+        if(parentUuid==null){
+            parentUuid= ROOT;
+        }
+        Map<String,Object> map=new HashMap<>();
+        map.put(Property.PARENT_UUID,parentUuid);
+        map.put(Property.TYPE,Property.IMAGE);
+        List list=indexService.getIndexList(0,map);
         return list;
     }
 
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
                             @RequestParam(value = "parent_uuid",required = false)String parentUuid){
-        //不对parent_uuid是否为空做判断 因为mybatis里面有动态sql的判断
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+
         indexService.createDir(name, parentUuid);
 
         return "success";
@@ -85,6 +115,10 @@ public class ApiController {
     public Map<String,Object> isUpload(@RequestParam("md5")String md5,
                                        @RequestParam(value = "parent_uuid",required = false)String parentUuid,
                                        @RequestParam(value = "name")String name){
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+
         if(indexService.md5Exist(md5)){
             indexService.saveByMd5(md5,parentUuid,name);
 
@@ -109,6 +143,10 @@ public class ApiController {
                       @RequestParam(value = "total")Integer total,//总片数
                       @RequestParam(value = "finish",required = false)Boolean finish //是否完成
                         ){
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+
         if(action.equals("check")){
             Map<String,Object> map=new HashMap<>();
             map.put("flag",SLICE_NOT_EXIST);
