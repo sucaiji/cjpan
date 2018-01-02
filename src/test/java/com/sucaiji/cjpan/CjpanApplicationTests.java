@@ -12,6 +12,8 @@ import net.coobird.thumbnailator.geometry.Position;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -32,26 +34,16 @@ import java.util.regex.Pattern;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CjpanApplicationTests {
-	@Autowired
-	private Md5Dao md5Dao;
-	@Autowired
-	private UserDao userDao;
-	@Autowired
-	private IndexDao indexDao;
-	@Autowired
-	private IndexService indexService;
+
+
+	final static Logger logger=LoggerFactory.getLogger(CjpanApplicationTests.class);
 	@Test
 	public void contextLoads() {
-		String rangeStr="0-4310393";
-		Long range;
-		Pattern pattern3 = Pattern.compile("\\d+-\\d+");
-		Matcher matcher3 = pattern3.matcher(rangeStr);
-		if (matcher3.matches()) {
-			System.out.println(rangeStr);
-			rangeStr=rangeStr.replaceAll("-\\d+$","");
-			System.out.println(rangeStr);
-			range = Long.valueOf(rangeStr);
-		}
+		logger.info("测试log{}","我整了个loghiahiahiahia");
+
+		logger.info("info{}","测试一下");
+		logger.error("error{}","发生了一坨错误");
+		System.out.println("测试测试");
 	}
 
 

@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.sucaiji.cjpan.config.Property.PARENT_UUID;
 import static com.sucaiji.cjpan.config.Property.ROOT;
+import static com.sucaiji.cjpan.config.Property.TYPE;
 
 @RestController
 @RequestMapping("/api")
@@ -66,33 +68,47 @@ public class ApiController {
         subject.logout();
     }
 
+    /**
+     *  获取一共有多少也
+     * @param uuid
+     * @param type
+     * @return
+     */
+    @RequestMapping("/total")
+    public Integer total(@RequestParam(value = "parent_uuid",required = false)String uuid,
+                            @RequestParam(value="type",required = false)String type){
+
+        return 1;
+    }
 
 
+    /**
+     * 一会添加分页功能
+     * @param uuid
+     * @param type
+     * @param pageSize
+     * @param pageNumber
+     * @return
+     */
     @RequestMapping("/visit")
-    public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid){//带参数uuid就访问那个文件夹 不带的话就主页
+    public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid,
+                             @RequestParam(value = "type",required = false)String type,
+                             @RequestParam(value = "page_size",required = false)Integer pageSize,
+                             @RequestParam(value = "page_number",required = false)Integer pageNumber){//带参数uuid就访问那个文件夹 不带的话就主页
         if(uuid==null){
             uuid= ROOT;
         }
-
-        List<Index> list;
-
-        list=indexService.getIndexList(uuid);
-
-        return list;
-    }
-
-    @RequestMapping("/image_list")
-    public List<Index> imageList(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
-                                 @RequestParam("type")String type){
-        if(parentUuid==null){
-            parentUuid= ROOT;
-        }
         Map<String,Object> map=new HashMap<>();
-        map.put(Property.PARENT_UUID,parentUuid);
-        map.put(Property.TYPE,Property.IMAGE);
-        List list=indexService.getIndexList(0,map);
+        map.put(PARENT_UUID,uuid);
+        if(type!=null) {
+            map.put(TYPE, type);
+        }
+        List<Index> list=indexService.getIndexList(0,map);
         return list;
+        //total pageSize pageNumber
     }
+
+
 
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
@@ -239,14 +255,6 @@ public class ApiController {
             return "failure";
         }
         return "success";
-
-        /*if(userService.login(email,password)){
-            session.setAttribute("user",email);
-            return "success";
-        }else {
-            return "failure";
-        }*/
-
     }
 
     @RequestMapping("/init_regist")

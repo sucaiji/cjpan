@@ -8,6 +8,8 @@ import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.util.Md5Util;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,13 +27,15 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.sucaiji.cjpan.init.InitRunner.*;
+import static com.sucaiji.cjpan.config.Property.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 
 @Service
 public class IndexServiceImpl implements IndexService {
+    final static Logger logger= LoggerFactory.getLogger(IndexServiceImpl.class);
+
     @Autowired
     private IndexDao indexDao;
     @Autowired
@@ -40,11 +44,7 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     private Md5Util md5Util;
 
-    private static final String VIDEO = "video";
-    private static final String IMAGE = "image";
-    private static final String MUSIC = "music";
-    private static final String DOCUMENT = "doc";
-    private static final String OTHER = "other";
+
 
     private Path basePath;
     private Path dataPath;
@@ -70,27 +70,37 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public List<Index> getIndexList(String parentUuid) {
         Map<String, Object> map = new HashMap<>();
-        map.put("parentUuid", parentUuid);
+        map.put(PARENT_UUID, parentUuid);
         return indexDao.selectIndex(map);
     }
 
     @Override
     public List<Index> getIndexList(Integer page, String parentUuid) {
         Map<String, Object> map = new HashMap<>();
-        map.put("parentUuid", parentUuid);
+        map.put(PARENT_UUID, parentUuid);
         return indexDao.selectIndex(map);
     }
 
     @Override
     public List<Index> getIndexList(Integer page, Map<String, Object> map) {
-        return indexDao.selectIndex(map);
+        List list= indexDao.selectIndex(map);
+        //Integer fromIndex;
+        //Integer toIndex;
+
+        return list;
+    }
+
+    @Override
+    public List<Index> getIndexList(Integer page, Integer pageSize, Map<String, Object> map) {
+
+        return null;
     }
 
 
     @Override
     public Index getIndexByUuid(String uuid) {
         Map<String, Object> map = new HashMap<>();
-        map.put("uuid", uuid);
+        map.put(UUID, uuid);
         List<Index> list = indexDao.selectIndex(map);
         if (list.size() == 0) {
             return null;
@@ -113,6 +123,7 @@ public class IndexServiceImpl implements IndexService {
     public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
         //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index = getIndexByUuid(uuid);
+        logger.info("获取一个index示例，uuid={}",uuid);
         if (index == null) {
             return;
             //return "error获取文件名失败";
@@ -131,12 +142,13 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public void writeInOutputStream(File file, OutputStream os) throws IOException {
         if (file == null) {
+            logger.error("通过{}获取文件失败，抛出FileNotFoundException()异常",file.getAbsolutePath());
             throw new FileNotFoundException();
         }
         if (!file.exists()) {
+            logger.error("文件不存在，file路径为{},抛出FileNotFoundException()异常",file.getAbsolutePath());
             throw new FileNotFoundException();
         }
-
         byte[] buffer = new byte[1024];
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -418,7 +430,7 @@ public class IndexServiceImpl implements IndexService {
 
 
     private String UUID() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
+        return java.util.UUID.randomUUID().toString().replaceAll("-", "");
     }
 
     private Timestamp time() {

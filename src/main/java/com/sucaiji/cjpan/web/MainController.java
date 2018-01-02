@@ -48,10 +48,12 @@ public class MainController {
 
     @RequestMapping(value = {"/","index","/index"})
     public String index(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
+                        @RequestParam(value = "pg",required = false)Integer pageNumber,
                         Model model){
         if(parentUuid==null){
             parentUuid=ROOT;
         }
+
 
         List<Index> list;
         list=indexService.getIndexList(parentUuid);
@@ -87,12 +89,7 @@ public class MainController {
                 type=OTHER;
         }
 
-        if(parentUuid==null){
-            parentUuid=ROOT;
-        }
-
         Map<String,Object> map=new HashMap<>();
-        map.put(PARENT_UUID,parentUuid);
         map.put(TYPE, type);
 
         List<Index> list;
@@ -130,7 +127,6 @@ public class MainController {
 
     @RequestMapping("/test")
     public String test(HttpServletRequest request,Model model){
-
         String parentUuid=request.getParameter("parent_uuid");
         List<Index> list;
         list=indexService.getIndexList(parentUuid);

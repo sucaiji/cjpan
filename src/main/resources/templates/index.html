@@ -22,7 +22,46 @@
     以获得更好的体验！</p>
 <![endif]-->
 
-<header class="am-topbar am-topbar-inverse admin-header">
+
+<div class="am-popup" id="model-move">
+    <div class="am-popup-inner">
+        <div class="am-popup-hd">
+            <h4 class="am-popup-title">请选择移动到哪</h4>
+            <span data-am-modal-close
+                  class="am-close">&times;</span>
+        </div>
+        <div class="am-popup-bd ">
+            暂未开放此功能
+        </div>
+    </div>
+</div>
+
+
+<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-info">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">Modal 标题
+            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
+        </div>
+        <div class="am-modal-bd">
+            信息
+        </div>
+    </div>
+</div>
+<div class="am-modal am-modal-prompt" tabindex="-1" id="model-rename">
+    <div class="am-modal-dialog">
+        <div class="am-modal-hd">重命名</div>
+        <div class="am-modal-bd">
+            新名字
+            <input type="text" class="am-modal-prompt-input">
+        </div>
+        <div class="am-modal-footer">
+            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+            <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+        </div>
+    </div>
+</div>
+
+<header class="am-topbar am-topbar-inverse">
     <a href="/index">
         <div class="am-topbar-brand">
             <strong>CJPAN</strong>
@@ -109,29 +148,30 @@
                     <button
                             type="button"
                             class="am-btn am-btn-secondary am-radius"
-                            data-am-modal="{target: '#doc-modal-1', closeViaDimmer: 0, width: 400, height: 225}">
+                            data-am-modal="{target: '#upload-model'}">
                         上传
                     </button>
 
-                    <!--弹出框-->
-                    <div class="am-modal am-modal-no-btn" tabindex="-1" id="doc-modal-1">
-                        <div class="am-modal-dialog">
-                            <div class="am-modal-hd">贼丑的上传窗口
-                                <a href="javascript: void(0)" class="am-close am-close-spin"
-                                   data-am-modal-close>&times;</a>
+                    <div class="am-popup" id="upload-model">
+                        <div class="am-popup-inner">
+                            <div class="am-popup-hd">
+                                <h4 class="am-popup-title">贼丑的上传窗口</h4>
+                                <span data-am-modal-close
+                                      class="am-close">&times;</span>
                             </div>
-                            <div class="am-modal-bd">
+                            <div class="am-popup-bd ">
                                 <!--上传用的-->
                                 <input class="am-btn-secondary" type="file" id="file"/>
 
                                 <button class="am-btn-secondary" id="upload">上传</button>
-                                <span id="output" style="font-size:12px">等待</span>
-                                <span id="usetime" style="font-size:12px;margin-left:20px;">用时</span>
-                                <span id="param" style="font-size:12px;margin-left:20px;">param==</span>
+                                <span id="output">等待</span>
+                                <span id="usetime">用时</span>
+                                <span id="param">param==</span>
                                 <!--上传用的完-->
                             </div>
                         </div>
                     </div>
+
 
                     <button
                             type="button"
@@ -175,15 +215,15 @@
                                 <div class="am-dropdown-content">
                                     <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
                                     <h5 type="button"
-                                        data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
+                                        data-am-modal="{target: '#model-rename'}">
                                         <a th:name="${index.uuid}" class="rename-btn">重命名</a>
                                     </h5>
                                     <h5 type="button"
-                                        data-am-modal="{target: '#model-move', closeViaDimmer: 0, width: 400, height: 225}">
+                                        data-am-modal="{target: '#model-move'}">
                                         <a th:name="${index.uuid}" class="move-btn">移动</a>
                                     </h5>
                                     <h5 type="button"
-                                        data-am-modal="{target: '#model-info', closeViaDimmer: 0, width: 400, height: 225}">
+                                        data-am-modal="{target: '#model-info'}">
                                         <a th:name="${index.uuid}" class="info-btn">详细信息</a>
                                     </h5>
                                 </div>
@@ -259,7 +299,7 @@
                                 <div class="am-dropdown-content">
                                     <h5><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></h5>
                                     <h5 type="button"
-                                            data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
+                                        data-am-modal="{target: '#model-rename', closeViaDimmer: 0, width: 400, height: 225}">
                                         <a th:name="${index.uuid}" class="rename-btn">重命名</a>
                                     </h5>
                                     <h5 type="button"
@@ -277,13 +317,10 @@
                     </a>
 
 
-
-
                 </li>
 
 
             </ul>
-
 
 
             <div class="am-margin am-cf">
@@ -311,38 +348,6 @@
 
 </div>
 
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-move">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            move
-        </div>
-    </div>
-</div>
-
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-info">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            信息
-        </div>
-    </div>
-</div>
-
-<div class="am-modal am-modal-no-btn" tabindex="-1" id="model-rename">
-    <div class="am-modal-dialog">
-        <div class="am-modal-hd">Modal 标题
-            <a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close>&times;</a>
-        </div>
-        <div class="am-modal-bd">
-            重命名
-        </div>
-    </div>
-</div>
 
 <a href="#" class="am-icon-btn am-icon-th-list am-show-sm-only admin-menu"
    data-am-offcanvas="{target: '#admin-offcanvas'}"></a>
@@ -368,9 +373,9 @@
 <script src="/js/spark-md5.min.js"></script>
 <script src="/js/upload.js"></script>
 <script>
-    var del=function (uuid) {
+    var del = function (uuid) {
         $.ajax({
-            url: "/api/delete?uuid="+uuid,
+            url: "/api/delete?uuid=" + uuid,
             type: "GET",
             async: true,        //异步
             processData: false,  //很重要，告诉jquery不要对form进行处理
@@ -448,9 +453,9 @@
             });
         });
 
-        var del=function (uuid) {
+        var del = function (uuid) {
             $.ajax({
-                url: "/api/delete?uuid="+uuid,
+                url: "/api/delete?uuid=" + uuid,
                 type: "GET",
                 async: true,        //异步
                 processData: false,  //很重要，告诉jquery不要对form进行处理

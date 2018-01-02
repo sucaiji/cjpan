@@ -8,16 +8,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 
+import static com.sucaiji.cjpan.config.Property.*;
+
 @Component
 public class InitRunner implements ApplicationRunner {
     @Autowired
     private InitDao initDao;
 
-
-    public static final String APP_NAME_EN="cjpan";
-    public static final String DATA_DIR="data";
-    public static final String TEMP_DIR="temp";
-    public static final String THUMBNAIL_DIR="thumbnail";
     private String  initPath;
 
     @Override
