@@ -323,35 +323,26 @@
             </ul>
 
 
-            <div class="am-margin am-cf">
+            <div id="pageList" class="am-margin am-cf">
                 <hr/>
                 <!--<p class="am-fl">共 15 条记录</p>-->
 
-
                 <ol class="am-pagination am-fr">
-
-                    <li class="am-disabled"><a href="#">&laquo;</a></li>
-                    <li class="am-active"><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">4</a></li>
-                    <li><a href="#">5</a></li>
-                    <li><a href="#">&raquo;</a></li>
+                    <li class="btn" id="prePage"><a>上一页</a></li>
+                    <li class="btn" id="btn1"><a>1</a></li>
+                    <span id="prePoint">...</span>
+                    <li class="btn" id="btn2"></li>
+                    <li class="btn" id="btn3"></li>
+                    <li class="btn am-active" id="btn4"></li>
+                    <li class="btn" id="btn5"></li>
+                    <li class="btn" id="btn6"></li>
+                    <span id="sufPoint">...</span>
+                    <li class="btn" id="btn7"></li>
+                    <li class="btn" id="sufPage"><a>下一页</a></li>
                 </ol>
+
             </div>
-            <ol class="am-pagination">
-                <li class="btn" id="prePage"><a>上一页</a></li>
-                <li class="btn" id="btn1"><a>1</a></li>
-                <span id="prePoint">...</span>
-                <li class="btn" id="btn2"></li>
-                <li class="btn" id="btn3"></li>
-                <li class="btn" id="btn4"></li>
-                <li class="btn" id="btn5"></li>
-                <li class="btn" id="btn6"></li>
-                <span id="sufPoint">...</span>
-                <li class="btn" id="btn7"></li>
-                <li class="btn" id="sufPage"><a>下一页</a></li>
-            </ol>
+
         </div>
 
         <footer class="admin-content-footer">
@@ -388,7 +379,10 @@
 <script src="/js/md5.js"></script>
 <script src="/js/spark-md5.min.js"></script>
 <script src="/js/upload.js"></script>
-<script>
+<script th:inline="javascript">
+
+
+
     var del = function (uuid) {
         $.ajax({
             url: "/api/delete?uuid=" + uuid,
@@ -417,6 +411,9 @@
 
         var parent_uuid = getQueryString("parent_uuid");
 
+        if(parent_uuid==null){
+            parent_uuid="root";
+        }
 
         $('#doc-prompt-toggle').on('click', function () {
             $('#my-prompt').modal({
@@ -486,22 +483,25 @@
         };
 
 
-    });
 
-    $(function () {
-        var currentPage = Number(2);
-        var pageNum = Number(4);
+        var currentPage = [[${currentPage}]] ; //Number(2);
+        var pageNum = [[${pageAmount}]]//Number(4);
 
         //给每个button赋值（第一个默认为1）
-        $("#btn2").html("<a>"+(currentPage - 2)+"</a>");
-        $("#btn3").html("<a>"+(currentPage - 1)+"</a>");
-        $("#btn4").html("<a>"+currentPage+"</a>");
-        $("#btn5").html("<a>"+(currentPage + 1)+"</a>");
-        $("#btn6").html("<a>"+(currentPage + 2)+"</a>");
-        $("#btn7").html("<a>"+pageNum+"</a>");
+        $("#btn2").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+(currentPage - 2)+"'>"+(currentPage - 2)+"</a>");
+        $("#btn3").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+(currentPage - 1)+"'>"+(currentPage - 1)+"</a>");
+        $("#btn4").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+currentPage+"'>"+currentPage+"</a>");
+        $("#btn5").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+(currentPage + 1)+"'>"+(currentPage + 1)+"</a>");
+        $("#btn6").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+(currentPage + 2)+"'>"+(currentPage + 2)+"</a>");
+        $("#btn7").html("<a href='index?parent_uuid="+parent_uuid+"&pg="+pageNum+"'>"+pageNum+"</a>");
 
         //可改变当前页的button样式
         $("#btn4").addClass("");//.css("background-color","#ff6384");
+
+        if(pageNum == 0){
+            $("#pageList").hide();
+        }
+
 
         //先处理"上一页"和"下一页"的情况
         if (currentPage == 1)  //如果当前页为首页
@@ -511,7 +511,13 @@
 
         if (currentPage == pageNum)    //如果当前页为末页
         {
-            $("#sufPage").hide();
+            $("#prePoint").hide();
+            $("#btn1").hide();
+            $("#btn2").hide();
+            $("#btn3").hide();
+            $("#btn7").hide();
+            $("#sufPoint").hide();
+
         }
 
         //处理当前页小于等于3的特殊情况
@@ -548,6 +554,10 @@
 
         if (currentPage == pageNum - 1) {
             $("#btn6").hide();
+        }
+
+        if(currentPage == 2&&pageNum == 2){
+            $("#btn3").show();
         }
     });
 </script>

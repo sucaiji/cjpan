@@ -65,6 +65,11 @@ public class MainController {
         list = indexService.getIndexList(pageNumber, parentUuid);
         model.addAttribute("indexList", list);
 
+        int total = indexService.getTotal(parentUuid,null);
+        int pageAmount = (int) Math.ceil((double) total/(double)indexService.DEFAULT_PAGE_SIZE);
+        model.addAttribute("currentPage",pageNumber);
+        model.addAttribute("pageAmount",pageAmount);
+
         if (parentUuid == null) {
             model.addAttribute("parentIndex", null);
             return "index";
@@ -76,8 +81,11 @@ public class MainController {
 
     @RequestMapping("/file/{str}")
     public String type(@PathVariable("str") String str,
-                       @RequestParam(value = "parent_uuid", required = false) String parentUuid,
+                       @RequestParam(value = "pg" , required = false) Integer pageNumber,
                        Model model) {
+        if (pageNumber == null) {
+            pageNumber = 1;
+        }
         String type;
         switch (str) {
             case "gallery":
@@ -100,8 +108,14 @@ public class MainController {
         map.put(TYPE, type);
 
         List<Index> list;
-        list = indexService.getIndexList(1, map);
+        list = indexService.getIndexList(pageNumber, map);
         model.addAttribute("indexList", list);
+
+        int total = indexService.getTotal(null,type);
+        int pageAmount = (int) Math.ceil((double) total/(double)indexService.DEFAULT_PAGE_SIZE);
+        System.out.println(total+"+"+pageAmount);
+        model.addAttribute("currentPage",pageNumber);
+        model.addAttribute("pageAmount",pageAmount);
 
         return "type";
 
