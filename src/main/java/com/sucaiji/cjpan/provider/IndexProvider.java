@@ -9,7 +9,7 @@ import static com.sucaiji.cjpan.config.Property.*;
 
 public class IndexProvider {
     public String insertIndex(Index index){
-        String str= new SQL(){
+        return new SQL(){
             {
                 INSERT_INTO("INDEXS");
                 VALUES("uuid","#{"+UUID+"}");
@@ -28,8 +28,6 @@ public class IndexProvider {
                 }
             }
         }.toString();
-        System.out.println(str);
-        return str;
     }
     public String selectIndex(Map<String,Object> index){
         return new SQL(){
@@ -44,8 +42,6 @@ public class IndexProvider {
 
                     if(index.get(PARENT_UUID)!=null){
                         WHERE("parent_uuid=#{"+PARENT_UUID+"}");
-                    } else {
-                        WHERE("parent_uuid is NULL");
                     }
                     if(index.get("name")!=null){
                         WHERE("name=#{"+NAME+"}");

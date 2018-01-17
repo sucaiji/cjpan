@@ -19,8 +19,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.imageio.ImageIO;
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,11 +43,8 @@ public class CjpanApplicationTests {
 	final static Logger logger=LoggerFactory.getLogger(CjpanApplicationTests.class);
 	@Test
 	public void contextLoads() {
-		logger.info("测试log{}","我整了个loghiahiahiahia");
 
-		logger.info("info{}","测试一下");
-		logger.error("error{}","发生了一坨错误");
-		System.out.println("测试测试");
+
 	}
 
 

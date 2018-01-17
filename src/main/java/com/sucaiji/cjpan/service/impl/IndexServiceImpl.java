@@ -34,7 +34,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Service
 public class IndexServiceImpl implements IndexService {
-    final static Logger logger= LoggerFactory.getLogger(IndexServiceImpl.class);
+    final static Logger logger = LoggerFactory.getLogger(IndexServiceImpl.class);
 
     @Autowired
     private IndexDao indexDao;
@@ -43,7 +43,6 @@ public class IndexServiceImpl implements IndexService {
 
     @Autowired
     private Md5Util md5Util;
-
 
 
     private Path basePath;
@@ -71,29 +70,66 @@ public class IndexServiceImpl implements IndexService {
     public List<Index> getIndexList(String parentUuid) {
         Map<String, Object> map = new HashMap<>();
         map.put(PARENT_UUID, parentUuid);
-        return indexDao.selectIndex(map);
+        return getIndexList(1, DEFAULT_PAGE_SIZE, map);
     }
 
     @Override
     public List<Index> getIndexList(Integer page, String parentUuid) {
         Map<String, Object> map = new HashMap<>();
         map.put(PARENT_UUID, parentUuid);
-        return indexDao.selectIndex(map);
+        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
     }
 
     @Override
     public List<Index> getIndexList(Integer page, Map<String, Object> map) {
-        List list= indexDao.selectIndex(map);
-        //Integer fromIndex;
-        //Integer toIndex;
-
-        return list;
+        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
     }
 
     @Override
     public List<Index> getIndexList(Integer page, Integer pageSize, Map<String, Object> map) {
 
-        return null;
+        List list = indexDao.selectIndex(map);
+
+        Integer fromIndex = (page - 1) * pageSize;
+        Integer toIndex = page * pageSize;
+        logger.debug("获得fromIndex[{}]和toIndex[{}]",fromIndex+"",toIndex+"");
+        boolean outOfSize = fromIndex > list.size() || page <= 0;
+        if (outOfSize) {
+            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", page + "", fromIndex + "");
+            return null;
+        }
+        Collections.reverse(list);
+
+        if (toIndex >= list.size() + 1) {
+            toIndex = list.size();
+            logger.debug("toIndex[{}]超过了list的大小，将toIndex的值设置为list.size()", toIndex + "");
+        }
+        logger.debug("即将分割list从[{}]到[{}]",fromIndex+"",toIndex+"");
+        list = list.subList(fromIndex, toIndex);
+        return list;
+    }
+
+    @Override
+    public Integer getTotal(String parentUuid, String type) {
+        Map<String,Object> map = new HashMap();
+        if(type != null){
+            if(parentUuid != null){
+                logger.debug("type[{}]不为空，且parent_uuid[{}]不为空，查询parent_uuid文件夹下的type类型文件",type,parentUuid);
+                map.put(PARENT_UUID,parentUuid);
+            }
+            logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
+            map.put(TYPE,type);
+            List list=indexDao.selectIndex(map);
+            return list.size();
+        }
+
+        if(parentUuid == null){
+            parentUuid = ROOT;
+        }
+        logger.debug("此时type为空，进入根据parentUuid[{}]获取当前目录下文件总条数的分支",parentUuid);
+        map.put(PARENT_UUID,parentUuid);
+        List list=indexDao.selectIndex(map);
+        return list.size();
     }
 
 
@@ -123,7 +159,7 @@ public class IndexServiceImpl implements IndexService {
     public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
         //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index = getIndexByUuid(uuid);
-        logger.info("获取一个index示例，uuid={}",uuid);
+        logger.info("获取一个index示例，uuid={}", uuid);
         if (index == null) {
             return;
             //return "error获取文件名失败";
@@ -142,11 +178,11 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public void writeInOutputStream(File file, OutputStream os) throws IOException {
         if (file == null) {
-            logger.error("通过{}获取文件失败，抛出FileNotFoundException()异常",file.getAbsolutePath());
+            logger.error("通过{}获取文件失败，抛出FileNotFoundException()异常", file.getAbsolutePath());
             throw new FileNotFoundException();
         }
         if (!file.exists()) {
-            logger.error("文件不存在，file路径为{},抛出FileNotFoundException()异常",file.getAbsolutePath());
+            logger.error("文件不存在，file路径为{},抛出FileNotFoundException()异常", file.getAbsolutePath());
             throw new FileNotFoundException();
         }
         byte[] buffer = new byte[1024];
@@ -359,7 +395,6 @@ public class IndexServiceImpl implements IndexService {
         Index index = new Index(uuid, parentUuid, name, getSuffix(name), getType(name), false, time(), anotherIndex.getSize());
         System.out.println(index);
         indexDao.insertIndex(index);
-
         md5Dao.insert(md5, uuid);
     }
 
@@ -384,6 +419,7 @@ public class IndexServiceImpl implements IndexService {
         }
         return true;
     }
+
     @Override
     public void deleteByUuid(String uuid) {
         Map<String, Object> map = new HashMap();

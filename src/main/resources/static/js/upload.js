@@ -57,7 +57,9 @@ function isUpload(file) {
                 name = file.name;
                 form.append("name", name);
                 form.append("md5", md5);
-                form.append("parent_uuid", parent_uuid);
+                if (parent_uuid != null) {
+                    form.append("parent_uuid", parent_uuid);
+                }
                 //Ajax提交
                 $.ajax({
                     url: "api/is_upload",
@@ -105,7 +107,6 @@ function isUpload(file) {
     };
 
     loadNext();
-
 
 
 }

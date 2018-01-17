@@ -8,6 +8,8 @@ import com.sucaiji.cjpan.service.UserService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +31,7 @@ import static com.sucaiji.cjpan.config.Property.TYPE;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
+    final static Logger logger = LoggerFactory.getLogger(ApiController.class);
     @Autowired
     private IndexService indexService;
     @Autowired
@@ -69,16 +72,19 @@ public class ApiController {
     }
 
     /**
-     *  获取一共有多少也
-     * @param uuid
+     *  获取一共有多少条数据
+     *  如果type不为空，且parent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
+     *  如果type为空，进入parentUuid目录下获取文件总条数
+     *  如果parentUuid和type都为空，获取root目录下文件总条数
+     * @param parentUuid
      * @param type
      * @return
      */
     @RequestMapping("/total")
-    public Integer total(@RequestParam(value = "parent_uuid",required = false)String uuid,
+    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
                             @RequestParam(value="type",required = false)String type){
 
-        return 1;
+        return indexService.getTotal(parentUuid, type);
     }
 
 
@@ -113,10 +119,10 @@ public class ApiController {
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
                             @RequestParam(value = "parent_uuid",required = false)String parentUuid){
+
         if(parentUuid==null){
             parentUuid=ROOT;
         }
-
         indexService.createDir(name, parentUuid);
 
         return "success";
@@ -134,12 +140,13 @@ public class ApiController {
         if(parentUuid==null){
             parentUuid=ROOT;
         }
-
         if(indexService.md5Exist(md5)){
+            logger.debug("该文件已经存在，进入秒传分支");
             indexService.saveByMd5(md5,parentUuid,name);
-
+            logger.debug("保存一个md5[{}],parentUuid[{}],name[{}]的文件",md5,parentUuid,name);
             Map<String,Object> map=new HashMap<>();
             map.put("flag",MD5_EXIST);
+            logger.debug("将信息返回到客户端[{}]",map);
             return map;
         }
         Map<String,Object> map=new HashMap<>();

@@ -13,11 +13,10 @@ import java.util.Map;
 
 
 public interface IndexService {
-    Integer DEFAULT_PAGE_SIZE=20;
+    Integer DEFAULT_PAGE_SIZE=5;
 
     /**
      * 创建文件夹，如果parentUuid为空，则在根目录创建文件夹
-     *
      * @param name
      * @param parentUuid
      */
@@ -42,7 +41,6 @@ public interface IndexService {
 
     /**
      * 通过某个文件夹的uuid获取文件夹下的文件
-     *
      * @param page
      * @param map
      * @return
@@ -57,6 +55,14 @@ public interface IndexService {
      * @return
      */
     List<Index> getIndexList(Integer page , Integer pageSize, Map<String, Object> map);
+
+    /**
+     * 获取数据条数
+     * @param parentUuid
+     * @param type
+     * @return
+     */
+    Integer getTotal(String parentUuid, String type);
 
 
     /**

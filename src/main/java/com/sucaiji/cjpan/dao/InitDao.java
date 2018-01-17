@@ -23,7 +23,7 @@ public interface InitDao{
             "  suffix VARCHAR(10)," +
             "  is_dir BOOLEAN NOT NULL," +
             "  l_update DATETIME NOT NULL," +
-            "  size INT," +
+            "  size BIGINT," +
             "  CONSTRAINT not_same UNIQUE (parent_uuid,name,is_dir)" +
             ")")
     void createTableIndexs();
