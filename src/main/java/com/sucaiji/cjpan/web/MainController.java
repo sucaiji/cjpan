@@ -44,10 +44,7 @@ public class MainController {
         return "init";
     }
 
-    @RequestMapping("/upload")
-    public String upload(Response response, Request request, Model model) {
-        return "upload";
-    }
+
 
     @RequestMapping(value = {"/", "index", "/index"})
     public String index(@RequestParam(value = "parent_uuid", required = false) String parentUuid,
@@ -122,19 +119,12 @@ public class MainController {
 
     }
 
-
-    @RequestMapping("/download")
-    public String download() {
-        return "download";
-    }
-
-
     @RequestMapping("/video/{uuid}")
     public String video(@PathVariable("uuid") String uuid,
                         Model model) {
         Index index = indexService.getIndexByUuid(uuid);
         model.addAttribute("index", index);
-        return "video";
+        return "demo3";
     }
 
 
