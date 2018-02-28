@@ -154,6 +154,7 @@ public class ApiController {
         return map;
     }
 
+
     @RequestMapping(value = "/upload")
     public Map<String,Object> upload(HttpServletRequest request,
                       @RequestParam(value = "file",required = false)MultipartFile multipartFile,
@@ -235,6 +236,8 @@ public class ApiController {
     public void image(@RequestParam("uuid")String uuid,
                       HttpServletRequest request,HttpServletResponse response){
         Index index=indexService.getIndexByUuid(uuid);
+
+        response.setContentType("image/jpeg");
         //测试用，测试完删掉
         /*response.setContentType("image/jpeg");//+index.getSuffix());
         try {
@@ -265,15 +268,28 @@ public class ApiController {
     }
 
     @RequestMapping("/init_regist")
-    public String initRegister(@RequestParam("email")String email,
-                             @RequestParam("password")String password,
-                             @RequestParam("name")String name){
+    public String initRegister(
+                            HttpServletRequest request,
+                            HttpServletResponse response,
+                            @RequestParam("email")String email,
+                            @RequestParam("password")String password,
+                            @RequestParam("name")String name){
         if(!userService.isEmpty()){
+            try {
+                response.sendRedirect("/index");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             //如果user表不是空的则什么也不做
             return "321321";
         }
         //魔法值admin后期改
         userService.regist(email,password,name,"admin");
+        try {
+            response.sendRedirect("/index");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return "123123";
     }
 
@@ -290,7 +306,6 @@ public class ApiController {
             e.printStackTrace();
         }
         response.setHeader("Accept-Ranges","bytes");
-
 
 
         String rangeStr=request.getHeader("range");
@@ -357,7 +372,6 @@ public class ApiController {
         response.setContentType("application/force-download");
         try {
             response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(fileName, "UTF-8"));//url这个是将文件名转码
-            //这句话有坑，数据库里面我记录的都是6 如果设置长度了的话 文件只会下载6b  等文件大小那里没问题了再加上这行代码
             response.setHeader("Content-Length", String.valueOf(fileLength));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

@@ -13,7 +13,8 @@ import java.util.Map;
 
 
 public interface IndexService {
-    Integer DEFAULT_PAGE_SIZE=5;
+    //默认每页数量
+    Integer DEFAULT_PAGE_SIZE=20;
 
     /**
      * 创建文件夹，如果parentUuid为空，则在根目录创建文件夹

@@ -1,10 +1,7 @@
 package com.sucaiji.cjpan.dao;
 
 import com.sucaiji.cjpan.entity.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +13,13 @@ public interface UserDao {
 
     @Insert("INSERT INTO USERS(count,password,name,role) VALUES(#{count},#{password},#{name},#{role})")
     void insert(User user);
+
+    @Update("UPDATE USERS" +
+            "  SET password=#{password}," +
+            "      name=#{name}," +
+            "      role=#{role}" +
+            "  WHERE id=#{id}")
+    void update(User user);
 
 
 }

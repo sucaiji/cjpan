@@ -17,7 +17,7 @@ var action = false;    //false检验分片是否上传过(默认); true上传文
 
 var page = {
     init: function () {
-        $("#upload").click(function () {
+        $("#btn-upload").click(function () {
             databgein = new Date();
             var file = $("#file")[0].files[0];  //文件对象
             isUpload(file);
@@ -187,7 +187,7 @@ function upload(file, filemd5) {
     var r = new FileReader();
     r.readAsBinaryString(data);
 
-    $(r).load(function (e) {
+    $(r).on('load', function (e) {
         var bolb = e.target.result;
         var md5 = hex_md5(bolb);
         form.append("md5", md5);

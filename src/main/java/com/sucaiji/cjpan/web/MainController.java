@@ -70,13 +70,14 @@ public class MainController {
         model.addAttribute("currentPage",pageNumber);
         model.addAttribute("pageAmount",pageAmount);
 
+
         if (parentUuid == null) {
             model.addAttribute("parentIndex", null);
             return "index";
         }
         Index index = indexService.getIndexByUuid(parentUuid);
         model.addAttribute("parentIndex", index);
-        return "index";
+        return "demo";
     }
 
     @RequestMapping("/file/{str}")
@@ -117,7 +118,7 @@ public class MainController {
         model.addAttribute("currentPage",pageNumber);
         model.addAttribute("pageAmount",pageAmount);
 
-        return "type";
+        return "demo2";
 
     }
 
@@ -136,10 +137,7 @@ public class MainController {
         return "video";
     }
 
-    @RequestMapping("/settings")
-    public String settings() {
-        return "settings";
-    }
+
 
 
     @RequestMapping("/test")

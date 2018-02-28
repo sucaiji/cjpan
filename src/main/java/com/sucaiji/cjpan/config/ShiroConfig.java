@@ -56,6 +56,7 @@ public class ShiroConfig {
        shiroFilterFactoryBean.setFilters(map);*/
         Map<String, String> filterChainDefinitions = new HashMap<>();
         filterChainDefinitions.put("/assets/**", "anon");
+        filterChainDefinitions.put("/creative-tim/**", "anon");
         filterChainDefinitions.put("/js/**", "anon");
         filterChainDefinitions.put("/img/**", "anon");
         filterChainDefinitions.put("/js/**", "anon");
