@@ -150,21 +150,25 @@
             </div>
 
             <!-- 重命名 -->
-            <div class="modal fade" id="rename" tabindex="-1" role="dialog" aria-labelledby="mkdirTitle"
+            <div class="modal fade" id="rename" tabindex="-1" role="dialog" aria-labelledby="renameTitle"
                  aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title" id="rename-title">创建文件夹</h4>
+                            <h4 class="modal-title" id="renameTitle">重命名</h4>
                         </div>
                         <div class="modal-body">
                             重命名新名字
-                            <input type="text" class="am-modal-prompt-input">
+                            <form id="rename-form">
+                                <input type="hidden" id="rename-uuid">
+                                <input type="text" id="rename-name">
+                            </form>
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-info btn-simple" data-dismiss="modal">确认</button>
+                            <button type="button" id="rename-btn" class="btn btn-info btn-simple" data-dismiss="modal">确认</button>
                         </div>
                     </div>
                 </div>

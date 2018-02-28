@@ -188,6 +188,31 @@
     <script src="/js/spark-md5.min.js"></script>
     <script type="text/javascript">
 
+        function getInfo(obj) {
+            $('#rename-uuid').val(obj.name);
+            $('#rename').modal('show');
+        }
+
+
+        var $renamebtn = $('#rename-btn');
+        $renamebtn.on('click', function () {
+            var uuid = $('#rename-uuid').val();
+            var newName = $('#rename-name').val();
+            $.ajax({
+                url: "/api/rename?uuid=" + uuid + "&name=" + newName,
+                type: "GET",
+                async: true,        //异步
+                processData: false,  //很重要，告诉jquery不要对form进行处理
+                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
+                success: function (data) {
+                    alert("重命名成功");
+                    location.reload(true);
+
+                }, error: function (XMLHttpRequest, errorThrown) {
+                    alert("服务器出错!");
+                }
+            });
+        })
 
 
         var del = function (uuid) {
@@ -199,6 +224,7 @@
                 contentType: false,  //很重要，指定为false才能形成正确的Content-Type
                 success: function (data) {
                     alert("成功删除");
+                    location.reload(true);
 
                 }, error: function (XMLHttpRequest, errorThrown) {
                     alert("服务器出错!");
@@ -304,7 +330,7 @@
                                         </a>
                                         <ul class="dropdown-menu">
                                             <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                            <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
+                                            <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             <li><a href="#">删除</a></li>
                                         </ul>
                                     </div>
@@ -340,7 +366,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
+                                                <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                                 <li><a href="#">删除</a></li>
                                             </ul>
                                         </div>
@@ -375,7 +401,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                                 <li><a href="#">移动</a></li>
                                             </ul>
                                         </div>
@@ -410,7 +436,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li><a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                                 <li><a href="#">删除</a></li>
                                             </ul>
                                         </div>

@@ -39,7 +39,6 @@ public class IndexProvider {
                 if(index.get(UUID)!=null){
                     WHERE("uuid=#{uuid}");
                 } else{
-
                     if(index.get(PARENT_UUID)!=null){
                         WHERE("parent_uuid=#{parentUuid}");
                     }
@@ -50,8 +49,6 @@ public class IndexProvider {
                         WHERE("type=#{type}");
                     }
                 }
-
-
 
             }
         }.toString();
@@ -64,8 +61,25 @@ public class IndexProvider {
                 if(index.get("uuid")!=null){
                     WHERE("uuid=#{uuid}");
                 }
-
             }
         }.toString();
     }
+    public String updateIndex(Map<String,Object> index){
+        return new SQL(){
+            {
+                UPDATE("INDEXS");
+                if (index.get("type") != null) {
+                    SET("type=#{type}");
+                }
+                if (index.get("name") != null){
+                    SET("name=#{name}");
+                }
+                if (index.get("lastUpdate") != null){
+                    SET("l_update=#{lastUpdate}");
+                }
+                WHERE("uuid=#{uuid}");
+            }
+        }.toString();
+    }
+
 }

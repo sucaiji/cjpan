@@ -88,6 +88,13 @@ public interface IndexService {
     File getThumbnailByMd5(String md5);
 
     /**
+     * 设置index的名字
+     * @param uuid
+     * @param name
+     */
+    void setIndexName(String uuid, String name);
+
+    /**
      * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
      *
      * @param uuid

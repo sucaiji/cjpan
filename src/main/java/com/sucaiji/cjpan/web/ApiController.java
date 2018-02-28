@@ -200,6 +200,13 @@ public class ApiController {
 
     }
 
+    @RequestMapping("/rename")
+    public String rename(@RequestParam("uuid")String uuid,
+                         @RequestParam("name")String name) {
+        indexService.setIndexName(uuid, name);
+        return "success";
+    }
+
     /**
      * 根据传入的uuid，删除该文件或者文件夹，如果是文件夹的话，则删除文件夹下所有文件
      * 注意，删除决定的确定应该在客户端上完成，这里只负责完成删除
@@ -352,9 +359,6 @@ public class ApiController {
 
         System.out.println(response.getHeader("Content-Range"));
         System.out.println(response.getHeader("Content-Length"));
-
-
-
 
     }
 

@@ -156,6 +156,14 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
+    public void setIndexName(String uuid, String name) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("uuid", uuid);
+        map.put("name", name);
+        indexDao.updateIndex(map);
+    }
+
+    @Override
     public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
         //通过uuid获取一个index实例，并通过这个实例获取文件名
         Index index = getIndexByUuid(uuid);
