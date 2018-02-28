@@ -192,9 +192,7 @@ function upload(file, filemd5) {
         var md5 = hex_md5(bolb);
         form.append("md5", md5);
 
-
         //Ajax提交
-
         $.ajax({
 
             url: "api/upload",
@@ -238,7 +236,8 @@ function upload(file, filemd5) {
                     }
                 }
             }, error: function (XMLHttpRequest, errorThrown) {
-                alert("服务器出2错!");
+                alert("服务器出错！");
+                upload(file, filemd5);
             }
         });
     })
