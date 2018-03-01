@@ -1,6 +1,8 @@
 package com.sucaiji.cjpan.service;
 
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -14,7 +16,7 @@ import java.util.Map;
 
 public interface IndexService {
     //默认每页数量
-    Integer DEFAULT_PAGE_SIZE=20;
+    Integer DEFAULT_PAGE_SIZE=5;
 
     /**
      * 创建文件夹，如果parentUuid为空，则在根目录创建文件夹
@@ -23,13 +25,6 @@ public interface IndexService {
      */
     void createDir(String name, String parentUuid);
 
-    /**
-     * 通过某个文件夹的uuid获取文件夹下所有文件
-     *
-     * @param parentUuid
-     * @return
-     */
-    List<Index> getIndexList(String parentUuid);
 
     /**
      * 通过某个文件夹的uuid获取文件夹下的第page页文件
@@ -38,24 +33,19 @@ public interface IndexService {
      * @param parentUuid
      * @return
      */
-    List<Index> getIndexList(Integer page, String parentUuid);
+    List<Index> getIndexList(Page page, String parentUuid);
 
     /**
-     * 通过某个文件夹的uuid获取文件夹下的文件
+     * 通过某个文件夹的uuid获取文件夹下的第page页文件
+     *
      * @param page
-     * @param map
+     * @param parentUuid
      * @return
      */
-    List<Index> getIndexList(Integer page, Map<String, Object> map);
+    List<Index> getIndexList(Page page, Type type);
 
-    /**
-     * 通过某个文件夹的uuid获取文件夹下的文件
-     * @param page
-     * @param pageSize
-     * @param map
-     * @return
-     */
-    List<Index> getIndexList(Integer page , Integer pageSize, Map<String, Object> map);
+
+
 
     /**
      * 获取数据条数
@@ -64,6 +54,18 @@ public interface IndexService {
      * @return
      */
     Integer getTotal(String parentUuid, String type);
+
+    /**
+     *
+     * @return
+     */
+    Page getPage(Integer pg);
+
+    /**
+     *
+     * @return
+     */
+    Page getPage(Integer pg, Integer limit);
 
 
     /**
@@ -201,5 +203,6 @@ public interface IndexService {
             this.total = total;
         }
     }
+
 
 }

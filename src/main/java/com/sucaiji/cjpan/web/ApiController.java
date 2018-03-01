@@ -2,7 +2,9 @@ package com.sucaiji.cjpan.web;
 
 
 import com.sucaiji.cjpan.config.Property;
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
 import org.apache.shiro.SecurityUtils;
@@ -64,7 +66,6 @@ public class ApiController {
      */
     public static final int SUCCESS_ALL_SLICE_UPLOAD=999;
 
-
     @RequestMapping("/exit")
     public void exit(){
         Subject subject=SecurityUtils.getSubject();
@@ -88,33 +89,42 @@ public class ApiController {
     }
 
 
+
     /**
-     * 一会添加分页功能
-     * @param uuid
-     * @param type
-     * @param pageSize
-     * @param pageNumber
+     * 访问文件列表
+     * @param uuid 访问的文件夹的uuid，如果为空，则是访问根目录
+     * @param type 想要访问的文件类型，不填则是全部类型
+     * @param limit 每页的个数,不填则是
+     * @param pg 第几页
      * @return
      */
     @RequestMapping("/visit")
-    public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid,
+    public Map<String, Object> visit(@RequestParam(value = "uuid",required = false)String uuid,
                              @RequestParam(value = "type",required = false)String type,
-                             @RequestParam(value = "page_size",required = false)Integer pageSize,
-                             @RequestParam(value = "page_number",required = false)Integer pageNumber){//带参数uuid就访问那个文件夹 不带的话就主页
-        if(uuid==null){
+                             @RequestParam(value = "limit",required = false)Integer limit,
+                             @RequestParam(value = "pg",required = false)Integer pg){//带参数uuid就访问那个文件夹 不带的话就主页
+        Map<String, Object> map = new HashMap<>();
+        Page page = indexService.getPage(pg, limit);
+        if (type != null) {
+            Type type1 = Type.getType(type);
+            List<Index> list = indexService.getIndexList(page, type1);
+            map.put("page", page);
+            map.put("data", list);
+            return map;
+        }
+        if(null == uuid && null == type){
             uuid= ROOT;
+            List<Index> list = indexService.getIndexList(page, uuid);
+            map.put("page", page);
+            map.put("data", list);
+            System.out.println(page);
+            return map;
         }
-        Map<String,Object> map=new HashMap<>();
-        map.put(PARENT_UUID,uuid);
-        if(type!=null) {
-            map.put(TYPE, type);
-        }
-        List<Index> list=indexService.getIndexList(0,map);
-        return list;
-        //total pageSize pageNumber
+        List<Index> list = indexService.getIndexList(page, uuid);
+        map.put("page", page);
+        map.put("data", list);
+        return map;
     }
-
-
 
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
@@ -217,7 +227,7 @@ public class ApiController {
     public String delete(@RequestParam("uuid")String uuid){
         indexService.deleteByUuid(uuid);
 
-        return "删完了";
+        return "success";
     }
     @RequestMapping("/thumbnail")
     public void thumbnail(@RequestParam("uuid")String uuid,HttpServletResponse response){

@@ -1,9 +1,11 @@
 package com.sucaiji.cjpan.service.impl;
 
 
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.util.Md5Util;
 import net.coobird.thumbnailator.Thumbnails;
@@ -57,6 +59,9 @@ public class IndexServiceImpl implements IndexService {
         thumbnailPath = Paths.get(basePath.toString() + File.separator + THUMBNAIL_DIR);
     }
 
+
+
+
     @Override
     public void createDir(String name, String parentUuid) {
         String uuid = UUID();
@@ -67,35 +72,47 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public List<Index> getIndexList(String parentUuid) {
-        Map<String, Object> map = new HashMap<>();
+    public List<Index> getIndexList(Page page, String parentUuid) {
+        Map map = new HashMap();
         map.put(PARENT_UUID, parentUuid);
-        return getIndexList(1, DEFAULT_PAGE_SIZE, map);
+
+        return subPage(page, map);
+    }
+    @Override
+    public List<Index> getIndexList(Page page, Type type) {
+        Map map = new HashMap();
+        map.put(TYPE, type.toString());
+        return subPage(page, map);
     }
 
-    @Override
-    public List<Index> getIndexList(Integer page, String parentUuid) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(PARENT_UUID, parentUuid);
-        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
-    }
 
-    @Override
-    public List<Index> getIndexList(Integer page, Map<String, Object> map) {
-        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
-    }
-
-    @Override
-    public List<Index> getIndexList(Integer page, Integer pageSize, Map<String, Object> map) {
-
+    private List subPage(Page page,Map map) {
         List list = indexDao.selectIndex(map);
+        logger.debug("根据map[{}],获取分页的数据[{}]", map, list);
+        int pg;
+        if(null != page.getPg()){
+            pg = page.getPg();
+        } else {
+            pg = 1;
+        }
+        int limit;
+        if(null != page.getLimit()){
+            limit = page.getLimit();
+        } else {
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        logger.debug("获得pg[{}]和limit[{}]",pg+"",limit+"");
 
-        Integer fromIndex = (page - 1) * pageSize;
-        Integer toIndex = page * pageSize;
+        getTotal()
+        int pageAmount = (int) Math.ceil((double) total/(double)DEFAULT_PAGE_SIZE);
+
+        Integer fromIndex = (pg - 1) * limit;
+        Integer toIndex = pg * limit;
+
         logger.debug("获得fromIndex[{}]和toIndex[{}]",fromIndex+"",toIndex+"");
-        boolean outOfSize = fromIndex > list.size() || page <= 0;
+        boolean outOfSize = fromIndex > list.size() || pg <= 0;
         if (outOfSize) {
-            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", page + "", fromIndex + "");
+            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", pg + "", fromIndex + "");
             return null;
         }
         Collections.reverse(list);
@@ -130,6 +147,24 @@ public class IndexServiceImpl implements IndexService {
         map.put(PARENT_UUID,parentUuid);
         List list=indexDao.selectIndex(map);
         return list.size();
+    }
+
+    @Override
+    public Page getPage(Integer pg) {
+        return getPage(pg, DEFAULT_PAGE_SIZE);
+    }
+
+    @Override
+    public Page getPage(Integer pg, Integer limit) {
+        if(null == limit||limit == 0){
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        if(null == pg||pg == 0){
+            pg = 1;
+        }
+        //假数据
+
+        return new Page(pg, limit, 100);
     }
 
 

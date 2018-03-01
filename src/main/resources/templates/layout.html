@@ -87,13 +87,13 @@
                                 <a href="#">密码修改</a>
                             </li>
                             <li>
-                                <a href="#">退出</a>
+                                <a id="exit-btn" href="#">退出</a>
                             </li>
 
                         </ul>
                     </li>
                 </ul>
-                <!--搜索功能
+
                 <form class="navbar-form navbar-right" role="search">
                     <div class="form-group  is-empty">
                         <input type="text" class="form-control" placeholder="Search">
@@ -103,7 +103,7 @@
                         <i class="material-icons">search</i>
                         <div class="ripple-container"></div>
                     </button>
-                </form>-->
+                </form>
             </div>
         </div>
     </nav>
@@ -130,35 +130,36 @@
                     </a>
                 </li>
                 <li id="sidebar-gallery">
-                    <a href="/file/gallery">
+                    <a href="/file/image">
                         <i class="material-icons">photo</i>
                         <p>图片</p>
                     </a>
                 </li>
                 <li id="sidebar-videos">
-                    <a href="/file/videos">
+                    <a href="/file/video">
                         <i class="material-icons">video_library</i>
                         <p>视频</p>
                     </a>
                 </li>
                 <li id="sidebar-musics">
-                    <a href="/file/musics">
+                    <a href="/file/music">
                         <i class="material-icons">library_music</i>
                         <p>音乐</p>
                     </a>
                 </li>
                 <li id="sidebar-documents">
-                    <a href="/file/documents">
+                    <a href="/file/document">
                         <i class="material-icons">library_books</i>
                         <p>文档</p>
                     </a>
                 </li>
                 <li id="sidebar-others">
-                    <a href="/file/others">
+                    <a href="/file/other">
                         <i class="material-icons">inbox</i>
                         <p>其他</p>
                     </a>
                 </li>
+                <!--
                 <li>
                     <a href="">
                         <i class="material-icons text-gray">notifications</i>
@@ -170,7 +171,7 @@
                         <i class="material-icons">unarchive</i>
                         <p>给我充钱~~~</p>
                     </a>
-                </li>
+                </li>-->
             </ul>
         </div>
     </div>
@@ -196,119 +197,10 @@
 
     <script src="/lightbox/ekko-lightbox.min.js"></script>
 
-    <script src="/js/md5.js"></script>
-    <script src="/js/spark-md5.min.js"></script>
+
+    <script src="/js/my.js"></script>
     <script type="text/javascript">
 
-        function getInfo(obj) {
-            $('#rename-uuid').val(obj.name);
-            $('#rename').modal('show');
-        }
-
-
-        var $renamebtn = $('#rename-btn');
-        $renamebtn.on('click', function () {
-            var uuid = $('#rename-uuid').val();
-            var newName = $('#rename-name').val();
-            $.ajax({
-                url: "/api/rename?uuid=" + uuid + "&name=" + newName,
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("重命名成功");
-                    location.reload(true);
-
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        })
-
-
-        var del = function (uuid) {
-            $.ajax({
-                url: "/api/delete?uuid=" + uuid,
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("成功删除");
-                    location.reload(true);
-
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        };
-
-        var $exitbtn = $('#exit-btn');
-        $exitbtn.on('click', function () {
-            $.ajax({
-                url: "/api/exit",
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("成功退出");
-                    location.reload(true);
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        });
-
-        $(document).ready(function () {
-
-            // Javascript method's body can be found in assets/js/demos.js
-            demo.initDashboardPageCharts();
-
-        });
-
-        function sidebarActive() {
-            var pathname = window.location.pathname;
-            switch (pathname) {
-                case "/index":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/index.html":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/file/videos":
-                    $("#sidebar-videos").addClass("active")
-                    break;
-                case "/file/gallery":
-                    $("#sidebar-gallery").addClass("active")
-                    break;
-                case "/file/documents":
-                    $("#sidebar-documents").addClass("active")
-                    break;
-                case "/file/others":
-                    $("#sidebar-others").addClass("active")
-                    break;
-                case "/file/musics":
-                    $("#sidebar-musics").addClass("active")
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        sidebarActive();
-
-        //开启画廊
-        $(document).on('click', '[data-toggle="gallery"]', function (event) {
-            event.preventDefault();
-            $(this).ekkoLightbox({
-                alwaysShowClose: true,
-            });
-        });
 
     </script>
 </div>

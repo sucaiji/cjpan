@@ -40,16 +40,12 @@
 
 </div>
 <div th:include="layout::footer"></div>
+<script src="/js/md5.js"></script>
+<script src="/js/spark-md5.min.js"></script>
 <script src="/js/upload.js"></script>
 <script>
 
-    //启动画廊
-   // baguetteBox.run('.gallery',{
-    //    filter:/\/api\/image.*/,
-  //  });
-
     $(function () {
-
         function getQueryString(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
             var r = window.location.search.substr(1).match(reg);
