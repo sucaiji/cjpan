@@ -84,8 +84,25 @@ public class ApiController {
     @RequestMapping("/total")
     public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
                             @RequestParam(value="type",required = false)String type){
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+        return indexService.getTotal(parentUuid);
+    }
 
-        return indexService.getTotal(parentUuid, type);
+    /**
+     *  获取一共有多少条数据
+     *  如果type不为空，且parent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
+     *  如果type为空，进入parentUuid目录下获取文件总条数
+     *  如果parentUuid和type都为空，获取root目录下文件总条数
+     * @param parentUuid
+     * @param type
+     * @return
+     */
+    @RequestMapping("/total_with_type")
+    public Integer totalWithType(@RequestParam(value="type",required = false)String type){
+
+        return indexService.getTotalWithType(type);
     }
 
 

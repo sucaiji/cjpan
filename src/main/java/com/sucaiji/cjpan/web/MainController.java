@@ -67,14 +67,14 @@ public class MainController {
 
         model.addAttribute("indexList", list);
 
-        int total = indexService.getTotal(parentUuid,null);
+        int total = indexService.getTotal(parentUuid);
         int pageAmount = (int) Math.ceil((double) total/(double) indexService.DEFAULT_PAGE_SIZE);
         model.addAttribute("currentPage",pageNumber);
         model.addAttribute("pageAmount",pageAmount);
 
         Index index = indexService.getIndexByUuid(parentUuid);
         model.addAttribute("parentIndex", index);
-        return "demo";
+        return "index";
     }
 
     @RequestMapping("/file/{str}")
@@ -92,13 +92,13 @@ public class MainController {
 
         model.addAttribute("indexList", list);
 
-        int total = indexService.getTotal(null,type.toString());
+        int total = indexService.getTotalWithType(type.toString());
         int pageAmount = (int) Math.ceil((double) total/(double)indexService.DEFAULT_PAGE_SIZE);
         System.out.println(total+"+"+pageAmount);
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("pageAmount", pageAmount);
 
-        return "demo2";
+        return "type";
 
     }
 
@@ -107,7 +107,7 @@ public class MainController {
                         Model model) {
         Index index = indexService.getIndexByUuid(uuid);
         model.addAttribute("index", index);
-        return "demo3";
+        return "video";
     }
 
 

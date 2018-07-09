@@ -43,8 +43,6 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     private Md5Dao md5Dao;
 
-    @Autowired
-    private Md5Util md5Util;
 
 
     private Path basePath;
@@ -103,8 +101,8 @@ public class IndexServiceImpl implements IndexService {
         }
         logger.debug("获得pg[{}]和limit[{}]",pg+"",limit+"");
 
-        getTotal()
-        int pageAmount = (int) Math.ceil((double) total/(double)DEFAULT_PAGE_SIZE);
+        //getTotal()
+        //int pageAmount = (int) Math.ceil((double) total/(double)DEFAULT_PAGE_SIZE);
 
         Integer fromIndex = (pg - 1) * limit;
         Integer toIndex = pg * limit;
@@ -127,24 +125,21 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Integer getTotal(String parentUuid, String type) {
+    public Integer getTotal(String parentUuid) {
         Map<String,Object> map = new HashMap();
-        if(type != null){
-            if(parentUuid != null){
-                logger.debug("type[{}]不为空，且parent_uuid[{}]不为空，查询parent_uuid文件夹下的type类型文件",type,parentUuid);
-                map.put(PARENT_UUID,parentUuid);
-            }
-            logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
-            map.put(TYPE,type);
-            List list=indexDao.selectIndex(map);
-            return list.size();
-        }
 
-        if(parentUuid == null){
-            parentUuid = ROOT;
-        }
         logger.debug("此时type为空，进入根据parentUuid[{}]获取当前目录下文件总条数的分支",parentUuid);
         map.put(PARENT_UUID,parentUuid);
+        List list=indexDao.selectIndex(map);
+        return list.size();
+    }
+
+    @Override
+    public Integer getTotalWithType(String type) {
+        Map<String,Object> map = new HashMap();
+
+        logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
+        map.put(TYPE,type);
         List list=indexDao.selectIndex(map);
         return list.size();
     }
@@ -353,7 +348,7 @@ public class IndexServiceImpl implements IndexService {
             }
             outFileChannel.close();
 
-            boolean checkMd5 = md5Util.md5CheckSum(file, fileMd5);
+            boolean checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
             if (checkMd5) {
                 File dirFile = new File(getFileParentPath(fileMd5).toString());
                 if (!dirFile.exists()) {
@@ -401,7 +396,7 @@ public class IndexServiceImpl implements IndexService {
         //生成缩略图
         switch (type) {
             case VIDEO:
-                //balabala
+                //TODO
                 break;
             case IMAGE:
                 generateImageThumbnail(fileMd5);
