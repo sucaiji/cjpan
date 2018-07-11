@@ -62,7 +62,7 @@ public class MainController {
         }
         logger.debug("用户请求的pageNumber为[{}]",pageNumber+"");
 
-        Page page = indexService.getPage(pageNumber, limit);
+        Page page = indexService.getPage(pageNumber, limit, parentUuid);
         List<Index> list = indexService.getIndexList(page, parentUuid);
 
         model.addAttribute("indexList", list);
@@ -87,7 +87,7 @@ public class MainController {
         }
         Type type = Type.getType(str);
 
-        Page page = indexService.getPage(pageNumber, limit);
+        Page page = indexService.getPageWithType(pageNumber, limit, type);
         List<Index> list = indexService.getIndexList(page, type);
 
         model.addAttribute("indexList", list);

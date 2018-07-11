@@ -74,16 +74,13 @@ public class ApiController {
 
     /**
      *  获取一共有多少条数据
-     *  如果type不为空，且parent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
-     *  如果type为空，进入parentUuid目录下获取文件总条数
-     *  如果parentUuid和type都为空，获取root目录下文件总条数
+     *  如果tparent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
+     *  如果parentUuid为空，获取root目录下文件总条数
      * @param parentUuid
-     * @param type
      * @return
      */
     @RequestMapping("/total")
-    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
-                            @RequestParam(value="type",required = false)String type){
+    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid) {
         if(parentUuid==null){
             parentUuid=ROOT;
         }
@@ -91,16 +88,12 @@ public class ApiController {
     }
 
     /**
-     *  获取一共有多少条数据
-     *  如果type不为空，且parent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
-     *  如果type为空，进入parentUuid目录下获取文件总条数
-     *  如果parentUuid和type都为空，获取root目录下文件总条数
-     * @param parentUuid
+     *  获取一共有多少条type类型的数据
      * @param type
      * @return
      */
     @RequestMapping("/total_with_type")
-    public Integer totalWithType(@RequestParam(value="type",required = false)String type){
+    public Integer totalWithType(@RequestParam(value="type")String type){
 
         return indexService.getTotalWithType(type);
     }
@@ -109,39 +102,57 @@ public class ApiController {
 
     /**
      * 访问文件列表
-     * @param uuid 访问的文件夹的uuid，如果为空，则是访问根目录
-     * @param type 想要访问的文件类型，不填则是全部类型
-     * @param limit 每页的个数,不填则是
+     * @param parentUuid 访问的文件夹的uuid，如果为空，则是访问根目录
+     * @param limit 每页的个数,不填则是默认值
      * @param pg 第几页
      * @return
      */
     @RequestMapping("/visit")
-    public Map<String, Object> visit(@RequestParam(value = "uuid",required = false)String uuid,
-                             @RequestParam(value = "type",required = false)String type,
+    public Map<String, Object> visit(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
                              @RequestParam(value = "limit",required = false)Integer limit,
                              @RequestParam(value = "pg",required = false)Integer pg){//带参数uuid就访问那个文件夹 不带的话就主页
         Map<String, Object> map = new HashMap<>();
-        Page page = indexService.getPage(pg, limit);
-        if (type != null) {
-            Type type1 = Type.getType(type);
-            List<Index> list = indexService.getIndexList(page, type1);
-            map.put("page", page);
-            map.put("data", list);
-            return map;
-        }
-        if(null == uuid && null == type){
-            uuid= ROOT;
-            List<Index> list = indexService.getIndexList(page, uuid);
+
+
+        if(null == parentUuid){
+            parentUuid = ROOT;
+            Page page = indexService.getPage(pg, limit, parentUuid);
+            List<Index> list = indexService.getIndexList(page, parentUuid);
             map.put("page", page);
             map.put("data", list);
             System.out.println(page);
             return map;
         }
-        List<Index> list = indexService.getIndexList(page, uuid);
+        Page page = indexService.getPage(pg, limit, parentUuid);
+        List<Index> list = indexService.getIndexList(page, parentUuid);
         map.put("page", page);
         map.put("data", list);
         return map;
     }
+
+
+    /**
+     * 访问文件列表
+     * @param type 想要访问的文件类型，不填则是全部类型
+     * @param limit 每页的个数,不填则是默认值
+     * @param pg 第几页
+     * @return
+     */
+    @RequestMapping("/visit_with_type")
+    public Map<String, Object> visitWithType(@RequestParam(value = "type")String type,
+                                     @RequestParam(value = "limit",required = false)Integer limit,
+                                     @RequestParam(value = "pg",required = false)Integer pg){
+        Map<String, Object> map = new HashMap<>();
+        Type type1 = Type.getType(type);
+        Page page = indexService.getPageWithType(pg, limit, type1);
+        List<Index> list = indexService.getIndexList(page, type1);
+        map.put("page", page);
+        map.put("data", list);
+
+        return map;
+
+    }
+
 
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
@@ -247,7 +258,8 @@ public class ApiController {
         return "success";
     }
     @RequestMapping("/thumbnail")
-    public void thumbnail(@RequestParam("uuid")String uuid,HttpServletResponse response){
+    public void thumbnail(@RequestParam("uuid")String uuid,
+                          HttpServletResponse response){
         String md5=indexService.getMd5ByUuid(uuid);
         if(md5==null){
             return;
@@ -272,13 +284,6 @@ public class ApiController {
         Index index=indexService.getIndexByUuid(uuid);
 
         response.setContentType("image/jpeg");
-        //测试用，测试完删掉
-        /*response.setContentType("image/jpeg");//+index.getSuffix());
-        try {
-            response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
         try {
             OutputStream os=response.getOutputStream();
             indexService.writeInOutputStream(index,os);

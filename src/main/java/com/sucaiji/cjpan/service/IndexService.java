@@ -66,13 +66,27 @@ public interface IndexService {
      *
      * @return
      */
-    Page getPage(Integer pg);
+    Page getPage(Integer pg, String uuid);
 
     /**
      *
      * @return
      */
-    Page getPage(Integer pg, Integer limit);
+    Page getPage(Integer pg, Integer limit, String uuid);
+
+    /**
+     *
+     * @return
+     */
+    Page getPageWithType(Integer pg, Type type);
+
+    /**
+     *
+     * @return
+     */
+    Page getPageWithType(Integer pg, Integer limit, Type type);
+
+
 
 
     /**

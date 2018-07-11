@@ -145,21 +145,35 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Page getPage(Integer pg) {
-        return getPage(pg, DEFAULT_PAGE_SIZE);
+    public Page getPage(Integer pg, String uuid) {
+        return getPage(pg, DEFAULT_PAGE_SIZE, uuid);
     }
 
     @Override
-    public Page getPage(Integer pg, Integer limit) {
+    public Page getPage(Integer pg, Integer limit, String uuid) {
         if(null == limit||limit == 0){
             limit = DEFAULT_PAGE_SIZE;
         }
         if(null == pg||pg == 0){
             pg = 1;
         }
-        //假数据
+        int total = getTotal(uuid);
 
-        return new Page(pg, limit, 100);
+
+        return new Page(pg, limit, total);
+    }
+
+    @Override
+    public Page getPageWithType(Integer pg, Type type) {
+        int limit = DEFAULT_PAGE_SIZE;
+
+        return getPageWithType(pg, limit, type);
+    }
+
+    @Override
+    public Page getPageWithType(Integer pg, Integer limit, Type type) {
+        int total = getTotalWithType(type.toString());
+        return new Page(pg, limit, total);
     }
 
 
