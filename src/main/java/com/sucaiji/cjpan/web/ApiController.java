@@ -294,23 +294,36 @@ public class ApiController {
 
     @RequestMapping("/login")
     public String login(HttpSession session,
-                        @RequestParam("email")String email,
+                        @RequestParam("account")String account,
                         @RequestParam("password")String password){
         Subject subject=SecurityUtils.getSubject();
-        UsernamePasswordToken token=new UsernamePasswordToken(email,password);
+        UsernamePasswordToken token=new UsernamePasswordToken(account,password);
         try {
             subject.login(token);
         } catch (Exception e){
             return "failure";
         }
+        subject.getSession().setAttribute("account", account);
         return "success";
+    }
+
+    @RequestMapping("/change_password")
+    public String changePassword(@RequestParam("old_pwd")String oldPassword,
+                                 @RequestParam("new_pwd")String newPassword) {
+        Subject subject = SecurityUtils.getSubject();
+        String account = subject.getSession().getAttribute("account").toString();
+        boolean success = userService.changePassword(account, oldPassword, newPassword);
+        if (success) {
+            return "success";
+        }
+        return "fail";
     }
 
     @RequestMapping("/init_regist")
     public String initRegister(
                             HttpServletRequest request,
                             HttpServletResponse response,
-                            @RequestParam("email")String email,
+                            @RequestParam("account")String account,
                             @RequestParam("password")String password,
                             @RequestParam("name")String name){
         if(!userService.isEmpty()){
@@ -320,16 +333,16 @@ public class ApiController {
                 e.printStackTrace();
             }
             //如果user表不是空的则什么也不做
-            return "321321";
+            return "fail";
         }
         //魔法值admin后期改
-        userService.regist(email,password,name,"admin");
+        userService.regist(account,password,name,"admin");
         try {
             response.sendRedirect("/index");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "123123";
+        return "success";
     }
 
     @RequestMapping("/video")
@@ -389,8 +402,8 @@ public class ApiController {
             }
         }
 
-        System.out.println(response.getHeader("Content-Range"));
-        System.out.println(response.getHeader("Content-Length"));
+        //System.out.println(response.getHeader("Content-Range"));
+        //System.out.println(response.getHeader("Content-Length"));
 
     }
 

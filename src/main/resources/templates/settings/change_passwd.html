@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" class="no-js">
+<head>
+    <div th:include="settings/settings_layout::head"></div>
+</head>
+<body>
+<div class="warpper">
+    <div th:include="settings/settings_layout::sidebar"></div>
+    <div class="main-panel">
+        <div th:include="settings/settings_layout::nav"></div>
+        <div class="content" style=" margin-top: 40px;">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                        <form>
+                            <div class="form-group">
+                                <label for="oldPassword">原密码</label>
+                                <input type="password" class="form-control" id="oldPassword" >
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">新密码</label>
+                                <input type="password" class="form-control" id="newPassword">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">确认密码</label>
+                                <input type="password" class="form-control" id="confirmPassword">
+                            </div>
+                            <p id="submit" class="btn">修改密码</p>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <footer class="footer">
+            <div class="container-fluid">
+                <p class="copyright pull-right">
+                    &copy;
+                    <script>
+                        document.write(new Date().getFullYear())
+                    </script>
+                    <a href="https://github.com/sucaiji/cjpan">CJPAN</a>, 可靠的私人云存储系统。
+                </p>
+            </div>
+        </footer>
+    </div>
+
+</div>
+<div th:include="settings/settings_layout::footer"></div>
+<script>
+
+
+    $('#submit').click(function () {
+        var oldPassword = $('#oldPassword').val();
+        var newPassword = $('#newPassword').val();
+        var confirmPassword = $('#confirmPassword').val();
+        if (newPassword != confirmPassword) {
+            alert("新密码和再次确认不一致")
+            return;
+        }
+        $.ajax({
+            url: "/api/change_password?old_pwd=" + oldPassword + "&new_pwd=" + newPassword ,
+            type: "GET",
+            async: true,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data == "\"success\"") {
+                    alert("修改成功")
+                    location.reload();
+                } else {
+                    alert("密码错误");
+                }
+            },
+            error: function (XMLHttpRequest, errorThrown) {
+            }
+        });
+    })
+</script>
+</body>
+</html>

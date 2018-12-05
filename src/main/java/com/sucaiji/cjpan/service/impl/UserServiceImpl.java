@@ -16,9 +16,9 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Override
-    public boolean login(String count, String password) {
+    public boolean login(String account, String password) {
         Map<String,Object> user=new HashMap<>();
-        user.put("count",count);
+        user.put("account",account);
         List<User> list=userDao.select(user);
         if(list.size()==0){
             return false;
@@ -31,9 +31,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void regist(String count, String password, String name, String role) {
-        User user=new User(count,password,name,role);
+    public void regist(String account, String password, String name, String role) {
+        User user=new User(account,password,name,role);
         userDao.insert(user);
+    }
+
+    @Override
+    public boolean changePassword(String account, String oldPassword, String newPassword) {
+        User user = userDao.selectByAccount(account);
+        if (oldPassword.equals(user.getPassword())) {
+            userDao.updatePassword(account, newPassword);
+            return true;
+        }
+        return false;
     }
 
     @Override

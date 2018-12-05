@@ -88,7 +88,7 @@
 										<span class="input-group-addon">
 											<i class="material-icons">face</i>
 										</span>
-                                    <input type="email" id="email" class="form-control" placeholder="邮箱">
+                                    <input type="text" id="account" class="form-control" placeholder="账号">
                                 </div>
 
                                 <div class="input-group">
@@ -143,7 +143,8 @@
                     </ul>
                 </nav>
                 <div class="copyright pull-right">
-                    &copy; 2018, made with <i class="fa fa-heart heart"></i> by <a href="" target="_blank">Sucaiji</a>
+                    <a href="https://github.com/sucaiji/cjpan">CJPAN</a>, 可靠的私人云存储系统。
+                    <!--&copy; 2018, made with <i class="fa fa-heart heart"></i> by <a href="" target="_blank">Sucaiji</a>-->
                 </div>
             </div>
         </footer>
@@ -174,10 +175,10 @@
 
         $('#login').on('click', function () {
 
-            var email = $('#email').val();
+            var account = $('#account').val();
             var password = $('#password').val();
             var form = new FormData();
-            form.append("email", email);
+            form.append("account", account);
             form.append("password", password);
 
             $.ajax({

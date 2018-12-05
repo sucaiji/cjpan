@@ -2,7 +2,7 @@ package com.sucaiji.cjpan.entity;
 
 public class User {
     private Integer id;
-    private String count;
+    private String account;
     private String password;
     private String name;
     private String role;
@@ -10,16 +10,16 @@ public class User {
     public User() {
     }
 
-    public User(String count, String password, String name, String role) {
-        this.count = count;
+    public User(String account, String password, String name, String role) {
+        this.account = account;
         this.password = password;
         this.name = name;
         this.role = role;
     }
 
-    public User(Integer id, String count, String password, String name, String role) {
+    public User(Integer id, String account, String password, String name, String role) {
         this.id = id;
-        this.count = count;
+        this.account = account;
         this.password = password;
         this.name = name;
         this.role = role;
@@ -33,12 +33,12 @@ public class User {
         this.id = id;
     }
 
-    public String getCount() {
-        return count;
+    public String getAccount() {
+        return account;
     }
 
-    public void setCount(String count) {
-        this.count = count;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getPassword() {
