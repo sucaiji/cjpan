@@ -9,3 +9,13 @@
     height:auto;
     width:27px;
 }
+.my-simple-text{
+    text-transform: uppercase;
+    padding: 5px 0px;
+    display: block;
+    font-size: 18px;
+    color: #3C4858;
+    text-align: center;
+    font-weight: 400;
+    line-height: 30px;
+}

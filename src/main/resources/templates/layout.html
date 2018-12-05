@@ -38,49 +38,62 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">
-                    Material Dashboard
-                </a>
+                <div class="navbar-brand">
+
+                    <div th:if="${parentIndex}">
+                        <a th:if="${parentIndex.parentUuid}"
+                           th:href="@{'/index?parent_uuid='+${parentIndex.parentUuid}}">
+                            <strong class="am-text-primary am-text-lg">返回上一级</strong>
+                        </a>
+                        <a th:unless="${parentIndex.parentUuid}" th:href="@{'/index'}">
+                            <strong class="am-text-primary am-text-lg">返回上一级</strong>
+                        </a>
+                        /
+                        <small>目前位于：</small>
+                        <small th:text="${parentIndex.name}"></small>
+                    </div>
+                    <div th:unless="${parentIndex}">
+                        <a href="/" class="my-simple-text"> CJPan私有云存储服务</a>
+                    </div>
+                </div>
             </div>
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a href="#pablo" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="material-icons">dashboard</i>
-                            <p class="hidden-lg hidden-md">Dashboard</p>
+                            <p class="hidden-lg hidden-md">321</p>
                         </a>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="material-icons">notifications</i>
-                            <span class="notification">5</span>
-                            <p class="hidden-lg hidden-md">Notifications</p>
+                            <p class="hidden-lg hidden-md">123</p>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="#">Mike John responded to your email</a>
+                                <a href="#">123</a>
                             </li>
-                            <li>
-                                <a href="#">You have 5 new tasks</a>
-                            </li>
-                            <li>
-                                <a href="#">You're now friend with Andrew</a>
-                            </li>
-                            <li>
-                                <a href="#">Another Notification</a>
-                            </li>
-                            <li>
-                                <a href="#">Another One</a>
-                            </li>
+
                         </ul>
                     </li>
                     <li>
                         <a href="#pablo" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="material-icons">person</i>
-                            <p class="hidden-lg hidden-md">Profile</p>
+                            <p class="hidden-lg hidden-md">设置</p>
                         </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="/settings/change_passwd">密码修改</a>
+                            </li>
+                            <li>
+                                <a id="exit-btn" href="#">退出</a>
+                            </li>
+
+                        </ul>
                     </li>
                 </ul>
+
                 <form class="navbar-form navbar-right" role="search">
                     <div class="form-group  is-empty">
                         <input type="text" class="form-control" placeholder="Search">
@@ -91,7 +104,6 @@
                         <div class="ripple-container"></div>
                     </button>
                 </form>
-
             </div>
         </div>
     </nav>
@@ -105,8 +117,8 @@
     Tip 2: you can also add an image using data-image tag
     -->
         <div class="logo">
-            <a href="/index" class="simple-text">
-                CJPan私有云存储服务
+            <a href="#" class="simple-text">
+                欢迎你，亲爱的xx
             </a>
         </div>
         <div class="sidebar-wrapper">
@@ -118,35 +130,36 @@
                     </a>
                 </li>
                 <li id="sidebar-gallery">
-                    <a href="/file/gallery">
+                    <a href="/file/image">
                         <i class="material-icons">photo</i>
                         <p>图片</p>
                     </a>
                 </li>
                 <li id="sidebar-videos">
-                    <a href="/file/videos">
+                    <a href="/file/video">
                         <i class="material-icons">video_library</i>
                         <p>视频</p>
                     </a>
                 </li>
                 <li id="sidebar-musics">
-                    <a href="/file/musics">
+                    <a href="/file/music">
                         <i class="material-icons">library_music</i>
                         <p>音乐</p>
                     </a>
                 </li>
                 <li id="sidebar-documents">
-                    <a href="/file/documents">
+                    <a href="/file/document">
                         <i class="material-icons">library_books</i>
                         <p>文档</p>
                     </a>
                 </li>
                 <li id="sidebar-others">
-                    <a href="/file/others">
+                    <a href="/file/other">
                         <i class="material-icons">inbox</i>
                         <p>其他</p>
                     </a>
                 </li>
+                <!--
                 <li>
                     <a href="">
                         <i class="material-icons text-gray">notifications</i>
@@ -158,7 +171,7 @@
                         <i class="material-icons">unarchive</i>
                         <p>给我充钱~~~</p>
                     </a>
-                </li>
+                </li>-->
             </ul>
         </div>
     </div>
@@ -184,93 +197,10 @@
 
     <script src="/lightbox/ekko-lightbox.min.js"></script>
 
-    <script src="/js/md5.js"></script>
-    <script src="/js/spark-md5.min.js"></script>
+
+    <script src="/js/my.js"></script>
     <script type="text/javascript">
 
-
-
-        var del = function (uuid) {
-            $.ajax({
-                url: "/api/delete?uuid=" + uuid,
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("成功删除");
-
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        };
-
-        var $exitbtn = $('#exit-btn');
-        $exitbtn.on('click', function () {
-            $.ajax({
-                url: "/api/exit",
-                type: "GET",
-                async: true,        //异步
-                processData: false,  //很重要，告诉jquery不要对form进行处理
-                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                success: function (data) {
-                    alert("成功退出");
-                    location.reload(true);
-                }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
-                }
-            });
-        });
-
-        $(document).ready(function () {
-
-            // Javascript method's body can be found in assets/js/demos.js
-            demo.initDashboardPageCharts();
-
-        });
-
-        function sidebarActive() {
-            var pathname = window.location.pathname;
-            switch (pathname) {
-                case "/index":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/index.html":
-                    $("#sidebar-all").addClass("active")
-                    break;
-                case "/file/videos":
-                    $("#sidebar-videos").addClass("active")
-                    break;
-                case "/file/gallery":
-                    $("#sidebar-gallery").addClass("active")
-                    break;
-                case "/file/documents":
-                    $("#sidebar-documents").addClass("active")
-                    break;
-                case "/file/others":
-                    $("#sidebar-others").addClass("active")
-                    break;
-                case "/file/musics":
-                    $("#sidebar-musics").addClass("active")
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        sidebarActive();
-
-        //开启画廊
-        $(document).on('click', '[data-toggle="gallery"]', function (event) {
-            event.preventDefault();
-            $(this).ekkoLightbox({
-                alwaysShowClose: true,
-            });
-        });
 
     </script>
 </div>
@@ -304,8 +234,7 @@
                                         </a>
                                         <ul class="dropdown-menu">
                                             <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                            <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
-                                            <li><a href="#">删除</a></li>
+                                            <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -340,8 +269,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
-                                                <li><a href="#">删除</a></li>
+                                                <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -375,8 +303,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
-                                                <li><a href="#">移动</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -410,8 +337,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li><a th:name="${index.uuid}" class="rename-btn" data-toggle="modal" data-target="#rename">重命名</a></li>
-                                                <li><a href="#">删除</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -426,6 +352,81 @@
 
     </div>
 
+</div>
+
+<div th:fragment="model">
+
+    <!-- 上传窗口 -->
+    <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="uploadTitle"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="uploadTitle">创建文件夹</h4>
+                </div>
+                <div class="modal-body">
+                    <!--上传用的-->
+                    <input class="am-btn-secondary" type="file" id="file"/>
+
+                    <button class="am-btn-secondary" id="btn-upload">上传</button>
+                    <span id="output">等待</span>
+                    <span id="usetime">用时</span>
+                    <span id="param">param==</span>
+                    <!--上传用的完-->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info btn-simple" data-dismiss="modal">后台等待</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 创建文件夹窗口 -->
+    <div class="modal fade" id="mkdir" tabindex="-1" role="dialog" aria-labelledby="mkdirTitle"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="mkdirTitle">创建文件夹</h4>
+                </div>
+                <div class="modal-body">
+                    请输入文件夹名称
+                    <input type="text" id="mkdir-name">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">取消</button>
+                    <button id="mkdir-btn" type="button" class="btn btn-info btn-simple" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重命名 -->
+    <div class="modal fade" id="rename" tabindex="-1" role="dialog" aria-labelledby="renameTitle"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="renameTitle">重命名</h4>
+                </div>
+                <div class="modal-body">
+                    重命名新名字
+                    <form id="rename-form">
+                        <input type="hidden" id="rename-uuid">
+                        <input type="text" id="rename-name">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">取消</button>
+                    <button type="button" id="rename-btn" class="btn btn-info btn-simple" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 

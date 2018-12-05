@@ -1,9 +1,11 @@
 package com.sucaiji.cjpan.service.impl;
 
 
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.util.Md5Util;
 import net.coobird.thumbnailator.Thumbnails;
@@ -41,8 +43,6 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     private Md5Dao md5Dao;
 
-    @Autowired
-    private Md5Util md5Util;
 
 
     private Path basePath;
@@ -57,6 +57,9 @@ public class IndexServiceImpl implements IndexService {
         thumbnailPath = Paths.get(basePath.toString() + File.separator + THUMBNAIL_DIR);
     }
 
+
+
+
     @Override
     public void createDir(String name, String parentUuid) {
         String uuid = UUID();
@@ -67,35 +70,47 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public List<Index> getIndexList(String parentUuid) {
-        Map<String, Object> map = new HashMap<>();
+    public List<Index> getIndexList(Page page, String parentUuid) {
+        Map map = new HashMap();
         map.put(PARENT_UUID, parentUuid);
-        return getIndexList(1, DEFAULT_PAGE_SIZE, map);
+
+        return subPage(page, map);
+    }
+    @Override
+    public List<Index> getIndexList(Page page, Type type) {
+        Map map = new HashMap();
+        map.put(TYPE, type.toString());
+        return subPage(page, map);
     }
 
-    @Override
-    public List<Index> getIndexList(Integer page, String parentUuid) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(PARENT_UUID, parentUuid);
-        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
-    }
 
-    @Override
-    public List<Index> getIndexList(Integer page, Map<String, Object> map) {
-        return getIndexList(page, DEFAULT_PAGE_SIZE, map);
-    }
-
-    @Override
-    public List<Index> getIndexList(Integer page, Integer pageSize, Map<String, Object> map) {
-
+    private List subPage(Page page,Map map) {
         List list = indexDao.selectIndex(map);
+        logger.debug("根据map[{}],获取分页的数据[{}]", map, list);
+        int pg;
+        if(null != page.getPg()){
+            pg = page.getPg();
+        } else {
+            pg = 1;
+        }
+        int limit;
+        if(null != page.getLimit()){
+            limit = page.getLimit();
+        } else {
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        logger.debug("获得pg[{}]和limit[{}]",pg+"",limit+"");
 
-        Integer fromIndex = (page - 1) * pageSize;
-        Integer toIndex = page * pageSize;
+        //getTotal()
+        //int pageAmount = (int) Math.ceil((double) total/(double)DEFAULT_PAGE_SIZE);
+
+        Integer fromIndex = (pg - 1) * limit;
+        Integer toIndex = pg * limit;
+
         logger.debug("获得fromIndex[{}]和toIndex[{}]",fromIndex+"",toIndex+"");
-        boolean outOfSize = fromIndex > list.size() || page <= 0;
+        boolean outOfSize = fromIndex > list.size() || pg <= 0;
         if (outOfSize) {
-            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", page + "", fromIndex + "");
+            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", pg + "", fromIndex + "");
             return null;
         }
         Collections.reverse(list);
@@ -110,26 +125,55 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Integer getTotal(String parentUuid, String type) {
+    public Integer getTotal(String parentUuid) {
         Map<String,Object> map = new HashMap();
-        if(type != null){
-            if(parentUuid != null){
-                logger.debug("type[{}]不为空，且parent_uuid[{}]不为空，查询parent_uuid文件夹下的type类型文件",type,parentUuid);
-                map.put(PARENT_UUID,parentUuid);
-            }
-            logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
-            map.put(TYPE,type);
-            List list=indexDao.selectIndex(map);
-            return list.size();
-        }
 
-        if(parentUuid == null){
-            parentUuid = ROOT;
-        }
         logger.debug("此时type为空，进入根据parentUuid[{}]获取当前目录下文件总条数的分支",parentUuid);
         map.put(PARENT_UUID,parentUuid);
         List list=indexDao.selectIndex(map);
         return list.size();
+    }
+
+    @Override
+    public Integer getTotalWithType(String type) {
+        Map<String,Object> map = new HashMap();
+
+        logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
+        map.put(TYPE,type);
+        List list=indexDao.selectIndex(map);
+        return list.size();
+    }
+
+    @Override
+    public Page getPage(Integer pg, String uuid) {
+        return getPage(pg, DEFAULT_PAGE_SIZE, uuid);
+    }
+
+    @Override
+    public Page getPage(Integer pg, Integer limit, String uuid) {
+        if(null == limit||limit == 0){
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        if(null == pg||pg == 0){
+            pg = 1;
+        }
+        int total = getTotal(uuid);
+
+
+        return new Page(pg, limit, total);
+    }
+
+    @Override
+    public Page getPageWithType(Integer pg, Type type) {
+        int limit = DEFAULT_PAGE_SIZE;
+
+        return getPageWithType(pg, limit, type);
+    }
+
+    @Override
+    public Page getPageWithType(Integer pg, Integer limit, Type type) {
+        int total = getTotalWithType(type.toString());
+        return new Page(pg, limit, total);
     }
 
 
@@ -153,6 +197,14 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public File getThumbnailByMd5(String md5) {
         return getFileThumbnailPath(md5).toFile();
+    }
+
+    @Override
+    public void setIndexName(String uuid, String name) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("uuid", uuid);
+        map.put("name", name);
+        indexDao.updateIndex(map);
     }
 
     @Override
@@ -310,7 +362,7 @@ public class IndexServiceImpl implements IndexService {
             }
             outFileChannel.close();
 
-            boolean checkMd5 = md5Util.md5CheckSum(file, fileMd5);
+            boolean checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
             if (checkMd5) {
                 File dirFile = new File(getFileParentPath(fileMd5).toString());
                 if (!dirFile.exists()) {
@@ -358,7 +410,7 @@ public class IndexServiceImpl implements IndexService {
         //生成缩略图
         switch (type) {
             case VIDEO:
-                //balabala
+                //TODO
                 break;
             case IMAGE:
                 generateImageThumbnail(fileMd5);

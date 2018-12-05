@@ -1,6 +1,8 @@
 package com.sucaiji.cjpan.service;
 
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -23,13 +25,6 @@ public interface IndexService {
      */
     void createDir(String name, String parentUuid);
 
-    /**
-     * 通过某个文件夹的uuid获取文件夹下所有文件
-     *
-     * @param parentUuid
-     * @return
-     */
-    List<Index> getIndexList(String parentUuid);
 
     /**
      * 通过某个文件夹的uuid获取文件夹下的第page页文件
@@ -38,32 +33,60 @@ public interface IndexService {
      * @param parentUuid
      * @return
      */
-    List<Index> getIndexList(Integer page, String parentUuid);
+    List<Index> getIndexList(Page page, String parentUuid);
 
     /**
-     * 通过某个文件夹的uuid获取文件夹下的文件
+     * 通过某个文件夹的uuid获取文件夹下的第page页文件
+     *
      * @param page
-     * @param map
+     * @param type
      * @return
      */
-    List<Index> getIndexList(Integer page, Map<String, Object> map);
+    List<Index> getIndexList(Page page, Type type);
 
-    /**
-     * 通过某个文件夹的uuid获取文件夹下的文件
-     * @param page
-     * @param pageSize
-     * @param map
-     * @return
-     */
-    List<Index> getIndexList(Integer page , Integer pageSize, Map<String, Object> map);
+
+
 
     /**
      * 获取数据条数
      * @param parentUuid
+     * @return
+     */
+    Integer getTotal(String parentUuid);
+
+    /**
+     * 获取数据条数
      * @param type
      * @return
      */
-    Integer getTotal(String parentUuid, String type);
+    Integer getTotalWithType(String type);
+
+
+    /**
+     *
+     * @return
+     */
+    Page getPage(Integer pg, String uuid);
+
+    /**
+     *
+     * @return
+     */
+    Page getPage(Integer pg, Integer limit, String uuid);
+
+    /**
+     *
+     * @return
+     */
+    Page getPageWithType(Integer pg, Type type);
+
+    /**
+     *
+     * @return
+     */
+    Page getPageWithType(Integer pg, Integer limit, Type type);
+
+
 
 
     /**
@@ -86,6 +109,13 @@ public interface IndexService {
      * @return
      */
     File getThumbnailByMd5(String md5);
+
+    /**
+     * 设置index的名字
+     * @param uuid
+     * @param name
+     */
+    void setIndexName(String uuid, String name);
 
     /**
      * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
@@ -194,5 +224,6 @@ public interface IndexService {
             this.total = total;
         }
     }
+
 
 }

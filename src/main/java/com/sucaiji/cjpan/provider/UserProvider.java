@@ -15,8 +15,8 @@ public class UserProvider  {
                 if(user.get("id")!=null){
                     WHERE("id=#{id}");
                 } else {
-                    if(user.get("count")!=null){
-                        WHERE("count=#{count}");
+                    if(user.get("account")!=null){
+                        WHERE("account=#{account}");
                     }
                     if(user.get("password")!=null){
                         WHERE("password=#{password}");

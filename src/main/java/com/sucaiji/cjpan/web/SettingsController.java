@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/settings")
 public class SettingsController {
-    @RequestMapping("/info")
-    public String settings() {
-        return "demo";
+
+    @RequestMapping("/change_passwd")
+    public String index() {
+        return "settings/change_passwd";
     }
+
 }

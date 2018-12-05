@@ -5,6 +5,7 @@ import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.dao.UserDao;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import net.coobird.thumbnailator.Thumbnailator;
 import net.coobird.thumbnailator.Thumbnails;
@@ -43,7 +44,7 @@ public class CjpanApplicationTests {
 	final static Logger logger=LoggerFactory.getLogger(CjpanApplicationTests.class);
 	@Test
 	public void contextLoads() {
-
+		System.out.println(new Page(5,2));
 
 	}
 

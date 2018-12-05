@@ -13,11 +13,19 @@ public interface UserService {
 
     /**
      * 注册
-     * @param count
+     * @param account
      * @param password
      * @param name
      */
-    void regist(String count,String password,String name,String role);
+    void regist(String account,String password,String name,String role);
+
+    /**
+     * 改密码
+     * @param oldPassword
+     * @param newPassword
+     * @return 旧密码无误且新密码符合格式时返回true，反之返回false
+     */
+    boolean changePassword(String account, String oldPassword, String newPassword);
 
     /**
      * 判断用户表是否为空

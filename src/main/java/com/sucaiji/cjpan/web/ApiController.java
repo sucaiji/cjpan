@@ -2,7 +2,9 @@ package com.sucaiji.cjpan.web;
 
 
 import com.sucaiji.cjpan.config.Property;
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
 import org.apache.shiro.SecurityUtils;
@@ -64,7 +66,6 @@ public class ApiController {
      */
     public static final int SUCCESS_ALL_SLICE_UPLOAD=999;
 
-
     @RequestMapping("/exit")
     public void exit(){
         Subject subject=SecurityUtils.getSubject();
@@ -73,47 +74,84 @@ public class ApiController {
 
     /**
      *  获取一共有多少条数据
-     *  如果type不为空，且parent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
-     *  如果type为空，进入parentUuid目录下获取文件总条数
-     *  如果parentUuid和type都为空，获取root目录下文件总条数
+     *  如果tparent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
+     *  如果parentUuid为空，获取root目录下文件总条数
      * @param parentUuid
-     * @param type
      * @return
      */
     @RequestMapping("/total")
-    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
-                            @RequestParam(value="type",required = false)String type){
+    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid) {
+        if(parentUuid==null){
+            parentUuid=ROOT;
+        }
+        return indexService.getTotal(parentUuid);
+    }
 
-        return indexService.getTotal(parentUuid, type);
+    /**
+     *  获取一共有多少条type类型的数据
+     * @param type
+     * @return
+     */
+    @RequestMapping("/total_with_type")
+    public Integer totalWithType(@RequestParam(value="type")String type){
+
+        return indexService.getTotalWithType(type);
+    }
+
+
+
+    /**
+     * 访问文件列表
+     * @param parentUuid 访问的文件夹的uuid，如果为空，则是访问根目录
+     * @param limit 每页的个数,不填则是默认值
+     * @param pg 第几页
+     * @return
+     */
+    @RequestMapping("/visit")
+    public Map<String, Object> visit(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
+                             @RequestParam(value = "limit",required = false)Integer limit,
+                             @RequestParam(value = "pg",required = false)Integer pg){//带参数uuid就访问那个文件夹 不带的话就主页
+        Map<String, Object> map = new HashMap<>();
+
+
+        if(null == parentUuid){
+            parentUuid = ROOT;
+            Page page = indexService.getPage(pg, limit, parentUuid);
+            List<Index> list = indexService.getIndexList(page, parentUuid);
+            map.put("page", page);
+            map.put("data", list);
+            System.out.println(page);
+            return map;
+        }
+        Page page = indexService.getPage(pg, limit, parentUuid);
+        List<Index> list = indexService.getIndexList(page, parentUuid);
+        map.put("page", page);
+        map.put("data", list);
+        return map;
     }
 
 
     /**
-     * 一会添加分页功能
-     * @param uuid
-     * @param type
-     * @param pageSize
-     * @param pageNumber
+     * 访问文件列表
+     * @param type 想要访问的文件类型，不填则是全部类型
+     * @param limit 每页的个数,不填则是默认值
+     * @param pg 第几页
      * @return
      */
-    @RequestMapping("/visit")
-    public List<Index> visit(@RequestParam(value = "uuid",required = false)String uuid,
-                             @RequestParam(value = "type",required = false)String type,
-                             @RequestParam(value = "page_size",required = false)Integer pageSize,
-                             @RequestParam(value = "page_number",required = false)Integer pageNumber){//带参数uuid就访问那个文件夹 不带的话就主页
-        if(uuid==null){
-            uuid= ROOT;
-        }
-        Map<String,Object> map=new HashMap<>();
-        map.put(PARENT_UUID,uuid);
-        if(type!=null) {
-            map.put(TYPE, type);
-        }
-        List<Index> list=indexService.getIndexList(0,map);
-        return list;
-        //total pageSize pageNumber
-    }
+    @RequestMapping("/visit_with_type")
+    public Map<String, Object> visitWithType(@RequestParam(value = "type")String type,
+                                     @RequestParam(value = "limit",required = false)Integer limit,
+                                     @RequestParam(value = "pg",required = false)Integer pg){
+        Map<String, Object> map = new HashMap<>();
+        Type type1 = Type.getType(type);
+        Page page = indexService.getPageWithType(pg, limit, type1);
+        List<Index> list = indexService.getIndexList(page, type1);
+        map.put("page", page);
+        map.put("data", list);
 
+        return map;
+
+    }
 
 
     @RequestMapping("/mkdir")
@@ -200,6 +238,13 @@ public class ApiController {
 
     }
 
+    @RequestMapping("/rename")
+    public String rename(@RequestParam("uuid")String uuid,
+                         @RequestParam("name")String name) {
+        indexService.setIndexName(uuid, name);
+        return "success";
+    }
+
     /**
      * 根据传入的uuid，删除该文件或者文件夹，如果是文件夹的话，则删除文件夹下所有文件
      * 注意，删除决定的确定应该在客户端上完成，这里只负责完成删除
@@ -210,10 +255,11 @@ public class ApiController {
     public String delete(@RequestParam("uuid")String uuid){
         indexService.deleteByUuid(uuid);
 
-        return "删完了";
+        return "success";
     }
     @RequestMapping("/thumbnail")
-    public void thumbnail(@RequestParam("uuid")String uuid,HttpServletResponse response){
+    public void thumbnail(@RequestParam("uuid")String uuid,
+                          HttpServletResponse response){
         String md5=indexService.getMd5ByUuid(uuid);
         if(md5==null){
             return;
@@ -238,13 +284,6 @@ public class ApiController {
         Index index=indexService.getIndexByUuid(uuid);
 
         response.setContentType("image/jpeg");
-        //测试用，测试完删掉
-        /*response.setContentType("image/jpeg");//+index.getSuffix());
-        try {
-            response.addHeader("Content-Disposition","attachment;filename="+ URLEncoder.encode(index.getName(), "UTF-8"));//url这个是将文件名转码
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
         try {
             OutputStream os=response.getOutputStream();
             indexService.writeInOutputStream(index,os);
@@ -255,23 +294,36 @@ public class ApiController {
 
     @RequestMapping("/login")
     public String login(HttpSession session,
-                        @RequestParam("email")String email,
+                        @RequestParam("account")String account,
                         @RequestParam("password")String password){
         Subject subject=SecurityUtils.getSubject();
-        UsernamePasswordToken token=new UsernamePasswordToken(email,password);
+        UsernamePasswordToken token=new UsernamePasswordToken(account,password);
         try {
             subject.login(token);
         } catch (Exception e){
             return "failure";
         }
+        subject.getSession().setAttribute("account", account);
         return "success";
+    }
+
+    @RequestMapping("/change_password")
+    public String changePassword(@RequestParam("old_pwd")String oldPassword,
+                                 @RequestParam("new_pwd")String newPassword) {
+        Subject subject = SecurityUtils.getSubject();
+        String account = subject.getSession().getAttribute("account").toString();
+        boolean success = userService.changePassword(account, oldPassword, newPassword);
+        if (success) {
+            return "success";
+        }
+        return "fail";
     }
 
     @RequestMapping("/init_regist")
     public String initRegister(
                             HttpServletRequest request,
                             HttpServletResponse response,
-                            @RequestParam("email")String email,
+                            @RequestParam("account")String account,
                             @RequestParam("password")String password,
                             @RequestParam("name")String name){
         if(!userService.isEmpty()){
@@ -281,16 +333,16 @@ public class ApiController {
                 e.printStackTrace();
             }
             //如果user表不是空的则什么也不做
-            return "321321";
+            return "fail";
         }
         //魔法值admin后期改
-        userService.regist(email,password,name,"admin");
+        userService.regist(account,password,name,"admin");
         try {
             response.sendRedirect("/index");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "123123";
+        return "success";
     }
 
     @RequestMapping("/video")
@@ -350,11 +402,8 @@ public class ApiController {
             }
         }
 
-        System.out.println(response.getHeader("Content-Range"));
-        System.out.println(response.getHeader("Content-Length"));
-
-
-
+        //System.out.println(response.getHeader("Content-Range"));
+        //System.out.println(response.getHeader("Content-Length"));
 
     }
 

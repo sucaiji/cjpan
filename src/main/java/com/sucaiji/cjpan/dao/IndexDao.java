@@ -26,4 +26,7 @@ public interface IndexDao {
 
     @DeleteProvider(type = com.sucaiji.cjpan.provider.IndexProvider.class,method = "deleteIndex")
     void deleteIndex(Map<String,Object> map);
+
+    @UpdateProvider(type = com.sucaiji.cjpan.provider.IndexProvider.class, method = "updateIndex")
+    void updateIndex(Map<String,Object> map);
 }
