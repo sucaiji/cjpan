@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sucaiji.cjpan.dao.UserDao">
+    <select id="selectByAccount" resultType="User">
+        SELECT * FROM USERS WHERE account = #{account}
+    </select>
+    <insert id="insert" parameterType="User">
+        INSERT INTO USERS(account,password,name,role) VALUES(#{account},#{password},#{name},#{role})
+    </insert>
+    <update id="update" parameterType="User">
+        UPDATE USERS
+            SET password=#{password},
+                name=#{name},
+                role=#{role}
+            WHERE id=#{id}
+    </update>
+    <update id="updatePassword">
+        UPDATE USERS SET password=#{password} WHERE account=#{account}
+    </update>
+</mapper>

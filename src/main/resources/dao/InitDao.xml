@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sucaiji.cjpan.dao.InitDao">
+    <update id="createTableUsers">
+        CREATE TABLE IF NOT EXISTS USERS (
+              id int PRIMARY KEY AUTO_INCREMENT,
+              account varchar(32) UNIQUE,
+              password varchar(32),
+              name varchar(20),
+              role varchar(10)
+        )
+    </update>
+    <update id="createTableIndexs">
+        CREATE TABLE IF NOT EXISTS INDEXS (
+              uuid CHAR(32) PRIMARY KEY,
+              parent_uuid CHAR(32),
+              name VARCHAR (254) NOT NULL,
+              type VARCHAR(10),
+              suffix VARCHAR(20),
+              is_dir BOOLEAN NOT NULL,
+              l_update DATETIME NOT NULL,
+              size BIGINT,
+              CONSTRAINT not_same UNIQUE (parent_uuid,name,is_dir)
+        )
+    </update>
+    <update id="createTableMd5">
+        CREATE TABLE IF NOT EXISTS MD5(
+            md5 CHAR(32),
+            uuid CHAR(32) PRIMARY KEY,
+            CONSTRAINT fk FOREIGN KEY(uuid) REFERENCES INDEXS(uuid)
+          )
+    </update>
+</mapper>

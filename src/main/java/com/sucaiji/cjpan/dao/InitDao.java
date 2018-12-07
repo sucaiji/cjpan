@@ -6,36 +6,11 @@ import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface InitDao{
-    @Update("CREATE TABLE IF NOT EXISTS USERS(" +
-            "  id int PRIMARY KEY AUTO_INCREMENT," +
-            "  account varchar(32) UNIQUE," +
-            "  password varchar(32)," +
-            "  name varchar(20)," +
-            "  role varchar(10)" +
-            ")")
+
     void createTableUsers();
 
-    @Update("CREATE TABLE IF NOT EXISTS INDEXS (" +
-            "  uuid CHAR(32) PRIMARY KEY," +
-            "  parent_uuid CHAR(32)," +
-            "  name VARCHAR (254) NOT NULL," +
-            "  type VARCHAR(10)," +
-            "  suffix VARCHAR(20)," +
-            "  is_dir BOOLEAN NOT NULL," +
-            "  l_update DATETIME NOT NULL," +
-            "  size BIGINT," +
-            "  CONSTRAINT not_same UNIQUE (parent_uuid,name,is_dir)" +
-            ")")
     void createTableIndexs();
 
-    @Update("CREATE TABLE IF NOT EXISTS MD5(" +
-            "  md5 CHAR(32)," +
-            "  uuid CHAR(32) PRIMARY KEY," +
-            "  CONSTRAINT fk FOREIGN KEY(uuid) REFERENCES INDEXS(uuid)" +
-            ")")
     void createTableMd5();
-
-
-
 
 }
