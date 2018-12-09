@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sucaiji.cjpan.dao.Md5Dao">
+    <select id="insert">
+        INSERT INTO MD5(md5,uuid) VALUES(#{md5},#{uuid})
+    </select>
+    <select id="selectUuidByMd5" resultType="String">
+        SELECT uuid FROM MD5 WHERE md5=#{md5}
+    </select>
+    <select id="selectMd5ByUuid" resultType="String">
+        SELECT md5 FROM MD5 WHERE uuid=#{uuid}
+    </select>
+    <delete id="deleteByUuid">
+        DELETE FROM MD5 WHERE uuid=#{uuid}
+    </delete>
+</mapper>
