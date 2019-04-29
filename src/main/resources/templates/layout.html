@@ -249,7 +249,8 @@
                         <div class="card card-stats">
                             <div class="gallery card-content">
                                 <a th:href="@{'/video/'+${index.uuid}}">
-                                    <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/videos.png'
+                                    <img class='am-img-thumbnail am-img-bdrs' th:src="@{'/api/thumbnail?uuid='+${index.uuid}}"
+                                         onerror="this.src='/img/tubiao/videos.png'"
                                          alt=''/></a>
                             </div>
                             <div class="card-footer">

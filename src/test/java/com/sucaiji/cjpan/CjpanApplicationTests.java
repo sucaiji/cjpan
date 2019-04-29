@@ -6,11 +6,15 @@ import com.sucaiji.cjpan.dao.Md5Dao;
 import com.sucaiji.cjpan.dao.UserDao;
 import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.entity.Page;
+
 import com.sucaiji.cjpan.service.IndexService;
-import net.coobird.thumbnailator.Thumbnailator;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Position;
-import net.coobird.thumbnailator.geometry.Positions;
+
+import org.jcodec.api.FrameGrab;
+import org.jcodec.common.io.NIOUtils;
+import org.jcodec.common.model.Picture;
+import org.jcodec.containers.mp4.boxes.MetaValue;
+import org.jcodec.movtool.MetadataEditor;
+import org.jcodec.scale.AWTUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -29,11 +33,16 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
+
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
 
 
 @RunWith(SpringRunner.class)
@@ -42,12 +51,14 @@ public class CjpanApplicationTests {
 
 
 	final static Logger logger=LoggerFactory.getLogger(CjpanApplicationTests.class);
+
+	@Autowired
+	private IndexService indexService;
+
+
 	@Test
-	public void contextLoads() {
-		System.out.println(new Page(5,2));
+	public void test() {
 
 	}
-
-
 
 }

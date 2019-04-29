@@ -115,8 +115,6 @@ public class MainController {
 
     @RequestMapping("/test")
     public String test(HttpServletRequest request, Model model) {
-
-
         return "test";
     }
 

@@ -4,6 +4,7 @@ public interface Property {
     String APP_NAME_EN = "cjpan";
     String DATA_DIR = "data";
     String TEMP_DIR = "temp";
+    String FRAME_TEMP_DIR = "frameTemp";
     String THUMBNAIL_DIR = "thumbnail";
 
 
