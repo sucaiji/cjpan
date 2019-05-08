@@ -194,10 +194,10 @@ public class ApiController {
 
 
     @RequestMapping(value = "/upload")
-    public Map<String,Object> upload(HttpServletRequest request,
+    public void upload(HttpServletRequest request,
                       @RequestParam(value = "file",required = false)MultipartFile multipartFile,
-                      @RequestParam("action")String action,
-                      @RequestParam("md5")String md5,//分片的md5
+//                      @RequestParam("action")String action,
+//                      @RequestParam("md5")String md5,//分片的md5
                       @RequestParam("filemd5")String fileMd5,//文件的md5
                       @RequestParam("name")String name,//文件名称
                       @RequestParam(value = "parent_uuid",required = false)String parentUuid,//父uuid，不带此参数的话代表
@@ -208,35 +208,33 @@ public class ApiController {
         if(parentUuid==null){
             parentUuid=ROOT;
         }
+        indexService.saveTemp(multipartFile,fileMd5,index);
+        //判断传过来的包finish参数是不是true 如果是的话代表是最后一个包，这时开始执行合并校验操作
+        if(finish){
+            indexService.saveFile(parentUuid, fileMd5,name,total);
+        }
+    }
 
-        if(action.equals("check")){
-            Map<String,Object> map=new HashMap<>();
-            map.put("flag",SLICE_NOT_EXIST);
-            return map;
-        }
-        if(action.equals("upload")){
-            indexService.saveTemp(multipartFile,fileMd5,md5,index);
-            //判断传过来的包finish参数是不是true 如果是的话代表是最后一个包，这时开始执行合并校验操作
-            if(finish){
-                boolean success=indexService.saveFile(parentUuid, fileMd5,name,total);
-                if(success) {
-                    Map<String,Object> map=new HashMap<>();
-                    map.put("flag",123123123);
-                    return map;
-                }else {
-                    Map<String,Object> map=new HashMap<>();
-                    map.put("flag",123188883);
-                    return map;
-                }
-            }
-            return new HashMap();
-        }
+    @RequestMapping(value = "/checkUpload")
+    public Map<String,Object> checkSuccess(@RequestParam("filemd5") String fileMd5) {
+        boolean success = indexService.checkUpload(fileMd5);
+
         Map<String,Object> map=new HashMap<>();
-        map.put("error","mmp你传错值了");
+        map.put("success", success);
         return map;
 
-
     }
+
+    //获取全部正在校验md5的list 暂时是测试用
+    @RequestMapping(value = "/getUploadList")
+    public List<String> uploadQueue() {
+        List<String> list = new ArrayList<>();
+        for (Map.Entry<String, Object> entry: indexService.getCheckMap().entrySet()) {
+            list.add(entry.getKey());
+        }
+        return list;
+    }
+
 
     @RequestMapping("/rename")
     public String rename(@RequestParam("uuid")String uuid,

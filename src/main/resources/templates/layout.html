@@ -364,17 +364,22 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="uploadTitle">创建文件夹</h4>
+                    <h4 class="modal-title" id="uploadTitle">上传文件</h4>
                 </div>
                 <div class="modal-body">
                     <!--上传用的-->
                     <input class="am-btn-secondary" type="file" id="file"/>
 
                     <button class="am-btn-secondary" id="btn-upload">上传</button>
-                    <span id="output">等待</span>
                     <span id="usetime">用时</span>
-                    <span id="param">param==</span>
                     <!--上传用的完-->
+
+                    <div id="upload-progress" class="progress" style="visibility: hidden">
+                        <div id="upload-progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; min-width: 2em;">
+                            <span id="upload-progress-text"></span>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-info btn-simple" data-dismiss="modal">后台等待</button>

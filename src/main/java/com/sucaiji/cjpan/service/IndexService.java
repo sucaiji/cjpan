@@ -31,6 +31,9 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +54,8 @@ public class IndexService {
     @Autowired
     private Md5Dao md5Dao;
 
-
+    private Map<String, Object> checkMap = new HashMap<>();
+    private ExecutorService checkPool = Executors.newCachedThreadPool();
 
     private Path basePath;
     private Path dataPath;
@@ -425,21 +429,16 @@ public class IndexService {
         return null;
     }
 
-    /**
-     * 文件合并和保存到数据库,并生成缩略图
-     *
-     * @param parentUuid
-     * @param fileMd5
-     * @param name
-     * @param total
-     * @return
-     */
-    public boolean saveFile(String parentUuid, String fileMd5, String name, int total) {
-        File file = new File(tempPath.toString() + File.separator + fileMd5 + File.separator + fileMd5);
-        if (!file.getParentFile().exists()) {
-            return false;
-        }
-        try {
+    public void saveFile(String parentUuid, String fileMd5, String name, int total) {
+        checkMap.put(fileMd5, new Object());
+        checkPool.execute(() -> {
+            File file = new File(tempPath.toString() + File.separator + fileMd5 + File.separator + fileMd5);
+            if (!file.getParentFile().exists()) {
+                //如果temp文件夹不存在 则抛出异常或return
+                return;
+            }
+            try {
+            //将文件合并
             FileOutputStream fos = new FileOutputStream(file);
             FileChannel outFileChannel = fos.getChannel();
 
@@ -454,75 +453,175 @@ public class IndexService {
                 inFileChannel.close();
             }
             outFileChannel.close();
+            boolean checkMd5 = false;
 
-            boolean checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
-            if (checkMd5) {
-                File dirFile = new File(getFileParentPath(fileMd5).toString());
-                if (!dirFile.exists()) {
-                    dirFile.mkdir();
+                checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
+                if (checkMd5) {
+                    File dirFile = new File(getFileParentPath(fileMd5).toString());
+                    if (!dirFile.exists()) {
+                        dirFile.mkdir();
+                    }
+
+                    Path from = Paths.get(file.getAbsolutePath());
+                    Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + fileMd5);
+                    Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
+                    //删除temp里面的文件
+
+                    //先删除文件夹下所有东西
+                    String[] children = file.getParentFile().list();
+                    for (String str : children) {
+                        Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
+
+                    }
+                    //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
+                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
+
+                    //获得文件的大小
+                    //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
+                    Long size = getFilePath(fileMd5).toFile().length();
+
+                    String uuid = UUID();
+                    Timestamp time = time();
+                    String suffix = getSuffix(name);
+                    String type = getType(name);
+                    Index index = new Index(uuid, parentUuid, name, suffix, type, false, time, size);
+                    //先文件的合并,与校验
+
+                    //在文件树表中添加记录
+                    indexDao.insertIndex(index);
+                    //md5表中添加记录
+                    md5Dao.insert(fileMd5, uuid);
+                    //生成缩略图
+                    switch (type) {
+                        case VIDEO:
+                            generateMovieTumbnail(fileMd5);
+                            break;
+                        case IMAGE:
+                            generateImageThumbnail(fileMd5);
+                            break;
+                        default:
+                            break;
+                    }
+                    if (checkMap.containsKey(fileMd5)) {
+                        checkMap.remove(fileMd5);
+                    }
                 }
-
-                Path from = Paths.get(file.getAbsolutePath());
-                Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + fileMd5);
-                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-                //删除temp里面的文件
-
-                //先删除文件夹下所有东西
-                String[] children = file.getParentFile().list();
-                for (String str : children) {
-                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
-
-                }
-
-                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        });
+    }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        //获得文件的大小
-        //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
-        Long size = getFilePath(fileMd5).toFile().length();
+    public Map<String, Object> getCheckMap() {
+        return checkMap;
+    }
 
-        String uuid = UUID();
-        Timestamp time = time();
-        String suffix = getSuffix(name);
-        String type = getType(name);
-        Index index = new Index(uuid, parentUuid, name, suffix, type, false, time, size);
-        //先文件的合并,与校验
-
-        //在文件树表中添加记录
-        indexDao.insertIndex(index);
-        //md5表中添加记录
-        md5Dao.insert(fileMd5, uuid);
-        //生成缩略图
-        switch (type) {
-            case VIDEO:
-                generateMovieTumbnail(fileMd5);
-                break;
-            case IMAGE:
-                generateImageThumbnail(fileMd5);
-                break;
-            default:
-                break;
+    public boolean checkUpload(String fileMd5) {
+        if (checkMap.containsKey(fileMd5)) {
+            return false;
         }
         return true;
     }
+
+//    /**
+//     * 文件合并和保存到数据库,并生成缩略图
+//     *
+//     * @param parentUuid
+//     * @param fileMd5
+//     * @param name
+//     * @param total
+//     * @return
+//     */
+//    public boolean saveFile(String parentUuid, String fileMd5, String name, int total) {
+//        File file = new File(tempPath.toString() + File.separator + fileMd5 + File.separator + fileMd5);
+//        if (!file.getParentFile().exists()) {
+//            return false;
+//        }
+//        try {
+//            FileOutputStream fos = new FileOutputStream(file);
+//            FileChannel outFileChannel = fos.getChannel();
+//
+//            List<File> files = new ArrayList<>();
+//            for (int i = 1; i <= total; i++) {
+//                files.add(new File(tempPath.toString() + File.separator + fileMd5 + File.separator + i));
+//            }
+//            for (File file1 : files) {
+//                FileInputStream fis = new FileInputStream(file1);
+//                FileChannel inFileChannel = fis.getChannel();
+//                inFileChannel.transferTo(0, file1.length(), outFileChannel);
+//                inFileChannel.close();
+//            }
+//            outFileChannel.close();
+//
+//            boolean checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
+//            if (checkMd5) {
+//                File dirFile = new File(getFileParentPath(fileMd5).toString());
+//                if (!dirFile.exists()) {
+//                    dirFile.mkdir();
+//                }
+//
+//                Path from = Paths.get(file.getAbsolutePath());
+//                Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + fileMd5);
+//                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
+//                //删除temp里面的文件
+//
+//                //先删除文件夹下所有东西
+//                String[] children = file.getParentFile().list();
+//                for (String str : children) {
+//                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
+//
+//                }
+//
+//                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
+//                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        }
+//        //获得文件的大小
+//        //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
+//        Long size = getFilePath(fileMd5).toFile().length();
+//
+//        String uuid = UUID();
+//        Timestamp time = time();
+//        String suffix = getSuffix(name);
+//        String type = getType(name);
+//        Index index = new Index(uuid, parentUuid, name, suffix, type, false, time, size);
+//        //先文件的合并,与校验
+//
+//        //在文件树表中添加记录
+//        indexDao.insertIndex(index);
+//        //md5表中添加记录
+//        md5Dao.insert(fileMd5, uuid);
+//        //生成缩略图
+//        switch (type) {
+//            case VIDEO:
+//                generateMovieTumbnail(fileMd5);
+//                break;
+//            case IMAGE:
+//                generateImageThumbnail(fileMd5);
+//                break;
+//            default:
+//                break;
+//        }
+//        return true;
+//    }
 
     /**
      * 将接收到的分片包保存在临时文件夹
      *
      * @param multipartFile
      * @param fileMd5
-     * @param md5
      * @param index
      */
-    public void saveTemp(MultipartFile multipartFile, String fileMd5, String md5, Integer index) {
+    public void saveTemp(MultipartFile multipartFile, String fileMd5, Integer index) {
         try {
             File tempDir = new File(tempPath.toFile() + File.separator + fileMd5);
             if (!tempDir.exists()) {
