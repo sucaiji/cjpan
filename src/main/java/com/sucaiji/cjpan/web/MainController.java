@@ -36,7 +36,7 @@ public class MainController {
     @RequestMapping("/login")
     public String login() {
         if (userService.isEmpty()) {
-            return "init2";
+            return "init";
         }
         return "login";
     }
