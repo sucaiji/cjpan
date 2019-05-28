@@ -309,27 +309,16 @@ public class ApiController {
 
     @RequestMapping("/init_regist")
     public String initRegister(
-                            HttpServletRequest request,
-                            HttpServletResponse response,
                             @RequestParam("account")String account,
                             @RequestParam("password")String password,
                             @RequestParam("name")String name){
+        //user表是空的代表第一次用
         if(!userService.isEmpty()){
-            try {
-                response.sendRedirect("/index");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //如果user表不是空的则什么也不做
             return "fail";
         }
         //魔法值admin后期改
-        userService.regist(account,password,name,"admin");
-        try {
-            response.sendRedirect("/index");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //改个屁就这样吧
+        userService.regist(account, password, name,"admin");
         return "success";
     }
 

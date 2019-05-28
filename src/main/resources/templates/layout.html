@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" class="no-js">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+
 </head>
 <body>
 <div th:fragment="head">
@@ -10,7 +9,6 @@
     <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png"/>
     <link rel="icon" type="image/png" href="../assets/img/favicon.png"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>Material Dashboard by Creative Tim</title>
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'/>
     <meta name="viewport" content="width=device-width"/>
     <!-- Bootstrap core CSS     -->
@@ -238,7 +236,7 @@
                     </div>
                 </div>
             </div>
-            <div  th:each="index:${indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
+            <div th:each="index:${indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
                 <div th:case="'video'">
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
                         <div class="card card-stats">
@@ -312,7 +310,7 @@
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
                         <div class="card card-stats">
                             <div class="card-content">
-                                <a th:href="@{'/index?parent_uuid='+${index.uuid}}">
+                                <a th:href="@{'/api/download?uuid='+${index.uuid}}">
                                     <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/documents.png'
                                          alt=''/></a>
                             </div>

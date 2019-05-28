@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="../assets/img/favicon.png">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <title>视频</title>
+    <title th:text="${index.name}">视频</title>
 
     <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 
@@ -42,7 +42,7 @@
                                 <a class="btn btn-primary col-xs-2" th:href="@{'/api/download?uuid='+${index.uuid}}">下载</a>
                             </div>
                         </div>
-                        <div class="col-xs-10 col-xs-offset-1">
+                        <div class="col-xs-10 col-xs-offset-1" style="margin-bottom: 80px;">
                             <!-- 16:9 aspect ratio -->
                             <div class="embed-responsive embed-responsive-16by9">
                                 <video class=""

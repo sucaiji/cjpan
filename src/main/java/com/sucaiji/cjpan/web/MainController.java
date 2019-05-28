@@ -36,17 +36,10 @@ public class MainController {
     @RequestMapping("/login")
     public String login() {
         if (userService.isEmpty()) {
-            return "init";
+            return "init2";
         }
         return "login";
     }
-
-    @RequestMapping("/init")
-    public String init() {
-        return "init";
-    }
-
-
 
     @RequestMapping(value = {"/", "index", "/index"})
     public String index(@RequestParam(value = "parent_uuid", required = false) String parentUuid,
