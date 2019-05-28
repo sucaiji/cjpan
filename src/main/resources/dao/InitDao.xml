@@ -21,8 +21,7 @@
               suffix VARCHAR(20),
               is_dir BOOLEAN NOT NULL,
               l_update DATETIME NOT NULL,
-              size BIGINT,
-              CONSTRAINT not_same UNIQUE (parent_uuid,name,is_dir)
+              size BIGINT
         )
     </update>
     <update id="createTableMd5">

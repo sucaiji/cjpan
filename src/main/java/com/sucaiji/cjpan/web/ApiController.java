@@ -49,22 +49,6 @@ public class ApiController {
      * 不存在相同文件
      */
     public static final int MD5_NOT_EXIST=2;
-    /**
-     * 分片已经存在
-     */
-    public static final int SLICE_EXIST=3;
-    /**
-     * 分片不存在
-     */
-    public static final int SLICE_NOT_EXIST=4;
-    /**
-     * 分片上传成功
-     */
-    public static final int SUCCESS_SLICE_UPLOAD=999;
-    /**
-     * 所有分片上传成功
-     */
-    public static final int SUCCESS_ALL_SLICE_UPLOAD=999;
 
     @RequestMapping("/exit")
     public void exit(){
@@ -153,17 +137,23 @@ public class ApiController {
 
     }
 
-
+    /**
+     * 创建文件夹
+     * @param name
+     * @param parentUuid
+     * @return 成功返回success 失败返回fail
+     */
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
                             @RequestParam(value = "parent_uuid",required = false)String parentUuid){
-
         if(parentUuid==null){
             parentUuid=ROOT;
         }
-        indexService.createDir(name, parentUuid);
-
-        return "success";
+        boolean success = indexService.createDir(name, parentUuid);
+        if (success) {
+            return "success";
+        }
+        return "fail";
     }
 
     /**
@@ -205,13 +195,13 @@ public class ApiController {
                       @RequestParam(value = "total")Integer total,//总片数
                       @RequestParam(value = "finish",required = false)Boolean finish //是否完成
                         ){
-        if(parentUuid==null){
-            parentUuid=ROOT;
+        if(parentUuid == null){
+            parentUuid = ROOT;
         }
-        indexService.saveTemp(multipartFile,fileMd5,index);
+        indexService.saveTemp(multipartFile, fileMd5, index);
         //判断传过来的包finish参数是不是true 如果是的话代表是最后一个包，这时开始执行合并校验操作
         if(finish){
-            indexService.saveFile(parentUuid, fileMd5,name,total);
+            indexService.saveFile(parentUuid, fileMd5, name, total);
         }
     }
 
@@ -399,9 +389,6 @@ public class ApiController {
                 e.printStackTrace();
             }
         }
-
-        //System.out.println(response.getHeader("Content-Range"));
-        //System.out.println(response.getHeader("Content-Length"));
 
     }
 

@@ -76,8 +76,12 @@
                 contentType: false,  //很重要，指定为false才能形成正确的Content-Type
                 success: function (data) {
                     var dataObj = eval(data);
-                    var flag = dataObj.flag;
-                    location.reload(true);
+                    if (dataObj == "success") {
+                        location.reload(true);
+                    } else {
+                        alert("创建失败，该目录中存在同名文件夹")
+                    }
+
 
                 }, error: function (XMLHttpRequest, errorThrown) {
                     alert("服务器出错!");

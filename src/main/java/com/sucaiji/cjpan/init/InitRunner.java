@@ -1,6 +1,7 @@
 package com.sucaiji.cjpan.init;
 
 import com.sucaiji.cjpan.config.Property;
+import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.InitDao;
 import com.sucaiji.cjpan.entity.Index;
@@ -26,7 +27,7 @@ public class InitRunner implements ApplicationRunner {
     @Autowired
     private IndexDao indexDao;
 
-    private String  initPath;
+    private String initPath;
 
     @Autowired
     private IndexService indexService;
@@ -68,19 +69,9 @@ public class InitRunner implements ApplicationRunner {
     private void initThumbnail() {
         List<Index> indexList = indexDao.selectIndex(new HashMap<>());
         for (Index index: indexList) {
-            try {
-                switch (index.getType()) {
-                    case Property.IMAGE:
-                        String md5 = indexService.getMd5ByUuid(index.getUuid());
-                        indexService.generateImageThumbnail(md5);
-                        break;
-                    case Property.VIDEO:
-                        String md51 = indexService.getMd5ByUuid(index.getUuid());
-                        indexService.generateMovieTumbnail(md51);
-                        break;
-                }
-            } catch (Exception e) {
-                System.out.println("图片生成失败");
+            String md5 = indexService.getMd5ByUuid(index.getUuid());
+            if (index.getType() != null && !index.getType().equals("")) {
+                indexService.generateThumbnail(md5, Type.getType(index.getType()));
             }
         }
     }

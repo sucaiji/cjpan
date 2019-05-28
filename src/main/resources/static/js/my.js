@@ -35,7 +35,8 @@ var del = function (uuid) {
             alert("成功删除");
             location.reload(true);
         }, error: function (XMLHttpRequest, errorThrown) {
-            alert("服务器出错!");
+            alert("成功删除");
+            location.reload(true);
         }
     });
 };
