@@ -418,46 +418,6 @@ public class IndexService {
         return new Range(start, end, fileSize);
     }
 
-//    public Range getRange(String rangeStr, Long fileSize) {
-//        System.out.println("rangeStr" + rangeStr);
-//        rangeStr = rangeStr.replaceAll("bytes=", "");
-//
-//
-//        Pattern pattern1 = Pattern.compile("\\d+");
-//        Matcher matcher1 = pattern1.matcher(rangeStr);
-//        if (matcher1.matches()) {
-//            Long start = Long.valueOf(rangeStr);
-//            return new Range(start, fileSize - 1, fileSize);
-//        }
-//
-//
-//        Pattern pattern2 = Pattern.compile("\\d+-");
-//        Matcher matcher2 = pattern2.matcher(rangeStr);
-//        if (matcher2.matches()) {
-//
-//            Long start = Long.valueOf(rangeStr.replaceAll("-", ""));
-//            return new Range(start, fileSize - 1, fileSize);
-//        }
-//
-//        Pattern pattern3 = Pattern.compile("\\d+-\\d+");
-//        Matcher matcher3 = pattern3.matcher(rangeStr);
-//        if (matcher3.matches()) {
-//            String temp = rangeStr.replaceAll("-\\d*", "");
-//            Long start = Long.valueOf(temp);
-//            temp = rangeStr.replaceAll("\\d*-", "");
-//            Long end = Long.valueOf(temp);
-//            return new Range(start, end, fileSize);
-//        }
-//
-//        Pattern pattern4 = Pattern.compile("-\\d+");
-//        Matcher matcher4 = pattern4.matcher(rangeStr);
-//        if (matcher4.matches()) {
-//            Long start = fileSize - 1 - Long.valueOf(rangeStr.replaceAll("-", ""));
-//            return new Range(start, fileSize - 1, fileSize);
-//        }
-//
-//        return null;
-//    }
 
     public void saveFile(String parentUuid, String fileMd5, String name, int total) {
         checkMap.put(fileMd5, new Object());
@@ -476,7 +436,7 @@ public class IndexService {
             for (int i = 1; i <= total; i++) {
                 files.add(new File(tempPath.toString() + File.separator + fileMd5 + File.separator + i));
             }
-            for (File file1 : files) {
+            for (File file1: files) {
                 FileInputStream fis = new FileInputStream(file1);
                 FileChannel inFileChannel = fis.getChannel();
                 inFileChannel.transferTo(0, file1.length(), outFileChannel);
@@ -510,12 +470,24 @@ public class IndexService {
                 //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
                 Long size = getFilePath(fileMd5).toFile().length();
 
+                String newName = name;
+                Map<String, Object> map = new HashMap<>();
+                map.put(PARENT_UUID, parentUuid);
+                map.put(NAME, name);
+                List<Index> list = indexDao.selectIndex(map);
+                if (list.size() > 0) {
+                    newName = judgeName(name, parentUuid);
+                }
+
                 String uuid = UUID();
                 Timestamp time = time();
-                String suffix = getSuffix(name);
-                Type type = getType(name);
-                Index index = new Index(uuid, parentUuid, name, suffix, type.toString(), false, time, size);
+                String suffix = getSuffix(newName);
+                Type type = getType(newName);
+                Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
                 //先文件的合并,与校验
+
+
+
 
                 //在文件树表中添加记录
                 indexDao.insertIndex(index);
@@ -546,94 +518,7 @@ public class IndexService {
         return true;
     }
 
-//    /**
-//     * 文件合并和保存到数据库,并生成缩略图
-//     *
-//     * @param parentUuid
-//     * @param fileMd5
-//     * @param name
-//     * @param total
-//     * @return
-//     */
-//    public boolean saveFile(String parentUuid, String fileMd5, String name, int total) {
-//        File file = new File(tempPath.toString() + File.separator + fileMd5 + File.separator + fileMd5);
-//        if (!file.getParentFile().exists()) {
-//            return false;
-//        }
-//        try {
-//            FileOutputStream fos = new FileOutputStream(file);
-//            FileChannel outFileChannel = fos.getChannel();
-//
-//            List<File> files = new ArrayList<>();
-//            for (int i = 1; i <= total; i++) {
-//                files.add(new File(tempPath.toString() + File.separator + fileMd5 + File.separator + i));
-//            }
-//            for (File file1 : files) {
-//                FileInputStream fis = new FileInputStream(file1);
-//                FileChannel inFileChannel = fis.getChannel();
-//                inFileChannel.transferTo(0, file1.length(), outFileChannel);
-//                inFileChannel.close();
-//            }
-//            outFileChannel.close();
-//
-//            boolean checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
-//            if (checkMd5) {
-//                File dirFile = new File(getFileParentPath(fileMd5).toString());
-//                if (!dirFile.exists()) {
-//                    dirFile.mkdir();
-//                }
-//
-//                Path from = Paths.get(file.getAbsolutePath());
-//                Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + fileMd5);
-//                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-//                //删除temp里面的文件
-//
-//                //先删除文件夹下所有东西
-//                String[] children = file.getParentFile().list();
-//                for (String str : children) {
-//                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
-//
-//                }
-//
-//                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-//                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
-//            }
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
-//        //获得文件的大小
-//        //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
-//        Long size = getFilePath(fileMd5).toFile().length();
-//
-//        String uuid = UUID();
-//        Timestamp time = time();
-//        String suffix = getSuffix(name);
-//        String type = getType(name);
-//        Index index = new Index(uuid, parentUuid, name, suffix, type, false, time, size);
-//        //先文件的合并,与校验
-//
-//        //在文件树表中添加记录
-//        indexDao.insertIndex(index);
-//        //md5表中添加记录
-//        md5Dao.insert(fileMd5, uuid);
-//        //生成缩略图
-//        switch (type) {
-//            case VIDEO:
-//                generateMovieTumbnail(fileMd5);
-//                break;
-//            case IMAGE:
-//                generateImageThumbnail(fileMd5);
-//                break;
-//            default:
-//                break;
-//        }
-//        return true;
-//    }
+
 
     /**
      * 将接收到的分片包保存在临时文件夹
@@ -668,9 +553,19 @@ public class IndexService {
         List<String> list = md5Dao.selectUuidByMd5(md5);
         //根据任意一个uuid获取该index实例
         Index anotherIndex = getIndexByUuid(list.get(0));
-
         //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
-        Index index = new Index(uuid, parentUuid, name, getSuffix(name), getType(name).toString(), false, time(), anotherIndex.getSize());
+
+        //判断是否重名
+        String newName = name;
+        Map<String, Object> map = new HashMap<>();
+        map.put(PARENT_UUID, parentUuid);
+        map.put(NAME, name);
+        List<Index> list2 = indexDao.selectIndex(map);
+        if (list2.size() > 0) {
+            newName = judgeName(name, parentUuid);
+        }
+
+        Index index = new Index(uuid, parentUuid, newName, getSuffix(newName), getType(newName).toString(), false, time(), anotherIndex.getSize());
         System.out.println(index);
         indexDao.insertIndex(index);
         md5Dao.insert(md5, uuid);
@@ -926,10 +821,16 @@ public class IndexService {
      * @return
      */
     private Type getType(String name) {
+
+        //判断该文件是否有后缀名
+        String[] strs = name.split("\\.", -1);
+        if (strs.length < 2) {
+            return Type.OTHER;
+        }
+
         //去掉点
         String suffix = getSuffix(name).replaceAll("\\.", "");
         //支持的文件类型
-
         Matcher videoMatcher = videoPattern.matcher(suffix);
         if (videoMatcher.matches()) {
             return Type.VIDEO;
@@ -962,6 +863,49 @@ public class IndexService {
             return m.group();
         }
         return null;
+    }
+
+    /**
+     * 循环判断是否重名 如果同名，添加后缀copy
+     * @param name
+     * @param parentUuid
+     * @return
+     */
+    private String judgeName(String name, String parentUuid) {
+        String newName = name;
+        while (true) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(PARENT_UUID, parentUuid);
+            map.put(NAME, newName);
+            List<Index> list = indexDao.selectIndex(map);
+            if (list.size() > 0) {
+                newName = addCopy(newName);
+            } else {
+                break;
+            }
+        }
+        return newName;
+    }
+
+    /**
+     * 循环判断是否重名 如果同名，添加后缀copy
+     * @param name
+     * @return
+     */
+    private String addCopy(String name) {
+        String[] strs = name.split("\\.", -1);
+        StringBuilder newName = new StringBuilder();
+        if (strs.length > 1) {
+            for (int i = 0; i < strs.length - 1; i++) {
+                newName.append(strs[i]);
+            }
+            newName.append(" - copy.");
+            newName.append(strs[strs.length - 1]);
+        } else {
+            newName.append(name);
+            newName.append(" - copy");
+        }
+        return newName.toString();
     }
 
     /**
