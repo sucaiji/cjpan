@@ -59,8 +59,6 @@ public class InitRunner implements ApplicationRunner {
     private void initTable(){
         initDao.createTableUsers();
         initDao.createTableIndexs();
-        initDao.createTableMd5();
-
     }
 
     /**
@@ -69,9 +67,8 @@ public class InitRunner implements ApplicationRunner {
     private void initThumbnail() {
         List<Index> indexList = indexDao.selectIndex(new HashMap<>());
         for (Index index: indexList) {
-            String md5 = indexService.getMd5ByUuid(index.getUuid());
             if (index.getType() != null && !index.getType().equals("")) {
-                indexService.generateThumbnail(md5, Type.getType(index.getType()));
+                indexService.generateThumbnail(index.getUuid(), Type.getType(index.getType()));
             }
         }
     }

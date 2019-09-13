@@ -8,6 +8,7 @@ import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.entity.Page;
 
 import com.sucaiji.cjpan.util.Md5Util;
+import com.sucaiji.cjpan.util.Utils;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.jcodec.api.FrameGrab;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -51,8 +53,6 @@ public class IndexService {
 
     @Autowired
     private IndexDao indexDao;
-    @Autowired
-    private Md5Dao md5Dao;
 
     private Map<String, Object> checkMap = new HashMap<>();
     private ExecutorService checkPool = Executors.newCachedThreadPool();
@@ -82,7 +82,7 @@ public class IndexService {
      * @return 文件夹创建是否成功，如果文件同名则会失败
      */
     public boolean createDir(String name, String parentUuid) {
-        String uuid = UUID();
+        String uuid = Utils.UUID();
         Timestamp time = time();
 
         Map<String, Object> map = new HashMap<>();
@@ -257,24 +257,15 @@ public class IndexService {
         return index;
     }
 
+
     /**
-     * 通过uuid获取到md5值,如果不存在则返回null
+     * 根据uuid获取到缩略图文件,如果缩略图不存在则尝试生成一波
      *
      * @param uuid
      * @return
      */
-    public String getMd5ByUuid(String uuid) {
-        return md5Dao.selectMd5ByUuid(uuid);
-    }
-
-    /**
-     * 根据md5获取到缩略图文件,如果缩略图不存在则尝试生成一波
-     *
-     * @param md5
-     * @return
-     */
-    public File getThumbnailByMd5(String md5) {
-        File file = getFileThumbnailPath(md5).toFile();
+    public File getThumbnailByUUID(String uuid) {
+        File file = getFileThumbnailPath(uuid).toFile();
         return file;
     }
 
@@ -399,6 +390,12 @@ public class IndexService {
         }
     }
 
+    /**
+     * 获取http请求要求的偏移量
+     * @param rangeStr
+     * @param fileSize
+     * @return
+     */
     public Range getRange(String rangeStr, Long fileSize) {
         rangeStr = rangeStr.replaceAll("bytes=", "");
         String[] strs = rangeStr.split("-", 2);
@@ -418,23 +415,23 @@ public class IndexService {
         return new Range(start, end, fileSize);
     }
 
-
-    public void saveFile(String parentUuid, String fileMd5, String name, int total) {
-        checkMap.put(fileMd5, new Object());
-        checkPool.execute(() -> {
-            File file = new File(tempPath.toString() + File.separator + fileMd5 + File.separator + fileMd5);
-            if (!file.getParentFile().exists()) {
-                //如果temp文件夹不存在 则抛出异常或return
-                return;
-            }
-            try {
+    //TODO 加上事务  回头测试是否实现了事务特性
+    @Transactional
+    public void saveFile(String parentUuid, String uuid, String name, int total) {
+        // File:文件分片路径/uuid，用来暂存合并后的总文件
+        File file = new File(tempPath.toString() + File.separator + uuid + File.separator + uuid);
+        if (!file.getParentFile().exists()) {
+            //如果temp文件夹不存在 则抛出异常或return
+            return;
+        }
+        try {
             //将文件合并
             FileOutputStream fos = new FileOutputStream(file);
             FileChannel outFileChannel = fos.getChannel();
 
             List<File> files = new ArrayList<>();
             for (int i = 1; i <= total; i++) {
-                files.add(new File(tempPath.toString() + File.separator + fileMd5 + File.separator + i));
+                files.add(new File(tempPath.toString() + File.separator + uuid + File.separator + i));
             }
             for (File file1: files) {
                 FileInputStream fis = new FileInputStream(file1);
@@ -443,76 +440,80 @@ public class IndexService {
                 inFileChannel.close();
             }
             outFileChannel.close();
-            boolean checkMd5 = false;
 
-            checkMd5 = Md5Util.md5CheckSum(file, fileMd5);
-            if (checkMd5) {
-                File dirFile = new File(getFileParentPath(fileMd5).toString());
-                if (!dirFile.exists()) {
-                    dirFile.mkdir();
-                }
-
-                Path from = Paths.get(file.getAbsolutePath());
-                Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + fileMd5);
-                Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-                //删除temp里面的文件
-
-                //先删除文件夹下所有东西
-                String[] children = file.getParentFile().list();
-                for (String str : children) {
-                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
-
-                }
-                //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
-
-                //获得文件的大小
-                //System.out.println(getFilePath(fileMd5).toFile().getAbsolutePath());
-                Long size = getFilePath(fileMd5).toFile().length();
-
-                String newName = name;
-                Map<String, Object> map = new HashMap<>();
-                map.put(PARENT_UUID, parentUuid);
-                map.put(NAME, name);
-                List<Index> list = indexDao.selectIndex(map);
-                if (list.size() > 0) {
-                    newName = judgeName(name, parentUuid);
-                }
-
-                String uuid = UUID();
-                Timestamp time = time();
-                String suffix = getSuffix(newName);
-                Type type = getType(newName);
-                Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
-                //先文件的合并,与校验
-
-
-
-
-                //在文件树表中添加记录
-                indexDao.insertIndex(index);
-                //md5表中添加记录
-                md5Dao.insert(fileMd5, uuid);
-                //生成缩略图
-                generateThumbnail(fileMd5, type);
-                if (checkMap.containsKey(fileMd5)) {
-                    checkMap.remove(fileMd5);
-                }
+            File dirFile = new File(getFileParentPath(uuid).toString());
+            if (!dirFile.exists()) {
+                dirFile.mkdir();
             }
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+
+            Path from = Paths.get(file.getAbsolutePath());
+            Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + uuid);
+            Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
+
+            //获得文件的大小
+            Long size = getFilePath(uuid).toFile().length();
+
+            String newName = name;
+            Map<String, Object> map = new HashMap<>();
+            map.put(PARENT_UUID, parentUuid);
+            map.put(NAME, name);
+            List<Index> list = indexDao.selectIndex(map);
+            if (list.size() > 0) {
+                newName = judgeName(name, parentUuid);
+            }
+
+            Timestamp time = time();
+            String suffix = getSuffix(newName);
+            Type type = getType(newName);
+            Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
+            //先文件的合并,与校验
+
+            //在文件树表中添加记录
+            indexDao.insertIndex(index);
+            //生成缩略图
+            generateThumbnail(uuid, type);
+            if (checkMap.containsKey(uuid)) {
+                checkMap.remove(uuid);
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //TODO 回头新建一个FileSaveException 此方法出错就抛这个异常  由controller 来处理异常
+            //删除temp里面的文件
+
+            //先删除文件夹下所有东西
+            String[] children = file.getParentFile().list();
+            for (String str : children) {
+                try {
+                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            //再删除文件夹本身
+            try {
+                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
+
     }
+
+
 
     public Map<String, Object> getCheckMap() {
         return checkMap;
     }
 
-    public boolean checkUpload(String fileMd5) {
-        if (checkMap.containsKey(fileMd5)) {
+    public boolean checkUpload(String uuid) {
+        if (checkMap.containsKey(uuid)) {
             return false;
         }
         return true;
@@ -540,36 +541,36 @@ public class IndexService {
         }
     }
 
-    /**
-     * 当服务器中有该文件时，通过md5值秒存（在数据库index表中添加一条新纪录）
-     *
-     * @param md5
-     * @param parentUuid
-     * @param name
-     */
-    public void saveByMd5(String md5, String parentUuid, String name) {
-        String uuid = UUID();
-        //根据该md5获取一个uuid列表
-        List<String> list = md5Dao.selectUuidByMd5(md5);
-        //根据任意一个uuid获取该index实例
-        Index anotherIndex = getIndexByUuid(list.get(0));
-        //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
-
-        //判断是否重名
-        String newName = name;
-        Map<String, Object> map = new HashMap<>();
-        map.put(PARENT_UUID, parentUuid);
-        map.put(NAME, name);
-        List<Index> list2 = indexDao.selectIndex(map);
-        if (list2.size() > 0) {
-            newName = judgeName(name, parentUuid);
-        }
-
-        Index index = new Index(uuid, parentUuid, newName, getSuffix(newName), getType(newName).toString(), false, time(), anotherIndex.getSize());
-        System.out.println(index);
-        indexDao.insertIndex(index);
-        md5Dao.insert(md5, uuid);
-    }
+//    /**
+//     * 当服务器中有该文件时，通过md5值秒存（在数据库index表中添加一条新纪录）
+//     *
+//     * @param md5
+//     * @param parentUuid
+//     * @param name
+//     */
+//    public void saveByMd5(String md5, String parentUuid, String name) {
+//        String uuid = Utils.UUID();
+//        //根据该md5获取一个uuid列表
+//        List<String> list = md5Dao.selectUuidByMd5(md5);
+//        //根据任意一个uuid获取该index实例
+//        Index anotherIndex = getIndexByUuid(list.get(0));
+//        //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
+//
+//        //判断是否重名
+//        String newName = name;
+//        Map<String, Object> map = new HashMap<>();
+//        map.put(PARENT_UUID, parentUuid);
+//        map.put(NAME, name);
+//        List<Index> list2 = indexDao.selectIndex(map);
+//        if (list2.size() > 0) {
+//            newName = judgeName(name, parentUuid);
+//        }
+//
+//        Index index = new Index(uuid, parentUuid, newName, getSuffix(newName), getType(newName).toString(), false, time(), anotherIndex.getSize());
+//        System.out.println(index);
+//        indexDao.insertIndex(index);
+//        md5Dao.insert(md5, uuid);
+//    }
 
     /**
      * 通过uuid获取文件实际所在位置，如果文件不存在则返回null
@@ -578,30 +579,26 @@ public class IndexService {
      * @return
      */
     public File getFileByUuid(String uuid) {
-        String md5 = md5Dao.selectMd5ByUuid(uuid);
-        if (md5 == null) {
-            return null;
-        }
-        File file = new File(getFilePath(md5).toString());
+        File file = new File(getFilePath(uuid).toString());
         if (!file.exists()) {
             return null;
         }
         return file;
     }
 
-    /**
-     * 判断该md5对应的文件是否存在
-     *
-     * @param md5
-     * @return
-     */
-    public boolean md5Exist(String md5) {
-        List list = md5Dao.selectUuidByMd5(md5);
-        if (list.size() == 0) {
-            return false;
-        }
-        return true;
-    }
+//    /**
+//     * 判断该md5对应的文件是否存在
+//     *
+//     * @param md5
+//     * @return
+//     */
+//    public boolean md5Exist(String md5) {
+//        List list = md5Dao.selectUuidByMd5(md5);
+//        if (list.size() == 0) {
+//            return false;
+//        }
+//        return true;
+//    }
 
     /**
      * 删除某个文件，如果该uuid指向一个文件夹的话，则删除该文件夹下所有文件
@@ -631,21 +628,19 @@ public class IndexService {
             indexDao.deleteIndex(map2);
         } else {
             //如果不是文件夹 则执行删除数据库信息，判断md5表中是否还有该md5记录，如果没有了，则删除该文件
-            String md5 = md5Dao.selectMd5ByUuid(uuid);
-
-            md5Dao.deleteByUuid(uuid);
+//            String md5 = md5Dao.selectMd5ByUuid(uuid);
 
             Map<String, Object> map3 = new HashMap<>();
             map3.put("uuid", uuid);
             indexDao.deleteIndex(map3);
 
             //查询md5表中是否还有该md5的记录,如果没有的话，删除文件
-            List<String> list1 = md5Dao.selectUuidByMd5(md5);
-            if (list1.size() == 0) {
-                deleteFile(md5);
+//            List<String> list1 = md5Dao.selectUuidByMd5(md5);
+//            if (list1.size() == 0) {
+                deleteFile(uuid);
                 System.out.println("文件删除");
                 return;
-            }
+//            }
 
         }
     }
@@ -775,21 +770,19 @@ public class IndexService {
             this.total = total;
         }
     }
-    private String UUID() {
-        return java.util.UUID.randomUUID().toString().replaceAll("-", "");
-    }
+
 
     private Timestamp time() {
         return new Timestamp(System.currentTimeMillis());
     }
 
     /**
-     * 根据md5值删除文件
+     * 根据uuid值删除文件
      *
-     * @param fileMd5
+     * @param uuid
      */
-    private void deleteFile(String fileMd5) {
-        File parentFile = new File(getFileParentPath(fileMd5).toString());
+    private void deleteFile(String uuid) {
+        File parentFile = new File(getFileParentPath(uuid).toString());
         System.out.println(parentFile.getAbsolutePath());
         if (!parentFile.exists()) {
             return;
@@ -911,24 +904,24 @@ public class IndexService {
     }
 
     /**
-     * 通过md5返回该文件的父路径的路径 文件的父路径是以该文件md5值的前4位作为文件夹路径存放的
+     * 通过uuid返回该文件的父路径的路径 文件的父路径是以该文件uuid值的前4位作为文件夹路径存放的
      *
-     * @param fileMd5
+     * @param uuid
      * @return
      */
-    private Path getFileParentPath(String fileMd5) {
-        Path path = Paths.get(dataPath.toString() + File.separator + fileMd5.substring(0, 4));
+    private Path getFileParentPath(String uuid) {
+        Path path = Paths.get(dataPath.toString() + File.separator + uuid.substring(0, 4));
         return path;
     }
 
     /**
-     * 通过md5返回该文件的路径
+     * 通过uuid返回该文件的路径
      *
-     * @param fileMd5
+     * @param uuid
      * @return
      */
-    private Path getFilePath(String fileMd5) {
-        Path path = Paths.get(getFileParentPath(fileMd5).toString() + File.separator + fileMd5);
+    private Path getFilePath(String uuid) {
+        Path path = Paths.get(getFileParentPath(uuid).toString() + File.separator + uuid);
         return path;
     }
 

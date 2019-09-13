@@ -24,11 +24,4 @@
               size BIGINT
         )
     </update>
-    <update id="createTableMd5">
-        CREATE TABLE IF NOT EXISTS MD5(
-            md5 CHAR(32),
-            uuid CHAR(32) PRIMARY KEY,
-            CONSTRAINT fk FOREIGN KEY(uuid) REFERENCES INDEXS(uuid)
-          )
-    </update>
 </mapper>

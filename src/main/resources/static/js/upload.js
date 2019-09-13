@@ -34,73 +34,49 @@ $(function () {
 });
 
 function isUpload(file) {
+    //调用接口获取uuid
+    var uuid = null;
+    $.ajax({
+        url: "api/getUUID",
+        type: "GET",
+        async: false,        //异步
+        processData: false,  //很重要，告诉jquery不要对form进行处理
+        contentType: false,  //很重要，指定为false才能形成正确的Content-Type
+        success: function (data) {
+            uuid = eval(data);
+        }
+    });
+
 
     //构造一个表单，FormData是HTML5新增的
-
     var form = new FormData();
-    var md5;
-    var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
-        //file = blob;
-        chunkSize = 2097152, // read in chunks of 2MB
-        chunks = Math.ceil(file.size / chunkSize),
-        currentChunk = 0,
-        spark = new SparkMD5.ArrayBuffer(),
-        frOnload = function (e) {
-            //  log.innerHTML+="\nread chunk number "+parseInt(currentChunk+1)+" of "+chunks;
-            spark.append(e.target.result); // append array buffer
-            currentChunk++;
-            if (currentChunk < chunks) {
-                loadNext();
+    var name = file.name;
+    form.append("name", name);
+
+    if (parent_uuid != null) {
+        form.append("parent_uuid", parent_uuid);
+    }
+    //Ajax提交
+    $.ajax({
+        url: "api/is_upload",
+        type: "POST",
+        data: form,
+        async: true,        //异步
+        processData: false,  //很重要，告诉jquery不要对form进行处理
+        contentType: false,  //很重要，指定为false才能形成正确的Content-Type
+        success: function (data) {
+            var dataObj = eval(data);
+            if (dataObj.flag == "2") {
+                //没有上传过文件
+                upload(file, uuid, 0);
+            }  else if (dataObj.flag == "1") {
+                //文件已经上传过
+                location.reload(true);
             }
-            else {
-                md5 = spark.end();
-                var name = file.name;
-                form.append("name", name);
-                form.append("md5", md5);
-                if (parent_uuid != null) {
-                    form.append("parent_uuid", parent_uuid);
-                }
-                //Ajax提交
-                $.ajax({
-                    url: "api/is_upload",
-                    type: "POST",
-                    data: form,
-                    async: true,        //异步
-                    processData: false,  //很重要，告诉jquery不要对form进行处理
-                    contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-                    success: function (data) {
-                        var dataObj = eval(data);
-                        if (dataObj.flag == "2") {
-                            //没有上传过文件
-                            upload(file, md5, 0);
-                        }  else if (dataObj.flag == "1") {
-                            //文件已经上传过
-                            //alert("文件已经上传过,秒传了！！");
-                            location.reload(true);
-                        }
-
-                    }, error: function (XMLHttpRequest, errorThrown) {
-                        alert("已经上传过或者服务器出1错!");
-                    }
-                });
-            }
-        },
-        frOnerror = function () {
-            log.innerHTML += "糟糕，好像哪里错了.";
-        };
-
-    function loadNext() {
-        var fileReader = new FileReader();
-        fileReader.onload = frOnload;
-        fileReader.onerror = frOnerror;
-        var start = currentChunk * chunkSize,
-            end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize;
-        fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
-    };
-
-    loadNext();
-
-
+        }, error: function (XMLHttpRequest, errorThrown) {
+            alert("已经上传过或者服务器出1错!");
+        }
+    });
 }
 
 function GetPercent(num, total) {
@@ -116,12 +92,11 @@ function GetPercent(num, total) {
  * file 文件对象
  * filemd5 整个文件的md5
 */
-function upload(file, filemd5, index) {
+function upload(file, uuid, index) {
     var name = file.name;        //文件名
     size = file.size;        //总大小
     var shardSize = 5 * 1024 * 1024;    //以5MB为一个分片
     var shardCount = Math.ceil(size / shardSize);  //总片数
-    // $("#param").append("总片数==" + shardCount + "<br/>");
 
     //计算每一片的起始与结束位置
     var start = index * shardSize;
@@ -143,7 +118,7 @@ function upload(file, filemd5, index) {
         form.append("parent_uuid", parent_uuid);
     }
 
-    form.append("filemd5", filemd5);
+    form.append("uuid", uuid);
     form.append("name", name);
     form.append("size", size);
     form.append("total", shardCount);  //总片数
@@ -179,23 +154,23 @@ function upload(file, filemd5, index) {
                     dataend = new Date();
                     $("#usetime").append(dataend.getTime() - databgein.getTime());
 
-                    checkSuccess(filemd5);
+                    checkSuccess(uuid);
                 } else {
                     //递归调用                　
-                    upload(file, filemd5, index);
+                    upload(file, uuid, index);
                 }
 
             }, error: function (XMLHttpRequest, errorThrown) {
-                upload(file, filemd5, index);
+                upload(file, uuid, index);
             }
         });
     })
 }
 
-function checkSuccess(filemd5) {
-    setInterval(function (fildmd5) {
+function checkSuccess(uuid) {
+    setInterval(function (uuid) {
         var form = new FormData();
-        form.append("filemd5", filemd5);
+        form.append("uuid", uuid);
         $.ajax({
             url: "api/checkUpload",
             type: "POST",

@@ -7,6 +7,7 @@ import com.sucaiji.cjpan.entity.Index;
 import com.sucaiji.cjpan.entity.Page;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
+import com.sucaiji.cjpan.util.Utils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.rmi.CORBA.Util;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -157,26 +159,33 @@ public class ApiController {
     }
 
     /**
+     * 获取一个uuid
+     * @return
+     */
+    @RequestMapping(value = "/getUUID")
+    public String getUUID() {
+        return Utils.UUID();
+    }
+
+    /**
      * 如果已经有该md5值对应的文件了，则告诉客户端已经存在，同时数据库里面添加文件记录
-     * @param md5
      * @return
      */
     @RequestMapping(value = "/is_upload")
-    public Map<String,Object> isUpload(@RequestParam("md5")String md5,
-                                       @RequestParam(value = "parent_uuid",required = false)String parentUuid,
+    public Map<String,Object> isUpload(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
                                        @RequestParam(value = "name")String name){
-        if(parentUuid==null){
-            parentUuid=ROOT;
-        }
-        if(indexService.md5Exist(md5)){
-            logger.debug("该文件已经存在，进入秒传分支");
-            indexService.saveByMd5(md5,parentUuid,name);
-            logger.debug("保存一个md5[{}],parentUuid[{}],name[{}]的文件",md5,parentUuid,name);
-            Map<String,Object> map=new HashMap<>();
-            map.put("flag",MD5_EXIST);
-            logger.debug("将信息返回到客户端[{}]",map);
-            return map;
-        }
+//        if(parentUuid==null){
+//            parentUuid=ROOT;
+//        }
+//        if(indexService.md5Exist(md5)){
+//            logger.debug("该文件已经存在，进入秒传分支");
+//            indexService.saveByMd5(md5,parentUuid,name);
+//            logger.debug("保存一个md5[{}],parentUuid[{}],name[{}]的文件",md5,parentUuid,name);
+//            Map<String,Object> map=new HashMap<>();
+//            map.put("flag",MD5_EXIST);
+//            logger.debug("将信息返回到客户端[{}]",map);
+//            return map;
+//        }
         Map<String,Object> map=new HashMap<>();
         map.put("flag",MD5_NOT_EXIST);
         return map;
@@ -185,29 +194,27 @@ public class ApiController {
 
     @RequestMapping(value = "/upload")
     public void upload(HttpServletRequest request,
-                      @RequestParam(value = "file",required = false)MultipartFile multipartFile,
-//                      @RequestParam("action")String action,
-//                      @RequestParam("md5")String md5,//分片的md5
-                      @RequestParam("filemd5")String fileMd5,//文件的md5
-                      @RequestParam("name")String name,//文件名称
-                      @RequestParam(value = "parent_uuid",required = false)String parentUuid,//父uuid，不带此参数的话代表
-                      @RequestParam(value = "index")Integer index,//文件第几片
-                      @RequestParam(value = "total")Integer total,//总片数
-                      @RequestParam(value = "finish",required = false)Boolean finish //是否完成
+                      @RequestParam(value = "file",required = false) MultipartFile multipartFile,
+                      @RequestParam("uuid") String uuid,
+                      @RequestParam("name") String name,//文件名称
+                      @RequestParam(value = "parent_uuid",required = false) String parentUuid,//父uuid，不带此参数的话代表
+                      @RequestParam(value = "index") Integer index,//文件第几片
+                      @RequestParam(value = "total") Integer total,//总片数
+                      @RequestParam(value = "finish",required = false) Boolean finish //是否完成
                         ){
         if(parentUuid == null){
             parentUuid = ROOT;
         }
-        indexService.saveTemp(multipartFile, fileMd5, index);
+        indexService.saveTemp(multipartFile, uuid, index);
         //判断传过来的包finish参数是不是true 如果是的话代表是最后一个包，这时开始执行合并校验操作
         if(finish){
-            indexService.saveFile(parentUuid, fileMd5, name, total);
+            indexService.saveFile(parentUuid, uuid, name, total);
         }
     }
 
     @RequestMapping(value = "/checkUpload")
-    public Map<String,Object> checkSuccess(@RequestParam("filemd5") String fileMd5) {
-        boolean success = indexService.checkUpload(fileMd5);
+    public Map<String,Object> checkSuccess(@RequestParam("uuid") String uuid) {
+        boolean success = indexService.checkUpload(uuid);
 
         Map<String,Object> map=new HashMap<>();
         map.put("success", success);
@@ -248,13 +255,9 @@ public class ApiController {
     @RequestMapping("/thumbnail")
     public void thumbnail(@RequestParam("uuid")String uuid,
                           HttpServletResponse response){
-        String md5=indexService.getMd5ByUuid(uuid);
-        if(md5==null){
-            return;
-        }
         response.setContentType("image/jpeg");
-        response.addHeader("Content-Disposition","attachment;filename="+md5+".jpg");
-        File file=indexService.getThumbnailByMd5(md5);
+        response.addHeader("Content-Disposition","attachment;filename="+uuid+".jpg");
+        File file=indexService.getThumbnailByUUID(uuid);
         if(file==null){
             return;
         }

@@ -10,7 +10,4 @@ public interface InitDao{
     void createTableUsers();
 
     void createTableIndexs();
-
-    void createTableMd5();
-
 }
