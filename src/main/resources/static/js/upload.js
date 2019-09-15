@@ -5,7 +5,7 @@ function getQueryString(name) {
     return null;
 }
 
-var parent_uuid = getQueryString("parent_uuid");
+var parentUuid = getQueryString("parent_uuid");
 
 
 var databgein;  //开始时间
@@ -22,7 +22,7 @@ var page = {
             $("#upload-progress-bar").attr("aria-valuenow", "100");
             $("#upload-progress-bar").css("width", "100%");
             $("#upload-progress-text").text("正在生成md5值");
-            isUpload(file);
+            upload(file);
         });
 
     }
@@ -33,11 +33,11 @@ $(function () {
     page.init();
 });
 
-function isUpload(file) {
+function upload(file) {
     //调用接口获取uuid
     var uuid = null;
     $.ajax({
-        url: "api/getUUID",
+        url: "api/getUuid",
         type: "GET",
         async: false,        //异步
         processData: false,  //很重要，告诉jquery不要对form进行处理
@@ -48,51 +48,17 @@ function isUpload(file) {
     });
 
 
-    //构造一个表单，FormData是HTML5新增的
-    var form = new FormData();
-    var name = file.name;
-    form.append("name", name);
 
-    if (parent_uuid != null) {
-        form.append("parent_uuid", parent_uuid);
-    }
-    //Ajax提交
-    $.ajax({
-        url: "api/is_upload",
-        type: "POST",
-        data: form,
-        async: true,        //异步
-        processData: false,  //很重要，告诉jquery不要对form进行处理
-        contentType: false,  //很重要，指定为false才能形成正确的Content-Type
-        success: function (data) {
-            var dataObj = eval(data);
-            if (dataObj.flag == "2") {
-                //没有上传过文件
-                upload(file, uuid, 0);
-            }  else if (dataObj.flag == "1") {
-                //文件已经上传过
-                location.reload(true);
-            }
-        }, error: function (XMLHttpRequest, errorThrown) {
-            alert("已经上传过或者服务器出1错!");
-        }
-    });
-}
+    uploadRecursion(file, uuid, 0);
 
-function GetPercent(num, total) {
-    num1 = parseFloat(num);
-    total1 = parseFloat(total);
-    if (isNaN(num1) || isNaN(total1)) {
-        return "-";
-    }
-    return total1 <= 0 ? "0" : (Math.round(num1 / total1 * 10000) / 100.00);
 }
 
 /*
+ * 分片上传文件的递归方法
  * file 文件对象
  * filemd5 整个文件的md5
 */
-function upload(file, uuid, index) {
+function uploadRecursion(file, uuid, index) {
     var name = file.name;        //文件名
     size = file.size;        //总大小
     var shardSize = 5 * 1024 * 1024;    //以5MB为一个分片
@@ -114,8 +80,8 @@ function upload(file, uuid, index) {
     }
 
 
-    if (parent_uuid != null) {
-        form.append("parent_uuid", parent_uuid);
+    if (parentUuid != null) {
+        form.append("parentUuid", parentUuid);
     }
 
     form.append("uuid", uuid);
@@ -135,6 +101,7 @@ function upload(file, uuid, index) {
 
     var r = new FileReader();
     r.readAsBinaryString(data);
+
 
     $(r).on('load', function (e) {
         var bolb = e.target.result;
@@ -157,15 +124,25 @@ function upload(file, uuid, index) {
                     checkSuccess(uuid);
                 } else {
                     //递归调用                　
-                    upload(file, uuid, index);
+                    uploadRecursion(file, uuid, index);
                 }
-
             }, error: function (XMLHttpRequest, errorThrown) {
-                upload(file, uuid, index);
+                uploadRecursion(file, uuid, index);
             }
         });
     })
 }
+
+
+function GetPercent(num, total) {
+    num1 = parseFloat(num);
+    total1 = parseFloat(total);
+    if (isNaN(num1) || isNaN(total1)) {
+        return "-";
+    }
+    return total1 <= 0 ? "0" : (Math.round(num1 / total1 * 10000) / 100.00);
+}
+
 
 function checkSuccess(uuid) {
     setInterval(function (uuid) {

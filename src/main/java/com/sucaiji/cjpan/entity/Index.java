@@ -17,17 +17,6 @@ public class Index {
     public Index() {
     }
 
-    /**
-     * 一般是文件的构造方法
-     * @param uuid
-     * @param parentUuid
-     * @param name
-     * @param suffix
-     * @param type
-     * @param wasDir
-     * @param lastUpdate
-     * @param size
-     */
     public Index(String uuid, String parentUuid, String name,String suffix ,String type, boolean wasDir, Timestamp lastUpdate, Long size) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
@@ -40,14 +29,6 @@ public class Index {
     }
 
 
-    /**
-     * 一般是创建文件夹时用到
-     * @param uuid
-     * @param parentUuid
-     * @param name
-     * @param wasDir
-     * @param lastUpdate
-     */
     public Index(String uuid, String parentUuid, String name, boolean wasDir, Timestamp lastUpdate) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;

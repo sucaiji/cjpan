@@ -162,7 +162,7 @@ public class ApiController {
      * 获取一个uuid
      * @return
      */
-    @RequestMapping(value = "/getUUID")
+    @RequestMapping(value = "/getUuid")
     public String getUUID() {
         return Utils.UUID();
     }
@@ -197,7 +197,7 @@ public class ApiController {
                       @RequestParam(value = "file",required = false) MultipartFile multipartFile,
                       @RequestParam("uuid") String uuid,
                       @RequestParam("name") String name,//文件名称
-                      @RequestParam(value = "parent_uuid",required = false) String parentUuid,//父uuid，不带此参数的话代表
+                      @RequestParam(value = "parentUuid",required = false) String parentUuid,//父uuid，不带此参数的话代表
                       @RequestParam(value = "index") Integer index,//文件第几片
                       @RequestParam(value = "total") Integer total,//总片数
                       @RequestParam(value = "finish",required = false) Boolean finish //是否完成
@@ -242,14 +242,12 @@ public class ApiController {
 
     /**
      * 根据传入的uuid，删除该文件或者文件夹，如果是文件夹的话，则删除文件夹下所有文件
-     * 注意，删除决定的确定应该在客户端上完成，这里只负责完成删除
      * @param uuid
      * @return
      */
     @RequestMapping("/delete")
     public String delete(@RequestParam("uuid")String uuid){
         indexService.deleteByUuid(uuid);
-
         return "success";
     }
     @RequestMapping("/thumbnail")
