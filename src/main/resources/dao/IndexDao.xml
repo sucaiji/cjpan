@@ -26,7 +26,61 @@
         size
     </sql>
 
-
+    <insert id="insertIndex" parameterType="com.sucaiji.cjpan.model.Index">
+        INSERT INTO indexs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                uuid,
+            </if>
+            <if test="parentUuid != null">
+                parent_uuid,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="suffix != null">
+                suffix,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="wasDir != null">
+                is_dir,
+            </if>
+            <if test="lastUpdate != null">
+                l_update,
+            </if>
+            <if test="size != null">
+                size,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uuid != null">
+                #{uuid},
+            </if>
+            <if test="parentUuid != null">
+                #{parentUuid},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="suffix != null">
+                #{suffix},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="wasDir != null">
+                #{wasDir},
+            </if>
+            <if test="lastUpdate != null">
+                #{lastUpdate},
+            </if>
+            <if test="size != null">
+                #{size},
+            </if>
+        </trim>
+    </insert>
 
     <select id="selectIndex" resultMap="index">
         SELECT
@@ -87,5 +141,9 @@
         </set>
         WHERE uuid = #{uuid}
     </update>
+
+    <delete id="deleteIndex">
+        DELETE FROM indexs WHERE uuid = #{uuid}
+    </delete>
 
 </mapper>

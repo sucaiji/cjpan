@@ -21,7 +21,7 @@ public class UserRealm implements Realm {
 
     @Override
     public AuthenticationInfo getAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        String count=(String)authenticationToken.getPrincipal();
+        String count = (String) authenticationToken.getPrincipal();
         String password=new String((char[])authenticationToken.getCredentials());
         if(!userService.login(count,password)){
             throw new IncorrectCredentialsException();

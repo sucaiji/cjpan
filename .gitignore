@@ -25,4 +25,5 @@ nbdist/
 
 cjpan.log
 cjpan.mv.db
+cjpan.trace.db
 cjpanData/
