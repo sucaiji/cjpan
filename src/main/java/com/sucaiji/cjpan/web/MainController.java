@@ -2,7 +2,6 @@ package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.model.Index;
-import com.sucaiji.cjpan.model.Page;
 import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
@@ -38,22 +37,21 @@ public class MainController {
     }
 
     @RequestMapping(value = {"/", "index", "/index"})
-    public String index(@RequestParam(value = "parent_uuid", required = false) String parentUuid,
+    public String index(@RequestParam(value = "parent_uuid", defaultValue = ROOT, required = false) String parentUuid,
                         @RequestParam(value = "pg", required = false) Integer pageNumber,
                         @RequestParam(value = "limit", required = false) Integer limit,
                         Model model) {
-        if (parentUuid == null) {
-            parentUuid = ROOT;
-        }
         if (pageNumber == null) {
             pageNumber = 1;
         }
-        PageVo vo = indexService.getPageVo(pageNumber, limit, parentUuid);
+        Index queryIndex = new Index();
+        queryIndex.setParentUuid(parentUuid);
+        PageVo vo = indexService.getPageVo(pageNumber, limit, queryIndex);
+        Index index = indexService.getIndexByUuid(parentUuid);
         int pageAmount = vo.getPages();
         model.addAttribute("currentPage",pageNumber);
         model.addAttribute("pageAmount",pageAmount);
         model.addAttribute("vo",vo);
-        Index index = indexService.getIndexByUuid(parentUuid);
         model.addAttribute("parentIndex", index);
         return "index";
     }
@@ -70,7 +68,9 @@ public class MainController {
             limit = 200;
         }
         Type type = Type.getType(str);
-        PageVo vo = indexService.getPageVo(pageNumber, limit, type);
+        Index index = new Index();
+        index.setType(type.toString());
+        PageVo vo = indexService.getPageVo(pageNumber, limit, index);
         int pageAmount = vo.getPages();
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("pageAmount", pageAmount);
@@ -85,11 +85,5 @@ public class MainController {
         model.addAttribute("index", index);
         return "video";
     }
-
-    @RequestMapping("/test")
-    public String test(HttpServletRequest request, Model model) {
-        return "test";
-    }
-
 
 }

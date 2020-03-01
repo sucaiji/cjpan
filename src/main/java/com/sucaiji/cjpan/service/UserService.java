@@ -46,7 +46,7 @@ public class UserService {
      * @param name
      */
     public void regist(String account, String password, String name, String role) {
-        User user=new User(account,password,name,role);
+        User user = new User(account, password, name, role);
         userDao.insert(user);
     }
 

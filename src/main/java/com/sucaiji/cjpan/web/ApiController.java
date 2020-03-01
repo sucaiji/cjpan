@@ -3,7 +3,7 @@ package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.model.Index;
-import com.sucaiji.cjpan.model.Page;
+import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
 import com.sucaiji.cjpan.util.Utils;
@@ -229,7 +229,10 @@ public class ApiController {
     @RequestMapping("/rename")
     public String rename(@RequestParam("uuid")String uuid,
                          @RequestParam("name")String name) {
-        indexService.setIndexName(uuid, name);
+        Index updateIndex = new Index();
+        updateIndex.setUuid(uuid);
+        updateIndex.setName(name);
+        indexService.updateIndex(updateIndex);
         return "success";
     }
 
@@ -248,13 +251,9 @@ public class ApiController {
                           HttpServletResponse response){
         response.setContentType("image/jpeg");
         response.addHeader("Content-Disposition","attachment;filename="+uuid+".jpg");
-        File file=indexService.getThumbnailByUUID(uuid);
-        if(file==null){
-            return;
-        }
         try {
             OutputStream os=response.getOutputStream();
-            indexService.writeInOutputStream(file,os);
+            indexService.writeThumbnailInOutputStream(uuid, os);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -264,7 +263,6 @@ public class ApiController {
     public void image(@RequestParam("uuid")String uuid,
                       HttpServletRequest request,HttpServletResponse response){
         Index index=indexService.getIndexByUuid(uuid);
-
         response.setContentType("image/jpeg");
         try {
             OutputStream os=response.getOutputStream();
@@ -333,21 +331,21 @@ public class ApiController {
 
         String rangeStr=request.getHeader("range");
         if(rangeStr!=null){
-            IndexService.Range range=indexService.getRange(rangeStr,index.getSize());
-            String total=String.valueOf(range.total);
-            String length=String.valueOf(range.length);
-            String start=String.valueOf(range.start);
-            String end=String.valueOf(range.end);
+            Range range=indexService.getRange(rangeStr,index.getSize());
+            String total=String.valueOf(range.getTotal());
+            String length=String.valueOf(range.getLength());
+            String start=String.valueOf(range.getStart());
+            String end=String.valueOf(range.getEnd());
 
             response.setHeader("Content-Range","bytes "+start+"-"+end+"/"+total);
             response.setHeader("Content-Length",length);
 
             System.out.println("range不为空");
             System.out.println("rangeStr="+rangeStr);
-            System.out.println("start"+range.start);
-            System.out.println("end"+range.end);
-            System.out.println("length"+range.length);
-            System.out.println("total"+range.total);
+            System.out.println("start"+range.getStart());
+            System.out.println("end"+range.getEnd());
+            System.out.println("length"+range.getLength());
+            System.out.println("total"+range.getTotal());
             response.setStatus(206);
             try {
                 OutputStream os=response.getOutputStream();
@@ -357,13 +355,12 @@ public class ApiController {
             }
         }else {
             Long end=index.getSize()-1L;
-            IndexService.Range range=new IndexService.Range(0L,end,index.getSize());
+            Range range=new Range(0L,end,index.getSize());
             String length=String.valueOf(index.getSize());
             System.out.println("range为空!");
             response.setStatus(200);
             response.setHeader("Content-Range", "bytes 0-"+end+"/"+index.getSize());
             response.setHeader("Content-Length", length);
-
 
             try {
                 OutputStream os=response.getOutputStream();
@@ -398,7 +395,7 @@ public class ApiController {
             //文件丢失时，这里会下载0kb的空文件
             //下次将writeInoutputStream函数修改一下
             OutputStream os=response.getOutputStream();
-            indexService.writeInOutputStream(uuid,os);
+            indexService.writeInOutputStream(index,os);
         } catch (IOException e) {
             e.printStackTrace();
         }

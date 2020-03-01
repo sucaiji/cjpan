@@ -1,11 +1,11 @@
 package com.sucaiji.cjpan.config;
 
 public enum Type {
-    VIDEO(Property.VIDEO),
-    IMAGE(Property.IMAGE),
-    DOCUMENT(Property.DOCUMENT),
-    MUSIC(Property.MUSIC),
-    OTHER(Property.OTHER);
+    VIDEO("video"),
+    IMAGE("image"),
+    DOCUMENT("doc"),
+    MUSIC("music"),
+    OTHER("other");
     private String name;
     Type(String name) {
         this.name = name;

@@ -1,12 +1,14 @@
 package com.sucaiji.cjpan.service;
 
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.model.Index;
-import com.sucaiji.cjpan.model.Page;
 
+import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.model.vo.PageVo;
+import com.sucaiji.cjpan.util.FileUtil;
 import com.sucaiji.cjpan.util.Utils;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -70,137 +72,67 @@ public class IndexService {
 
 
     /**
-     * 创建文件夹
-     * @param name
-     * @param parentUuid
-     * @return 文件夹创建是否成功，如果文件同名则会失败
-     */
-    public boolean createDir(String name, String parentUuid) {
-        String uuid = Utils.UUID();
-        Timestamp time = time();
-
-        Map<String, Object> map = new HashMap<>();
-        map.put(NAME, name);
-        map.put(PARENT_UUID, parentUuid);
-        List<Index> list = indexDao.selectIndex(map);
-        if (list.size() > 0) {
-            return false;
-        }
-        Index index = new Index(uuid, parentUuid, name, true, time);
-        indexDao.insertIndex(index);
-        return true;
-    }
-
-    /**
-     * 获取type类型的文件列表
-     * @param pg
-     * @param limit
-     * @param type
-     * @return
-     */
-    public PageVo getPageVo(Integer pg, Integer limit, Type type) {
-        if(null == limit||limit == 0){
-            limit = DEFAULT_PAGE_SIZE;
-        }
-        if(null == pg||pg == 0){
-            pg = 1;
-        }
-        PageVo pageVo = new PageVo();
-        pageVo.setSize(limit);
-        pageVo.setPage(pg);
-        Map map = new HashMap();
-        map.put(TYPE, type.toString());
-        PageHelper.startPage(pg, limit);
-        com.github.pagehelper.Page page = (com.github.pagehelper.Page) indexDao.selectIndex(map);
-        pageVo.setPages(page.getPages());
-        pageVo.setTotal(page.getTotal());
-        pageVo.setIndexList(page.getResult());
-        return pageVo;
-    }
-
-    /**
      * 获取文件列表vo
      * @param pg
      * @param limit
-     * @param uuid
+     * @param queryIndex
      * @return
      */
-    public PageVo getPageVo(Integer pg, Integer limit, String uuid) {
-        if(null == limit||limit == 0){
+    public PageVo getPageVo(Integer pg, Integer limit, Index queryIndex) {
+        if (null == limit || limit == 0) {
             limit = DEFAULT_PAGE_SIZE;
         }
-        if(null == pg||pg == 0){
+        if (null == pg || pg == 0) {
             pg = 1;
         }
+
+        PageHelper.startPage(pg, limit);
+        Page page = (Page) indexDao.selectIndex(queryIndex);
+
         PageVo pageVo = new PageVo();
         pageVo.setSize(limit);
         pageVo.setPage(pg);
-
-        PageHelper.startPage(pg, limit);
-        Map map = new HashMap();
-        map.put(PARENT_UUID, uuid);
-        com.github.pagehelper.Page page = (com.github.pagehelper.Page) indexDao.selectIndex(map);
         pageVo.setPages(page.getPages());
         pageVo.setTotal(page.getTotal());
         pageVo.setIndexList(page.getResult());
         return pageVo;
     }
 
-
     /**
+     * 通过uuid获取index数据
+     * @param uuid
      * @return
      */
     public Index getIndexByUuid(String uuid) {
-        Map<String, Object> map = new HashMap<>();
-        map.put(UUID, uuid);
-        List<Index> list = indexDao.selectIndex(map);
+        Index index = new Index();
+        index.setUuid(uuid);
+        List<Index> list = indexDao.selectIndex(index);
         if (list.size() == 0) {
             return null;
         }
-        Index index = list.get(0);
-        return index;
+        Index indexModel = list.get(0);
+        return indexModel;
     }
 
-
     /**
-     * 根据uuid获取到缩略图文件,如果缩略图不存在则尝试生成一波
-     *
-     * @param uuid
-     * @return
+     * 更新update数据，根据uuid更新，uuid不能为空
+     * @param updateIndex
      */
-    public File getThumbnailByUUID(String uuid) {
-        File file = getFileThumbnailPath(uuid).toFile();
-        return file;
+    public void updateIndex(Index updateIndex) {
+        indexDao.updateIndex(updateIndex);
     }
 
     /**
-     * 设置index的名字
-     * @param uuid
-     * @param name
-     */
-    public void setIndexName(String uuid, String name) {
-        Map<String,Object> map = new HashMap<>();
-        map.put("uuid", uuid);
-        map.put("name", name);
-        indexDao.updateIndex(map);
-    }
-
-    /**
-     * 根据传入的uuid获取到文件，并写入到传入的outputstream里面
-     *
+     * 根据传入的index获取到文件缩略图，并写入到传入的outputstream里面
      * @param uuid
      * @param os
+     * @throws IOException
      */
-    public void writeInOutputStream(String uuid, OutputStream os) throws IOException {
-        //通过uuid获取一个index实例，并通过这个实例获取文件名
-        Index index = getIndexByUuid(uuid);
-        logger.info("获取一个index示例，uuid={}", uuid);
-        if (index == null) {
-            return;
-            //return "error获取文件名失败";
-        }
-        writeInOutputStream(index, os);
+    public void writeThumbnailInOutputStream(String uuid, OutputStream os) throws IOException {
+        File file = getFileThumbnailPath(uuid).toFile();
+        FileUtil.writeInOutputStream(file, os);
     }
+
 
     /**
      * 根据传入的index获取到文件，并写入到传入的outputstream里面
@@ -211,88 +143,45 @@ public class IndexService {
     public void writeInOutputStream(Index index, OutputStream os) throws IOException {
         String uuid = index.getUuid();
         File file = getFileByUuid(uuid);
-        writeInOutputStream(file, os);
+        FileUtil.writeInOutputStream(file, os);
     }
 
     /**
-     * 将传入的file写入到outputStream里面
-     *
-     * @param file
+     * 根据传入的index获取到文件，并根据偏移量写入到传入的outputstream里面
+     * @param index
      * @param os
+     * @param range
      * @throws IOException
      */
-    public void writeInOutputStream(File file, OutputStream os) throws IOException {
-        if (file == null) {
-            logger.error("通过{}获取文件失败，抛出FileNotFoundException()异常", file.getAbsolutePath());
-            throw new FileNotFoundException();
-        }
-        if (!file.exists()) {
-            logger.error("文件不存在，file路径为{},抛出FileNotFoundException()异常", file.getAbsolutePath());
-            throw new FileNotFoundException();
-        }
-        byte[] buffer = new byte[1024];
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        try {
-            fis = new FileInputStream(file);
-            bis = new BufferedInputStream(fis);
-            int i = bis.read(buffer);
-            while (i != -1) {
-                os.write(buffer, 0, i);
-                i = bis.read(buffer);
-            }
-        } finally {
-            bis.close();
-            fis.close();
-        }
-    }
-
-    public void writeInOutputStream(String uuid, OutputStream os, Range range) throws IOException {
-        Index index = getIndexByUuid(uuid);
-        if (index == null) {
-            return;
-        }
-        writeInOutputStream(index, os, range);
-    }
-
     public void writeInOutputStream(Index index, OutputStream os, Range range) throws IOException {
         String uuid = index.getUuid();
         File file = getFileByUuid(uuid);
-        writeInOutputStream(file, os, range);
+        FileUtil.writeInOutputStream(file, os, range);
     }
 
     /**
-     * 根据偏移量将数据写入流中
-     *
-     * @param file
-     * @param os
-     * @param range 偏移量
-     * @throws IOException
+     * 创建文件夹
+     * @param name
+     * @param parentUuid
+     * @return 文件夹创建是否成功，如果文件同名则会失败
      */
-    public void writeInOutputStream(File file, OutputStream os, Range range) throws IOException {
-        if (file == null) {
-            throw new FileNotFoundException();
-        }
-        if (!file.exists()) {
-            throw new FileNotFoundException();
-        }
-        long limit = range.length;
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-        try {
-            System.out.println("偏移量" + range + "");
-            randomAccessFile.seek(range.start);
+    public boolean createDir(String name, String parentUuid) {
+        String uuid = Utils.UUID();
+        Timestamp time = time();
 
-            byte[] buffer = new byte[1024];
-            int i = randomAccessFile.read(buffer);
-            while (i != -1 && limit > 0) {
-                os.write(buffer, 0, i);
-                limit -= i;
-                i = randomAccessFile.read(buffer);
-            }
-        } finally {
-            randomAccessFile.close();
+        Index queryIndex = new Index();
+        queryIndex.setName(name);
+        queryIndex.setParentUuid(parentUuid);
+
+        List<Index> list = indexDao.selectIndex(queryIndex);
+        if (list.size() > 0) {
+            return false;
         }
+        Index index = new Index(uuid, parentUuid, name, true, time);
+        indexDao.insertIndex(index);
+        return true;
     }
+
 
     /**
      * 获取http请求要求的偏移量
@@ -358,10 +247,10 @@ public class IndexService {
             Long size = getFilePath(uuid).toFile().length();
 
             String newName = name;
-            Map<String, Object> map = new HashMap<>();
-            map.put(PARENT_UUID, parentUuid);
-            map.put(NAME, name);
-            List<Index> list = indexDao.selectIndex(map);
+            Index queryIndex = new Index();
+            queryIndex.setParentUuid(parentUuid);
+            queryIndex.setName(name);
+            List<Index> list = indexDao.selectIndex(queryIndex);
             if (list.size() > 0) {
                 newName = judgeName(name, parentUuid);
             }
@@ -445,36 +334,6 @@ public class IndexService {
         }
     }
 
-//    /**
-//     * 当服务器中有该文件时，通过md5值秒存（在数据库index表中添加一条新纪录）
-//     *
-//     * @param md5
-//     * @param parentUuid
-//     * @param name
-//     */
-//    public void saveByMd5(String md5, String parentUuid, String name) {
-//        String uuid = Utils.UUID();
-//        //根据该md5获取一个uuid列表
-//        List<String> list = md5Dao.selectUuidByMd5(md5);
-//        //根据任意一个uuid获取该index实例
-//        Index anotherIndex = getIndexByUuid(list.get(0));
-//        //获取一个index实例，就为了得到它的size，没有什么卵用，或许我应该换一种方式得到size？
-//
-//        //判断是否重名
-//        String newName = name;
-//        Map<String, Object> map = new HashMap<>();
-//        map.put(PARENT_UUID, parentUuid);
-//        map.put(NAME, name);
-//        List<Index> list2 = indexDao.selectIndex(map);
-//        if (list2.size() > 0) {
-//            newName = judgeName(name, parentUuid);
-//        }
-//
-//        Index index = new Index(uuid, parentUuid, newName, getSuffix(newName), getType(newName).toString(), false, time(), anotherIndex.getSize());
-//        System.out.println(index);
-//        indexDao.insertIndex(index);
-//        md5Dao.insert(md5, uuid);
-//    }
 
     /**
      * 通过uuid获取文件实际所在位置，如果文件不存在则返回null
@@ -490,29 +349,15 @@ public class IndexService {
         return file;
     }
 
-//    /**
-//     * 判断该md5对应的文件是否存在
-//     *
-//     * @param md5
-//     * @return
-//     */
-//    public boolean md5Exist(String md5) {
-//        List list = md5Dao.selectUuidByMd5(md5);
-//        if (list.size() == 0) {
-//            return false;
-//        }
-//        return true;
-//    }
-
     /**
      * 删除某个文件，如果该uuid指向一个文件夹的话，则删除该文件夹下所有文件
      *
      * @param uuid
      */
     public void deleteByUuid(String uuid) {
-        Map<String, Object> map = new HashMap();
-        map.put("uuid", uuid);
-        List<Index> list = indexDao.selectIndex(map);
+        Index index1 = new Index();
+        index1.setUuid(uuid);
+        List<Index> list = indexDao.selectIndex(index1);
         if (list.size() == 0) {
             return;
         }
@@ -521,11 +366,11 @@ public class IndexService {
 
         //如果index是一个文件夹的话，递归删除文件夹下所有文件
         if (index.getWasDir()) {
-            Map<String, Object> map1 = new HashMap();
-            map1.put("parentUuid", index.getUuid());
-            List<Index> childUuidList = indexDao.selectIndex(map1);
-            for (Index index1 : childUuidList) {
-                deleteByUuid(index1.getUuid());
+            Index queryIndex = new Index();
+            queryIndex.setParentUuid(index.getUuid());
+            List<Index> childUuidList = indexDao.selectIndex(queryIndex);
+            for (Index item : childUuidList) {
+                deleteByUuid(item.getUuid());
             }
             Map<String, Object> map2 = new HashMap<>();
             map2.put("uuid", uuid);
@@ -548,6 +393,8 @@ public class IndexService {
 
         }
     }
+
+
 
 
     /**
@@ -661,19 +508,19 @@ public class IndexService {
         }
     }
 
-    public static class Range {
-        public Long start;
-        public Long end;
-        public Long length;
-        public Long total;
-
-        public Range(Long start, Long end, Long total) {
-            this.start = start;
-            this.end = end;
-            this.length = end - start + 1;
-            this.total = total;
-        }
-    }
+//    public static class Range {
+//        public Long start;
+//        public Long end;
+//        public Long length;
+//        public Long total;
+//
+//        public Range(Long start, Long end, Long total) {
+//            this.start = start;
+//            this.end = end;
+//            this.length = end - start + 1;
+//            this.total = total;
+//        }
+//    }
 
 
     private Timestamp time() {
@@ -773,10 +620,10 @@ public class IndexService {
     private String judgeName(String name, String parentUuid) {
         String newName = name;
         while (true) {
-            Map<String, Object> map = new HashMap<>();
-            map.put(PARENT_UUID, parentUuid);
-            map.put(NAME, newName);
-            List<Index> list = indexDao.selectIndex(map);
+            Index index = new Index();
+            index.setParentUuid(parentUuid);
+            index.setName(newName);
+            List<Index> list = indexDao.selectIndex(index);
             if (list.size() > 0) {
                 newName = addCopy(newName);
             } else {
@@ -830,16 +677,16 @@ public class IndexService {
     }
 
     /**
-     * 通过md5返回该文件的缩略图的路径
-
+     * 通过uuid返回该文件的缩略图的路径
      *
-     * @param md5
+     * @param uuid
      * @return
      */
-    private Path getFileThumbnailPath(String md5) {
-        Path path = Paths.get(thumbnailPath + File.separator + md5.substring(0, 4) + File.separator + md5 + ".jpg");
+    private Path getFileThumbnailPath(String uuid) {
+        Path path = Paths.get(thumbnailPath + File.separator + uuid.substring(0, 4) + File.separator + uuid + ".jpg");
         return path;
     }
+
 
 
 

@@ -1,7 +1,11 @@
 package com.sucaiji.cjpan.util;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import com.sucaiji.cjpan.model.Range;
+import com.sucaiji.cjpan.service.IndexService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.Map;
@@ -10,6 +14,74 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FileUtil {
+    private final static Logger logger = LoggerFactory.getLogger(FileUtil.class);
+
+
+    /**
+     * 将传入的file写入到outputStream里面
+     *
+     * @param file
+     * @param os
+     * @throws IOException
+     */
+    public static void writeInOutputStream(File file, OutputStream os) throws IOException {
+        if (file == null) {
+            logger.error("writeInOutputStream错误，文件为空");
+            throw new FileNotFoundException();
+        }
+        if (!file.exists()) {
+            logger.error("writeInOutputStream错误，文件不存在，file路径为{}", file.getAbsolutePath());
+            throw new FileNotFoundException();
+        }
+        byte[] buffer = new byte[1024];
+//        FileInputStream fis = null;
+//        BufferedInputStream bis = null;
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedInputStream bis = new BufferedInputStream(fis);){
+//            fis = new FileInputStream(file);
+//            bis = new BufferedInputStream(fis);
+            int i = bis.read(buffer);
+            while (i != -1) {
+                os.write(buffer, 0, i);
+                i = bis.read(buffer);
+            }
+        }
+    }
+
+
+    /**
+     * 根据偏移量将数据写入流中
+     *
+     * @param file
+     * @param os
+     * @param range 偏移量
+     * @throws IOException
+     */
+    public static void writeInOutputStream(File file, OutputStream os, Range range) throws IOException {
+        if (file == null) {
+            throw new FileNotFoundException();
+        }
+        if (!file.exists()) {
+            throw new FileNotFoundException();
+        }
+        long limit = range.getLength();
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
+        try {
+            System.out.println("偏移量" + range + "");
+            randomAccessFile.seek(range.getStart());
+
+            byte[] buffer = new byte[1024];
+            int i = randomAccessFile.read(buffer);
+            while (i != -1 && limit > 0) {
+                os.write(buffer, 0, i);
+                limit -= i;
+                i = randomAccessFile.read(buffer);
+            }
+        } finally {
+            randomAccessFile.close();
+        }
+    }
+
 
 //    public static void copyFile() {
 //        Path from = Paths.get(file.getAbsolutePath());

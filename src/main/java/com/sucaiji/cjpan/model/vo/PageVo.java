@@ -1,9 +1,15 @@
 package com.sucaiji.cjpan.model.vo;
 
 import com.sucaiji.cjpan.model.Index;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PageVo {
     private Integer size;
     private Integer page;
@@ -13,43 +19,4 @@ public class PageVo {
 
     private List<Index> indexList;
 
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    public Integer getPage() {
-        return page;
-    }
-
-    public void setPage(Integer page) {
-        this.page = page;
-    }
-
-    public Long getTotal() {
-        return total;
-    }
-
-    public void setTotal(Long total) {
-        this.total = total;
-    }
-
-    public Integer getPages() {
-        return pages;
-    }
-
-    public void setPages(Integer pages) {
-        this.pages = pages;
-    }
-
-    public List<Index> getIndexList() {
-        return indexList;
-    }
-
-    public void setIndexList(List<Index> indexList) {
-        this.indexList = indexList;
-    }
 }

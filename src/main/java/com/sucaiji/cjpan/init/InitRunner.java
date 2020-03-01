@@ -64,7 +64,7 @@ public class InitRunner implements ApplicationRunner {
      * 初始化视频和图片的缩略图
      */
     private void initThumbnail() {
-        List<Index> indexList = indexDao.selectIndex(new HashMap<>());
+        List<Index> indexList = indexDao.selectIndex(new Index());
         for (Index index: indexList) {
             if (index.getType() != null && !index.getType().equals("")) {
                 indexService.generateThumbnail(index.getUuid(), Type.getType(index.getType()));

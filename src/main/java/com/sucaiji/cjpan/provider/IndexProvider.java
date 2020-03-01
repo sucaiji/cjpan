@@ -30,28 +30,6 @@ public class IndexProvider {
         }.toString();
     }
 
-    public String selectIndex(Map<String, Object> index) {
-        return new SQL() {
-            {
-                SELECT("*");
-                FROM("INDEXS");
-
-
-                if (index.get(UUID) != null) {
-                    WHERE("uuid=#{uuid}");
-                }
-                if (index.get(PARENT_UUID) != null) {
-                    WHERE("parent_uuid=#{parentUuid}");
-                }
-                if (index.get(NAME) != null) {
-                    WHERE("name=#{name}");
-                }
-                if (index.get(TYPE) != null) {
-                    WHERE("type=#{type}");
-                }
-            }
-        }.toString();
-    }
 
     public String deleteIndex(Map<String, Object> index) {
         return new SQL() {
@@ -60,24 +38,6 @@ public class IndexProvider {
                 if (index.get("uuid") != null) {
                     WHERE("uuid=#{uuid}");
                 }
-            }
-        }.toString();
-    }
-
-    public String updateIndex(Map<String, Object> index) {
-        return new SQL() {
-            {
-                UPDATE("INDEXS");
-                if (index.get("type") != null) {
-                    SET("type=#{type}");
-                }
-                if (index.get("name") != null) {
-                    SET("name=#{name}");
-                }
-                if (index.get("lastUpdate") != null) {
-                    SET("l_update=#{lastUpdate}");
-                }
-                WHERE("uuid=#{uuid}");
             }
         }.toString();
     }

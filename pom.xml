@@ -37,7 +37,13 @@
 			<artifactId>pagehelper-spring-boot-starter</artifactId>
 			<version>1.2.13</version>
 		</dependency>
-
+		<!-- lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.12</version>
+			<scope>provided</scope>
+		</dependency>
 
 
 		<dependency>

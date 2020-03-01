@@ -13,16 +13,9 @@ public interface Property {
     String UUID = "uuid";
     String TYPE = "type";
     String PARENT_UUID = "parentUuid";
-    String LAST_UPDATE = "lastUpdate";
-    String IS_DIR = "wasDir";
+
     String SIZE = "size";
     String NAME = "name";
     String SUFFIX = "suffix";
 
-    String ALL = "all";
-    String VIDEO = "video";
-    String IMAGE = "image";
-    String MUSIC = "music";
-    String DOCUMENT = "doc";
-    String OTHER = "other";
 }

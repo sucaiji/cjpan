@@ -68,9 +68,9 @@ public class CjpanApplicationTests {
 			assert "fb363f5e81efddce810df89cdb6ea19d".equalsIgnoreCase(realMd5);
 
 			//查询文件是否正确保存到数据库
-			Map<String, Object> map = new HashMap<>();
-			map.put("uuid", md5);
-			List<Index> indexs = indexDao.selectIndex(map);
+			Index queryIndex = new Index();
+			queryIndex.setUuid(md5);
+			List<Index> indexs = indexDao.selectIndex(queryIndex);
 			assert indexs.get(0).getSize().equals(20L);
 			assert indexs.get(0).getUuid().equals(md5);
 			assert indexs.get(0).getName().equals("名杂");
