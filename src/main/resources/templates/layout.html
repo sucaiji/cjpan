@@ -18,11 +18,11 @@
     <!--  CSS for Demo Purpose, don't include it in your project     -->
     <link href="/creative-tim/css/demo.css" rel="stylesheet"/>
     <!--     Fonts and icons     -->
-    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
-    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300|Material+Icons' rel='stylesheet'
+    <link href="/plugins/fontawesome/font-awesome.min.css" rel="stylesheet">
+    <link href='/creative-tim/css/css.css' rel='stylesheet'
           type='text/css'>
-    <link rel="stylesheet" type="text/css" href="/lightbox/ekko-lightbox.css"/>
-
+    <script src="/plugins/sweetalert/sweetalert2@9.js"></script>
+    <link rel="stylesheet" type="text/css" href="/plugins/lightbox/ekko-lightbox.css"/>
     <link rel="stylesheet" href="/css/style.css"/>
 </div>
 
@@ -152,19 +152,6 @@
                         <p>其他</p>
                     </a>
                 </li>
-                <!--
-                <li>
-                    <a href="">
-                        <i class="material-icons text-gray">notifications</i>
-                        <p>分享</p>
-                    </a>
-                </li>
-                <li class="active-pro">
-                    <a href="">
-                        <i class="material-icons">unarchive</i>
-                        <p>给我充钱~~~</p>
-                    </a>
-                </li>-->
             </ul>
         </div>
     </div>
@@ -188,7 +175,7 @@
     <!-- Material Dashboard DEMO methods, don't include it in your project! -->
     <script src="/creative-tim/js/demo.js"></script>
 
-    <script src="/lightbox/ekko-lightbox.min.js"></script>
+    <script src="/plugins/lightbox/ekko-lightbox.min.js"></script>
 
 
     <script src="/js/my.js"></script>
@@ -226,7 +213,7 @@
                                             <b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                            <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                             <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                         </ul>
                                     </div>
@@ -262,7 +249,7 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>
@@ -296,7 +283,7 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>
@@ -330,7 +317,7 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
                                             </ul>
                                         </div>

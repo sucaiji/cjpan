@@ -57,9 +57,9 @@ public class ShiroConfig {
         Map<String, String> filterChainDefinitions = new HashMap<>();
         filterChainDefinitions.put("/assets/**", "anon");
         filterChainDefinitions.put("/creative-tim/**", "anon");
+        filterChainDefinitions.put("/plugins/**", "anon");
         filterChainDefinitions.put("/js/**", "anon");
         filterChainDefinitions.put("/img/**", "anon");
-        filterChainDefinitions.put("/js/**", "anon");
         filterChainDefinitions.put("/api/login", "anon");
         filterChainDefinitions.put("/api/init_regist", "anon");
         filterChainDefinitions.put("/**", "user");
