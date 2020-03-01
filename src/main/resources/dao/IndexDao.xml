@@ -4,4 +4,56 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sucaiji.cjpan.dao.IndexDao">
 
+    <resultMap id="index" type="com.sucaiji.cjpan.model.Index" >
+        <result column="uuid" property="uuid"/>
+        <result column="parent_uuid" property="parentUuid"/>
+        <result column="name" property="name"/>
+        <result column="suffix" property="suffix"/>
+        <result column="type" property="type"/>
+        <result column="is_dir" property="wasDir"/>
+        <result column="l_update" property="lastUpdate"/>
+        <result column="size" property="size"/>
+    </resultMap>
+
+
+
+    <select id="selectIndex" resultMap="index">
+        SELECT
+            uuid,
+            parent_uuid,
+            name,
+            suffix,
+            type,
+            is_dir,
+            l_update,
+            size
+        FROM
+            indexs
+        WHERE 1=1
+        <if test="uuid != null">
+            and uuid = #{uuid}
+        </if>
+        <if test="parentUuid != null">
+            and parent_uuid = #{parentUuid}
+        </if>
+        <if test="name != null">
+            and name = #{name}
+        </if>
+        <if test="suffix != null">
+            and suffix = #{suffix}
+        </if>
+        <if test="type != null">
+            and type = #{type}
+        </if>
+        <if test="wasDir != null">
+            and is_dir = #{wasDir}
+        </if>
+        <if test="lastUpdate != null">
+            and l_update = #{lastUpdate}
+        </if>
+        <if test="size != null">
+            and size = #{size}
+        </if>
+    </select>
+
 </mapper>

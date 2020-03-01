@@ -1,10 +1,9 @@
 package com.sucaiji.cjpan.init;
 
-import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.InitDao;
-import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.model.Index;
 import com.sucaiji.cjpan.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;

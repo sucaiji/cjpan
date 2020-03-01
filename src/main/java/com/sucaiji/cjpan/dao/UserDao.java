@@ -1,6 +1,6 @@
 package com.sucaiji.cjpan.dao;
 
-import com.sucaiji.cjpan.entity.User;
+import com.sucaiji.cjpan.model.User;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

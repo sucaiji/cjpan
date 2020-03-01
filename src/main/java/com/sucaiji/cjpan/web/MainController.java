@@ -1,13 +1,11 @@
 package com.sucaiji.cjpan.web;
 
-import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.config.Type;
-import com.sucaiji.cjpan.entity.Index;
-import com.sucaiji.cjpan.entity.Page;
+import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.Page;
+import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
-import org.apache.coyote.Request;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.sucaiji.cjpan.config.Property.*;
 
@@ -49,22 +45,14 @@ public class MainController {
         if (parentUuid == null) {
             parentUuid = ROOT;
         }
-        logger.debug("用户请求的parentUuid为[{}]",parentUuid);
         if (pageNumber == null) {
             pageNumber = 1;
         }
-        logger.debug("用户请求的pageNumber为[{}]",pageNumber+"");
-
-        Page page = indexService.getPage(pageNumber, limit, parentUuid);
-        List<Index> list = indexService.getIndexList(page, parentUuid);
-
-        model.addAttribute("indexList", list);
-
-        int total = indexService.getTotal(parentUuid);
-        int pageAmount = (int) Math.ceil((double) total/(double) indexService.DEFAULT_PAGE_SIZE);
+        PageVo vo = indexService.getPageVo(pageNumber, limit, parentUuid);
+        int pageAmount = vo.getPages();
         model.addAttribute("currentPage",pageNumber);
         model.addAttribute("pageAmount",pageAmount);
-
+        model.addAttribute("vo",vo);
         Index index = indexService.getIndexByUuid(parentUuid);
         model.addAttribute("parentIndex", index);
         return "index";
@@ -78,21 +66,16 @@ public class MainController {
         if (pageNumber == null) {
             pageNumber = 1;
         }
+        if (limit == null) {
+            limit = 200;
+        }
         Type type = Type.getType(str);
-
-        Page page = indexService.getPageWithType(pageNumber, limit, type);
-        List<Index> list = indexService.getIndexList(page, type);
-
-        model.addAttribute("indexList", list);
-
-        int total = indexService.getTotalWithType(type.toString());
-        int pageAmount = (int) Math.ceil((double) total/(double)indexService.DEFAULT_PAGE_SIZE);
-        System.out.println(total+"+"+pageAmount);
+        PageVo vo = indexService.getPageVo(pageNumber, limit, type);
+        int pageAmount = vo.getPages();
         model.addAttribute("currentPage", pageNumber);
         model.addAttribute("pageAmount", pageAmount);
-
+        model.addAttribute("vo",vo);
         return "type";
-
     }
 
     @RequestMapping("/video/{uuid}")
@@ -102,9 +85,6 @@ public class MainController {
         model.addAttribute("index", index);
         return "video";
     }
-
-
-
 
     @RequestMapping("/test")
     public String test(HttpServletRequest request, Model model) {

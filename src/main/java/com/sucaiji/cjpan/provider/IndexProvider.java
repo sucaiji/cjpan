@@ -1,6 +1,6 @@
 package com.sucaiji.cjpan.provider;
 
-import com.sucaiji.cjpan.entity.Index;
+import com.sucaiji.cjpan.model.Index;
 import org.apache.ibatis.jdbc.SQL;
 
 import java.util.Map;

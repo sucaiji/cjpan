@@ -1,13 +1,12 @@
 package com.sucaiji.cjpan.service;
 
-import com.sucaiji.cjpan.config.Property;
+import com.github.pagehelper.PageHelper;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
-import com.sucaiji.cjpan.dao.Md5Dao;
-import com.sucaiji.cjpan.entity.Index;
-import com.sucaiji.cjpan.entity.Page;
+import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.Page;
 
-import com.sucaiji.cjpan.util.Md5Util;
+import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.util.Utils;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -30,7 +29,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -40,7 +38,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.sucaiji.cjpan.config.Property.*;
-import static com.sucaiji.cjpan.config.Property.IMAGE;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -72,9 +69,6 @@ public class IndexService {
     }
 
 
-
-
-
     /**
      * 创建文件夹
      * @param name
@@ -98,149 +92,59 @@ public class IndexService {
     }
 
     /**
-     * 通过某个文件夹的uuid获取文件夹下的第page页文件
-     *
-     * @param page
-     * @param parentUuid
-     * @return
-     */
-    public List<Index> getIndexList(Page page, String parentUuid) {
-        Map map = new HashMap();
-        map.put(PARENT_UUID, parentUuid);
-
-        return subPage(page, map);
-    }
-
-    /**
-     * 通过某个文件夹的uuid获取文件夹下的第page页文件
-     *
-     * @param page
+     * 获取type类型的文件列表
+     * @param pg
+     * @param limit
      * @param type
      * @return
      */
-    public List<Index> getIndexList(Page page, Type type) {
-        Map map = new HashMap();
-        map.put(TYPE, type.toString());
-        return subPage(page, map);
-    }
-
-    private List subPage(Page page,Map map) {
-        List list = indexDao.selectIndex(map);
-        logger.debug("根据map[{}],获取分页的数据[{}]", map, list);
-        int pg;
-        if(null != page.getPg()){
-            pg = page.getPg();
-        } else {
-            pg = 1;
-        }
-        int limit;
-        if(null != page.getLimit()){
-            limit = page.getLimit();
-        } else {
-            limit = DEFAULT_PAGE_SIZE;
-        }
-        logger.debug("获得pg[{}]和limit[{}]",pg+"",limit+"");
-
-        //getTotal()
-        //int pageAmount = (int) Math.ceil((double) total/(double)DEFAULT_PAGE_SIZE);
-
-        Integer fromIndex = (pg - 1) * limit;
-        Integer toIndex = pg * limit;
-
-        logger.debug("获得fromIndex[{}]和toIndex[{}]",fromIndex+"",toIndex+"");
-        boolean outOfSize = fromIndex > list.size() || pg <= 0;
-        if (outOfSize) {
-            logger.error("用户请求的页数[{}]的fromIndex[{}]超出范围，返回空列表", pg + "", fromIndex + "");
-            return null;
-        }
-        Collections.reverse(list);
-
-        if (toIndex >= list.size() + 1) {
-            toIndex = list.size();
-            logger.debug("toIndex[{}]超过了list的大小，将toIndex的值设置为list.size()", toIndex + "");
-        }
-        logger.debug("即将分割list从[{}]到[{}]",fromIndex+"",toIndex+"");
-        list = list.subList(fromIndex, toIndex);
-        return list;
-    }
-
-
-
-
-    /**
-     * 获取数据条数
-     * @param parentUuid
-     * @return
-     */
-    public Integer getTotal(String parentUuid) {
-        Map<String,Object> map = new HashMap();
-
-        logger.debug("此时type为空，进入根据parentUuid[{}]获取当前目录下文件总条数的分支",parentUuid);
-        map.put(PARENT_UUID,parentUuid);
-        List list=indexDao.selectIndex(map);
-        return list.size();
-    }
-
-    /**
-     * 获取数据条数
-     * @param type
-     * @return
-     */
-    public Integer getTotalWithType(String type) {
-        Map<String,Object> map = new HashMap();
-
-        logger.debug("type[{}]不为空，进入根据type获取总数据条数的分支",type);
-        map.put(TYPE, type);
-        List list=indexDao.selectIndex(map);
-        return list.size();
-    }
-
-
-    /**
-     *
-     * @return
-     */
-    public Page getPage(Integer pg, String uuid) {
-        return getPage(pg, DEFAULT_PAGE_SIZE, uuid);
-    }
-
-    /**
-     *
-     * @return
-     */
-    public Page getPage(Integer pg, Integer limit, String uuid) {
+    public PageVo getPageVo(Integer pg, Integer limit, Type type) {
         if(null == limit||limit == 0){
             limit = DEFAULT_PAGE_SIZE;
         }
         if(null == pg||pg == 0){
             pg = 1;
         }
-        int total = getTotal(uuid);
-
-
-        return new Page(pg, limit, total);
+        PageVo pageVo = new PageVo();
+        pageVo.setSize(limit);
+        pageVo.setPage(pg);
+        Map map = new HashMap();
+        map.put(TYPE, type.toString());
+        PageHelper.startPage(pg, limit);
+        com.github.pagehelper.Page page = (com.github.pagehelper.Page) indexDao.selectIndex(map);
+        pageVo.setPages(page.getPages());
+        pageVo.setTotal(page.getTotal());
+        pageVo.setIndexList(page.getResult());
+        return pageVo;
     }
 
     /**
-     *
+     * 获取文件列表vo
+     * @param pg
+     * @param limit
+     * @param uuid
      * @return
      */
-    public Page getPageWithType(Integer pg, Type type) {
-        int limit = DEFAULT_PAGE_SIZE;
+    public PageVo getPageVo(Integer pg, Integer limit, String uuid) {
+        if(null == limit||limit == 0){
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        if(null == pg||pg == 0){
+            pg = 1;
+        }
+        PageVo pageVo = new PageVo();
+        pageVo.setSize(limit);
+        pageVo.setPage(pg);
 
-        return getPageWithType(pg, limit, type);
+        PageHelper.startPage(pg, limit);
+        Map map = new HashMap();
+        map.put(PARENT_UUID, uuid);
+        com.github.pagehelper.Page page = (com.github.pagehelper.Page) indexDao.selectIndex(map);
+        pageVo.setPages(page.getPages());
+        pageVo.setTotal(page.getTotal());
+        pageVo.setIndexList(page.getResult());
+        return pageVo;
     }
-
-    /**
-     *
-     * @return
-     */
-    public Page getPageWithType(Integer pg, Integer limit, Type type) {
-        int total = getTotalWithType(type.toString());
-        return new Page(pg, limit, total);
-    }
-
-
 
 
     /**

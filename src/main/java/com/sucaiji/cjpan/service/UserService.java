@@ -2,7 +2,7 @@ package com.sucaiji.cjpan.service;
 
 
 import com.sucaiji.cjpan.dao.UserDao;
-import com.sucaiji.cjpan.entity.User;
+import com.sucaiji.cjpan.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
