@@ -1,5 +1,6 @@
 package com.sucaiji.cjpan.init;
 
+import com.sucaiji.cjpan.config.ExternalProperties;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.InitDao;
@@ -11,7 +12,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.sucaiji.cjpan.config.Property.*;
@@ -26,33 +26,32 @@ public class InitRunner implements ApplicationRunner {
     @Autowired
     private IndexDao indexDao;
 
-    private String initPath;
-
     @Autowired
     private IndexService indexService;
 
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
 
-        initPath=System.getProperty("user.dir");
-        File file=new File(initPath+File.separator+ APP_NAME_EN);
+        String initPath = System.getProperty("user.dir");
+        File file=new File(APP_DIR);
         if(!file.exists()){
             file.mkdir();
         }
-        File data=new File(file.getAbsolutePath()+File.separator+DATA_DIR);
+        File data=new File(DATA_DIR);
         if(!data.exists()){
             data.mkdir();
         }
-        File temp=new File(file.getAbsolutePath()+File.separator+TEMP_DIR);
+        File temp=new File(TEMP_DIR);
         if(!temp.exists()){
             temp.mkdir();
         }
-        File thumbnail=new File(file.getAbsolutePath()+File.separator+THUMBNAIL_DIR);
+        File thumbnail=new File(THUMBNAIL_DIR);
         if(!thumbnail.exists()){
             thumbnail.mkdir();
         }
         initTable();
         initThumbnail();
+        initExternalProperties();
     }
 
     private void initTable(){
@@ -70,5 +69,12 @@ public class InitRunner implements ApplicationRunner {
                 indexService.generateThumbnail(index.getUuid(), Type.getType(index.getType()));
             }
         }
+    }
+
+    /**
+     * 初始化外部配置文件
+     */
+    private void initExternalProperties() {
+        ExternalProperties.initExternalProperties();
     }
 }

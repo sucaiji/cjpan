@@ -49,7 +49,7 @@ public class CjpanApplicationTests {
 	private Path tempPath;
 	@Test
 	public void refactorSave() {
-		basePath = Paths.get(System.getProperty("user.dir") + File.separator + APP_NAME_EN);
+		basePath = Paths.get(System.getProperty("user.dir") + File.separator + APP_DIR);
 		dataPath = Paths.get(basePath.toString() + File.separator + DATA_DIR);
 		tempPath = Paths.get(basePath.toString() + File.separator + TEMP_DIR);
 		try {

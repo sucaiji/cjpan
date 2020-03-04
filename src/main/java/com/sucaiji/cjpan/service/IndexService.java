@@ -2,6 +2,7 @@ package com.sucaiji.cjpan.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.model.Index;
@@ -55,21 +56,6 @@ public class IndexService {
 
     private Map<String, Object> checkMap = new HashMap<>();
     private ExecutorService checkPool = Executors.newCachedThreadPool();
-
-    private Path basePath;
-    private Path dataPath;
-    private Path tempPath;
-    private Path thumbnailPath;
-    private Path frameTempPath;
-
-    public IndexService() {
-        basePath = Paths.get(System.getProperty("user.dir") + File.separator + APP_NAME_EN);
-        dataPath = Paths.get(basePath.toString() + File.separator + DATA_DIR);
-        tempPath = Paths.get(basePath.toString() + File.separator + TEMP_DIR);
-        thumbnailPath = Paths.get(basePath.toString() + File.separator + THUMBNAIL_DIR);
-        frameTempPath = Paths.get(basePath.toString() + File.separator + FRAME_TEMP_DIR);
-    }
-
 
     /**
      * 获取文件列表vo
@@ -212,7 +198,7 @@ public class IndexService {
     @Transactional
     public void saveFile(String parentUuid, String uuid, String name, int total) {
         // File:文件分片路径/uuid，用来暂存合并后的总文件
-        File file = new File(tempPath.toString() + File.separator + uuid + File.separator + uuid);
+        File file = new File(Property.TEMP_DIR + File.separator + uuid + File.separator + uuid);
         if (!file.getParentFile().exists()) {
             //如果temp文件夹不存在 则抛出异常或return
             return;
@@ -224,7 +210,7 @@ public class IndexService {
 
             List<File> files = new ArrayList<>();
             for (int i = 1; i <= total; i++) {
-                files.add(new File(tempPath.toString() + File.separator + uuid + File.separator + i));
+                files.add(new File(Property.TEMP_DIR + File.separator + uuid + File.separator + i));
             }
             for (File file1: files) {
                 FileInputStream fis = new FileInputStream(file1);
@@ -323,7 +309,7 @@ public class IndexService {
      */
     public void saveTemp(MultipartFile multipartFile, String fileMd5, Integer index) {
         try {
-            File tempDir = new File(tempPath.toFile() + File.separator + fileMd5);
+            File tempDir = new File(Property.TEMP_DIR + File.separator + fileMd5);
             if (!tempDir.exists()) {
                 tempDir.mkdir();
             }
@@ -464,7 +450,7 @@ public class IndexService {
         if (thumbnailFile.exists()) {
             return;
         }
-        File tempFile = new File(frameTempPath.toString() + File.separator + md5);
+        File tempFile = new File(Property.FRAME_TEMP_DIR + File.separator + md5);
         if (!thumbnailFile.exists()) {
             thumbnailFile.getParentFile().mkdirs();
         }
@@ -661,7 +647,7 @@ public class IndexService {
      * @return
      */
     private Path getFileParentPath(String uuid) {
-        Path path = Paths.get(dataPath.toString() + File.separator + uuid.substring(0, 4));
+        Path path = Paths.get(Property.DATA_DIR + File.separator + uuid.substring(0, 4));
         return path;
     }
 
@@ -683,7 +669,7 @@ public class IndexService {
      * @return
      */
     private Path getFileThumbnailPath(String uuid) {
-        Path path = Paths.get(thumbnailPath + File.separator + uuid.substring(0, 4) + File.separator + uuid + ".jpg");
+        Path path = Paths.get(Property.THUMBNAIL_DIR + File.separator + uuid.substring(0, 4) + File.separator + uuid + ".jpg");
         return path;
     }
 

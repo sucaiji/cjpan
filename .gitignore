@@ -27,3 +27,5 @@ cjpan.log
 cjpan.mv.db
 cjpan.trace.db
 cjpanData/
+
+external.properties
