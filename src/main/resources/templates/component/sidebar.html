@@ -1,0 +1,84 @@
+<div th:fragment="sidebar" xmlns:th="http://www.thymeleaf.org" class="no-js">
+    <div class="sidebar" data-color="red" data-image="/img/a.jpg">
+        <div class="logo">
+            <a href="#" class="simple-text">
+                欢迎你，亲爱的管理员
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <ul class="nav">
+                <li id="sidebar-all">
+                    <a href="/index.html">
+                        <i class="material-icons">inbox</i>
+                        <p>全部文件</p>
+                    </a>
+                </li>
+                <li id="sidebar-gallery">
+                    <a href="/file/image">
+                        <i class="material-icons">photo</i>
+                        <p>图片</p>
+                    </a>
+                </li>
+                <li id="sidebar-videos">
+                    <a href="/file/video">
+                        <i class="material-icons">video_library</i>
+                        <p>视频</p>
+                    </a>
+                </li>
+                <li id="sidebar-musics">
+                    <a href="/file/music">
+                        <i class="material-icons">library_music</i>
+                        <p>音乐</p>
+                    </a>
+                </li>
+                <li id="sidebar-documents">
+                    <a href="/file/document">
+                        <i class="material-icons">library_books</i>
+                        <p>文档</p>
+                    </a>
+                </li>
+                <li id="sidebar-others">
+                    <a href="/file/other">
+                        <i class="material-icons">inbox</i>
+                        <p>其他</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function sidebarActive() {
+            var pathname = window.location.pathname;
+            switch (pathname) {
+                case "/index":
+                    $("#sidebar-all").addClass("active")
+                    break;
+                case "/":
+                    $("#sidebar-all").addClass("active")
+                    break;
+                case "/index.html":
+                    $("#sidebar-all").addClass("active")
+                    break;
+                case "/file/video":
+                    $("#sidebar-videos").addClass("active")
+                    break;
+                case "/file/image":
+                    $("#sidebar-gallery").addClass("active")
+                    break;
+                case "/file/document":
+                    $("#sidebar-documents").addClass("active")
+                    break;
+                case "/file/other":
+                    $("#sidebar-others").addClass("active")
+                    break;
+                case "/file/music":
+                    $("#sidebar-musics").addClass("active")
+                    break;
+                default:
+                    break;
+            }
+        }
+        sidebarActive();
+    </script>
+</div>

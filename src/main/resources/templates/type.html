@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" class="no-js">
 <head>
-    <div th:include="layout::head"></div>
+    <div th:include="component/head::head"></div>
     <title>CJPAN私有云存储服务</title>
 </head>
 <body>
 <div class="warpper">
-    <div th:include="layout::model"></div>
-    <div th:include="layout::sidebar"></div>
+    <div th:include="component/model::model"></div>
+    <div th:include="component/sidebar::sidebar"></div>
     <div class="main-panel">
-        <div th:include="layout::nav"></div>
+        <div th:include="component/nav::nav"></div>
         <div class="content">
-            <div th:include="layout::content"></div>
+            <div th:include="component/content::content"></div>
         </div>
         <footer class="footer">
             <div class="container-fluid">
@@ -27,6 +27,6 @@
     </div>
 
 </div>
-<div th:include="layout::footer"></div>
+<div th:include="component/footer::footer"></div>
 </body>
 </html>

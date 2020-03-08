@@ -5,7 +5,7 @@ function getQueryString(name) {
     return null;
 }
 
-var parentUuid = getQueryString("parent_uuid");
+var parentUuid = getQueryString("parentUuid");
 
 
 var databgein;  //开始时间

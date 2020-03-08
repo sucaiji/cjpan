@@ -54,7 +54,7 @@ public class ApiController {
 
 //    /**
 //     *  获取一共有多少条数据
-//     *  如果tparent_uuid不为空，则查询parent_uuid文件夹下的type类型文件
+//     *  如果parent_Uuid不为空，则查询parentUuid文件夹下的type类型文件
 //     *  如果parentUuid为空，获取root目录下文件总条数
 //     * @param parentUuid
 //     * @return
@@ -140,7 +140,7 @@ public class ApiController {
      */
     @RequestMapping("/mkdir")
     public String createDir(@RequestParam("name")String name,
-                            @RequestParam(value = "parent_uuid",required = false)String parentUuid){
+                            @RequestParam(value = "parentUuid",required = false)String parentUuid){
         if(parentUuid==null){
             parentUuid=ROOT;
         }
@@ -165,7 +165,7 @@ public class ApiController {
      * @return
      */
     @RequestMapping(value = "/is_upload")
-    public Map<String,Object> isUpload(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
+    public Map<String,Object> isUpload(@RequestParam(value = "parentUuid",required = false)String parentUuid,
                                        @RequestParam(value = "name")String name){
 //        if(parentUuid==null){
 //            parentUuid=ROOT;

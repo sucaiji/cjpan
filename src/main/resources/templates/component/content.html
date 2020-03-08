@@ -1,0 +1,232 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org" class="no-js">
+    <!-- 分页插件 -->
+    <script src="/plugins/twbs-pagination/jquery.twbsPagination.min.js"></script>
+    <!-- 图片幻灯片战士 -->
+    <script src="/plugins/lightbox/ekko-lightbox.min.js"></script>
+    <div class="container-fluid gallery">
+        <div class="row">
+            <div th:each="index:${vo.indexList}" th:if="${index.wasDir}">
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                    <div class="card card-stats">
+                        <div class="card-content">
+                            <a th:href="@{'/index?parentUuid='+${index.uuid}}">
+                                <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/folder.png'
+                                     alt=''/></a>
+                        </div>
+                        <div class="card-footer">
+                            <div class="stats">
+                                <div class="col-xs-7">
+                                    <a th:href="@{'/index?parentUuid='+${index.uuid}}">
+                                        <div class='text-omit' th:text="${index.name}">name</div>
+                                        <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+                                    </a>
+                                </div>
+                                <div class="col-xs-5">
+                                    <div class="dropdown">
+                                        <a href="#" class="btn btn-simple btn-xs btn-round dropdown-toggle"
+                                           data-toggle="dropdown">
+                                            选项
+                                            <b class="caret"></b>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                            <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:each="index:${vo.indexList}" th:if="${not index.wasDir}" th:switch="${index.type}">
+                <div th:case="'video'">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <div class="card card-stats">
+                            <div class="gallery card-content">
+                                <a th:href="@{'/video/'+${index.uuid}}">
+                                    <img class='am-img-thumbnail am-img-bdrs' th:src="@{'/api/thumbnail?uuid='+${index.uuid}}"
+                                         onerror="this.src='/img/tubiao/videos.png'"
+                                         alt=''/></a>
+                            </div>
+                            <div class="card-footer">
+                                <div class="stats">
+                                    <div class="col-xs-7">
+                                        <a th:href="@{'/video/'+${index.uuid}}">
+                                            <div class='text-omit' th:text="${index.name}">name</div>
+                                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-simple btn-xs btn-round dropdown-toggle"
+                                               data-toggle="dropdown">
+                                                选项
+                                                <b class="caret"></b>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:case="'image'">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <div class="card card-stats">
+                            <div class="card-content">
+                                <a th:href="@{'/api/image?uuid='+${index.uuid}}" data-toggle="gallery" data-gallery="example-gallery" data-type="image">
+                                    <img th:src="@{'/api/thumbnail?uuid='+${index.uuid}}" class="img-fluid am-img-thumbnail am-img-bdrs">
+                                </a>
+                            </div>
+                            <div class="card-footer">
+                                <div class="stats">
+                                    <div class="col-xs-7">
+                                        <a th:href="@{'/api/image?uuid='+${index.uuid}}">
+                                            <div class='text-omit' th:text="${index.name}">name</div>
+                                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-simple btn-xs btn-round dropdown-toggle"
+                                               data-toggle="dropdown">
+                                                选项
+                                                <b class="caret"></b>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:case="*" th:href="@{'/api/download?uuid='+${index.uuid}}">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <div class="card card-stats">
+                            <div class="card-content">
+                                <a th:href="@{'/api/download?uuid='+${index.uuid}}">
+                                    <img class='am-img-thumbnail am-img-bdrs' src='/img/tubiao/documents.png'
+                                         alt=''/></a>
+                            </div>
+                            <div class="card-footer">
+                                <div class="stats">
+                                    <div class="col-xs-7">
+                                        <a th:href="@{'/api/download?uuid='+${index.uuid}}">
+                                            <div class='text-omit' th:text="${index.name}">name</div>
+                                            <div class='gallery-desc' th:text="${index.lastUpdate}">2375-09-26</div>
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-simple btn-xs btn-round dropdown-toggle"
+                                               data-toggle="dropdown">
+                                                选项
+                                                <b class="caret"></b>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul id="pagination" class="pagination-sm"></ul>
+    </div>
+
+
+    <script type="text/javascript" th:inline="javascript">
+
+        //开启画廊
+        $(document).on('click', '[data-toggle="gallery"]', function (event) {
+            event.preventDefault();
+            $(this).ekkoLightbox({
+                alwaysShowClose: true,
+            });
+        });
+
+        //分页插件
+        $('#pagination').twbsPagination({
+            totalPages: [[${vo.pages}]],
+            startPage: [[${vo.page}]],
+            visiblePages: 5,
+            first: "首页",
+            last: "最后一页",
+            prev: "上一页",
+            next: "下一页",
+            onPageClick: function (event, page) {
+                //页面刚加载时会调用onPageClick方法，防止在当前页面反复跳转
+                if (page == [[${vo.page}]]) {
+                    return;
+                }
+                //获取到原本的全部参数，只修改pg 并跳转
+                var params = getAllParam();
+                params.pg = page;
+                var urlParam = Object.keys(params).map(function (key) {
+                    return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+                }).join("&");
+
+                var redirectUrl = window.location.pathname + "?" + urlParam;
+                window.location.href = redirectUrl;
+            }
+        });
+
+
+        function del(uuid) {
+            Swal.fire({
+                type: 'warning', // 弹框类型
+                title: '删除', //标题
+                text: "删除后将无法恢复，请谨慎操作！", //显示内容
+
+                confirmButtonColor: '#3085d6',// 确定按钮的 颜色
+                confirmButtonText: '确定',// 确定按钮的 文字
+                showCancelButton: true, // 是否显示取消按钮
+                cancelButtonColor: '#d33', // 取消按钮的 颜色
+                cancelButtonText: "取消", // 取消按钮的 文字
+
+                focusCancel: true, // 是否聚焦 取消按钮
+                reverseButtons: true  // 是否 反转 两个按钮的位置 默认是  左边 确定  右边 取消
+            }).then((isConfirm) => {
+                //判断 是否 点击的 确定按钮
+                if (isConfirm.value) {
+                    $.ajax({
+                        url: "/api/delete?uuid=" + uuid,
+                        type: "GET",
+                        async: true,        //异步
+                        processData: false,  //很重要，告诉jquery不要对form进行处理
+                        contentType: false,  //很重要，指定为false才能形成正确的Content-Type
+                        success: function (data) {
+                            Swal.fire("成功", "删除成功", "success").then(function (isConfirm) {
+                                location.reload(true);
+                            });
+
+                        }, error: function (XMLHttpRequest, errorThrown) {
+                            Swal.fire("失败", "删除失败", "error").then(function (isConfirm) {
+                                location.reload(true);
+                            });
+                        }
+                    });
+                } else {
+                }
+
+            });
+
+        };
+    </script>
+
+</div>

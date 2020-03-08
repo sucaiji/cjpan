@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" class="no-js">
 <head>
-    <div th:include="layout::head"></div>
+    <div th:include="component/head::head"></div>
     <title>CJPAN私有云存储服务</title>
 </head>
 <body>
 <div class="warpper">
-    <div th:include="layout::model"></div>
-    <div th:include="layout::sidebar"></div>
+    <div th:include="component/model::model"></div>
+    <div th:include="component/sidebar::sidebar"></div>
     <div class="main-panel">
 
-        <div th:include="layout::nav"></div>
+        <div th:include="component/nav::nav"></div>
         <div class="content" style=" margin-top: 40px;">
 
             <!-- Button trigger modal -->
@@ -23,7 +23,7 @@
                 创建文件夹
             </button>
 
-            <div th:include="layout::content"></div>
+            <div th:include="component/content::content"></div>
 
         </div>
         <footer class="footer">
@@ -40,32 +40,26 @@
     </div>
 
 </div>
-<div th:include="layout::footer"></div>
+<div th:include="component/footer::footer"></div>
 <script src="/js/md5.js"></script>
 <script src="/js/spark-md5.min.js"></script>
 <script src="/js/upload.js"></script>
 <script>
 
     $(function () {
-        function getQueryString(name) {
-            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-            var r = window.location.search.substr(1).match(reg);
-            if (r != null) return unescape(r[2]);
-            return null;
-        }
 
-        var parent_uuid = getQueryString("parent_uuid");
+        var parentUuid = getQueryString("parentUuid");
 
-        if (parent_uuid == null) {
-            parent_uuid = "root";
+        if (parentUuid == null) {
+            parentUuid = "root";
         }
 
         $('#mkdir-btn').on('click', function () {
             var form = new FormData();
-            if (parent_uuid != null) {
-                form.append("parent_uuid", parent_uuid);
+            if (parentUuid != null) {
+                form.append("parentUuid", parentUuid);
             } else {
-                form.append("parent_uuid", "root");
+                form.append("parentUuid", "root");
             }
             form.append("name", $('#mkdir-name').val());
             $.ajax({
@@ -82,8 +76,6 @@
                     } else {
                         alert("创建失败，该目录中存在同名文件夹")
                     }
-
-
                 }, error: function (XMLHttpRequest, errorThrown) {
                     alert("服务器出错!");
                 }

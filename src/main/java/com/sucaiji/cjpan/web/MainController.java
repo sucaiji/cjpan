@@ -1,5 +1,6 @@
 package com.sucaiji.cjpan.web;
 
+import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.config.Type;
 import com.sucaiji.cjpan.model.Index;
 import com.sucaiji.cjpan.model.vo.PageVo;
@@ -41,9 +42,9 @@ public class MainController {
     }
 
     @RequestMapping(value = {"/", "index", "/index"})
-    public String index(@RequestParam(value = "parent_uuid", defaultValue = ROOT, required = false) String parentUuid,
-                        @RequestParam(value = "pg", required = false) Integer pageNumber,
-                        @RequestParam(value = "limit", required = false) Integer limit,
+    public String index(@RequestParam(value = "parentUuid", defaultValue = ROOT, required = false) String parentUuid,
+                        @RequestParam(value = "pg", required = false, defaultValue = "1") Integer pageNumber,
+                        @RequestParam(value = "limit", required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                         Model model) {
         if (pageNumber == null) {
             pageNumber = 1;
@@ -52,32 +53,20 @@ public class MainController {
         queryIndex.setParentUuid(parentUuid);
         PageVo vo = indexService.getPageVo(pageNumber, limit, queryIndex);
         Index index = indexService.getIndexByUuid(parentUuid);
-        int pageAmount = vo.getPages();
-        model.addAttribute("currentPage",pageNumber);
-        model.addAttribute("pageAmount",pageAmount);
-        model.addAttribute("vo",vo);
+        model.addAttribute("vo", vo);
         model.addAttribute("parentIndex", index);
         return "index";
     }
 
     @RequestMapping("/file/{str}")
     public String type(@PathVariable("str") String str,
-                       @RequestParam(value = "pg" , required = false) Integer pageNumber,
-                       @RequestParam(value = "limit" , required = false) Integer limit,
+                       @RequestParam(value = "pg" , required = false, defaultValue = "1") Integer pageNumber,
+                       @RequestParam(value = "limit" , required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                        Model model) {
-        if (pageNumber == null) {
-            pageNumber = 1;
-        }
-        if (limit == null) {
-            limit = 200;
-        }
         Type type = Type.getType(str);
         Index index = new Index();
         index.setType(type.toString());
         PageVo vo = indexService.getPageVo(pageNumber, limit, index);
-        int pageAmount = vo.getPages();
-        model.addAttribute("currentPage", pageNumber);
-        model.addAttribute("pageAmount", pageAmount);
         model.addAttribute("vo",vo);
         return "type";
     }
