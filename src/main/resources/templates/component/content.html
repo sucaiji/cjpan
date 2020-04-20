@@ -1,8 +1,9 @@
 <div th:fragment="content" xmlns:th="http://www.thymeleaf.org" class="no-js">
     <!-- 分页插件 -->
     <script src="/plugins/twbs-pagination/jquery.twbsPagination.min.js"></script>
-    <!-- 图片幻灯片战士 -->
+    <!-- 图片幻灯片展示 -->
     <script src="/plugins/lightbox/ekko-lightbox.min.js"></script>
+
     <div class="container-fluid gallery">
         <div class="row">
             <div th:each="index:${vo.indexList}" th:if="${index.wasDir}">
@@ -30,7 +31,7 @@
                                         </a>
                                         <ul class="dropdown-menu">
                                             <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                            <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                            <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -66,7 +67,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                                <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="rename(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -100,7 +101,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -134,7 +135,7 @@
                                             </a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
-                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="getInfo(this)" >重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -185,6 +186,11 @@
                 window.location.href = redirectUrl;
             }
         });
+
+        function rename(obj) {
+            $('#rename-uuid').val(obj.name);
+            $('#rename').modal('show');
+        }
 
 
         function del(uuid) {

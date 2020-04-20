@@ -84,6 +84,25 @@ public class IndexService {
         return pageVo;
     }
 
+    public PageVo search(Integer pg, Integer limit, String name) {
+        if (null == limit || limit == 0) {
+            limit = DEFAULT_PAGE_SIZE;
+        }
+        if (null == pg || pg == 0) {
+            pg = 1;
+        }
+        PageHelper.startPage(pg, limit);
+        Page page = (Page) indexDao.fuzzySelectIndex(name);
+
+        PageVo pageVo = new PageVo();
+        pageVo.setSize(limit);
+        pageVo.setPage(pg);
+        pageVo.setPages(page.getPages());
+        pageVo.setTotal(page.getTotal());
+        pageVo.setIndexList(page.getResult());
+        return pageVo;
+    }
+
     /**
      * 通过uuid获取index数据
      * @param uuid

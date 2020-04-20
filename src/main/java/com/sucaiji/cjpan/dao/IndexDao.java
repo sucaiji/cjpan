@@ -13,6 +13,8 @@ public interface IndexDao {
 
     List<Index> selectIndex(Index index);
 
+    List<Index> fuzzySelectIndex(String name);
+
     void deleteIndex(Map<String,Object> map);
 
     void updateIndex(Index index);

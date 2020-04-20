@@ -46,9 +46,6 @@ public class MainController {
                         @RequestParam(value = "pg", required = false, defaultValue = "1") Integer pageNumber,
                         @RequestParam(value = "limit", required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                         Model model) {
-        if (pageNumber == null) {
-            pageNumber = 1;
-        }
         Index queryIndex = new Index();
         queryIndex.setParentUuid(parentUuid);
         PageVo vo = indexService.getPageVo(pageNumber, limit, queryIndex);
@@ -57,6 +54,17 @@ public class MainController {
         model.addAttribute("parentIndex", index);
         return "index";
     }
+
+    @RequestMapping(value = "/search")
+    public String search(@RequestParam(value = "name") String name,
+                         @RequestParam(value = "pg", required = false, defaultValue = "1") Integer pageNumber,
+                        @RequestParam(value = "limit", required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
+                        Model model) {
+        PageVo vo = indexService.search(pageNumber, limit, name);
+        model.addAttribute("vo", vo);
+        return "search";
+    }
+
 
     @RequestMapping("/file/{str}")
     public String type(@PathVariable("str") String str,

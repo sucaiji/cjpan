@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" class="no-js">
+<head>
+    <div th:include="component/head::head"></div>
+    <title>CJPAN私有云存储服务</title>
+</head>
+<body>
+<div class="warpper">
+    <div th:include="component/model::model"></div>
+    <div th:include="component/sidebar::sidebar"></div>
+    <div class="main-panel">
+        <div th:include="component/nav::nav"></div>
+        <div class="content">
+            <div th:include="component/content::content"></div>
+        </div>
+        <footer class="footer">
+            <div class="container-fluid">
+                <p class="copyright pull-right">
+                    &copy;
+                    <script>
+                        document.write(new Date().getFullYear())
+                    </script>
+                    <a href="https://github.com/sucaiji/cjpan">CJPAN</a>, 可靠的私人云存储系统。
+                </p>
+            </div>
+        </footer>
+    </div>
+
+</div>
+<div th:include="component/footer::footer"></div>
+</body>
+</html>

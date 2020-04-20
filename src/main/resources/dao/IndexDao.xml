@@ -81,6 +81,13 @@
             </if>
         </trim>
     </insert>
+    
+    <select id="fuzzySelectIndex" resultMap="index">
+        SELECT
+        <include refid="BaseSql"/>
+        FROM indexs
+        WHERE name LIKE concat('%',#{name,jdbcType=VARCHAR},'%')
+    </select>
 
     <select id="selectIndex" resultMap="index">
         SELECT

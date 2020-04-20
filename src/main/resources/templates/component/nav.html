@@ -64,16 +64,16 @@
                     </li>
                 </ul>
 
-                <!--<form class="navbar-form navbar-right" role="search">-->
-                <!--<div class="form-group  is-empty">-->
-                <!--<input type="text" class="form-control" placeholder="Search">-->
-                <!--<span class="material-input"></span>-->
-                <!--</div>-->
-                <!--<button type="submit" class="btn btn-white btn-round btn-just-icon">-->
-                <!--<i class="material-icons">search</i>-->
-                <!--<div class="ripple-container"></div>-->
-                <!--</button>-->
-                <!--</form>-->
+                <form action="/search" class="navbar-form navbar-right" role="search">
+                    <div class="form-group  is-empty">
+                        <input type="text" required="required" name="name" id="search-name" class="form-control" placeholder="搜索">
+                        <span class="material-input"></span>
+                    </div>
+                    <button id="search-btn" class="btn btn-white btn-round btn-just-icon">
+                        <i class="material-icons">search</i>
+                        <div class="ripple-container"></div>
+                    </button>
+                </form>
             </div>
         </div>
     </nav>
@@ -95,5 +95,18 @@
                 }
             });
         });
+
+        // var searchBtn = $("#search-btn");
+        // searchBtn.on('click', function () {
+        //     var name = $("#search-name").val();
+        //     if (name == null || name == '') {
+        //         alert("请输入搜索内容")
+        //         return;
+        //     }
+        //
+        //     window.location.href = "/search?name=" + name;
+        // })
+
+
     </script>
 </div>

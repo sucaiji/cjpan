@@ -1,7 +1,4 @@
-function getInfo(obj) {
-    $('#rename-uuid').val(obj.name);
-    $('#rename').modal('show');
-}
+
 
 
 $(document).ready(function () {
