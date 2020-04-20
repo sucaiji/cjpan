@@ -199,7 +199,7 @@ public class IndexService {
              FileChannel outFileChannel = fos.getChannel()) {
             //将文件合并
             List<File> files = new ArrayList<>();
-            for (int i = 0; i < total; i++) {
+            for (int i = 1; i <= total; i++) {
                 files.add(new File(Property.TEMP_DIR + File.separator + uuid + File.separator + i));
             }
             for (File file1: files) {
@@ -208,6 +208,8 @@ public class IndexService {
                 inFileChannel.transferTo(0, file1.length(), outFileChannel);
                 inFileChannel.close();
             }
+            outFileChannel.close();
+            fos.close();
 
             File dirFile = new File(getFileParentPath(uuid).toString());
             if (!dirFile.exists()) {
