@@ -19,4 +19,8 @@ public class PageVo {
 
     private List<Index> indexList;
 
+    public PageVo(Integer page, Integer size) {
+        this.page = page;
+        this.size = size;
+    }
 }

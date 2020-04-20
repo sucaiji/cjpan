@@ -13,8 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 import static com.sucaiji.cjpan.config.Property.*;
 
@@ -67,13 +65,13 @@ public class MainController {
 
 
     @RequestMapping("/file/{str}")
-    public String type(@PathVariable("str") String str,
+    public String type(@PathVariable("str") String type,
                        @RequestParam(value = "pg" , required = false, defaultValue = "1") Integer pageNumber,
                        @RequestParam(value = "limit" , required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                        Model model) {
-        Type type = Type.getType(str);
+//        Type type = Type.getType(str);
         Index index = new Index();
-        index.setType(type.toString());
+        index.setType(type);
         PageVo vo = indexService.getPageVo(pageNumber, limit, index);
         model.addAttribute("vo",vo);
         return "type";

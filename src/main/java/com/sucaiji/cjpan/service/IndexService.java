@@ -46,10 +46,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Service
 public class IndexService {
-    //默认每页数量
-    public static final Integer DEFAULT_PAGE_SIZE=200;
 
-    final static Logger logger = LoggerFactory.getLogger(IndexService.class);
+    private final static Logger logger = LoggerFactory.getLogger(IndexService.class);
+
 
     @Autowired
     private IndexDao indexDao;
@@ -65,25 +64,30 @@ public class IndexService {
      * @return
      */
     public PageVo getPageVo(Integer pg, Integer limit, Index queryIndex) {
-        if (null == limit || limit == 0) {
+        if (null == limit || limit.equals(0)) {
             limit = DEFAULT_PAGE_SIZE;
         }
-        if (null == pg || pg == 0) {
+        if (null == pg || pg.equals(0)) {
             pg = 1;
         }
 
         PageHelper.startPage(pg, limit);
         Page page = (Page) indexDao.selectIndex(queryIndex);
 
-        PageVo pageVo = new PageVo();
-        pageVo.setSize(limit);
-        pageVo.setPage(pg);
+        PageVo pageVo = new PageVo(pg, limit);
         pageVo.setPages(page.getPages());
         pageVo.setTotal(page.getTotal());
         pageVo.setIndexList(page.getResult());
         return pageVo;
     }
 
+    /**
+     * 分页搜索
+     * @param pg
+     * @param limit
+     * @param name
+     * @return
+     */
     public PageVo search(Integer pg, Integer limit, String name) {
         if (null == limit || limit == 0) {
             limit = DEFAULT_PAGE_SIZE;
@@ -94,7 +98,7 @@ public class IndexService {
         PageHelper.startPage(pg, limit);
         Page page = (Page) indexDao.fuzzySelectIndex(name);
 
-        PageVo pageVo = new PageVo();
+        PageVo pageVo = new PageVo(pg, limit);
         pageVo.setSize(limit);
         pageVo.setPage(pg);
         pageVo.setPages(page.getPages());
@@ -109,13 +113,7 @@ public class IndexService {
      * @return
      */
     public Index getIndexByUuid(String uuid) {
-        Index index = new Index();
-        index.setUuid(uuid);
-        List<Index> list = indexDao.selectIndex(index);
-        if (list.size() == 0) {
-            return null;
-        }
-        Index indexModel = list.get(0);
+        Index indexModel = indexDao.get(uuid);
         return indexModel;
     }
 
@@ -172,7 +170,7 @@ public class IndexService {
      */
     public boolean createDir(String name, String parentUuid) {
         String uuid = Utils.UUID();
-        Timestamp time = time();
+        Timestamp time = Utils.time();
 
         Index queryIndex = new Index();
         queryIndex.setName(name);
@@ -188,32 +186,7 @@ public class IndexService {
     }
 
 
-    /**
-     * 获取http请求要求的偏移量
-     * @param rangeStr
-     * @param fileSize
-     * @return
-     */
-    public Range getRange(String rangeStr, Long fileSize) {
-        rangeStr = rangeStr.replaceAll("bytes=", "");
-        String[] strs = rangeStr.split("-", 2);
-        Long start;
-        if (strs[0] == null || strs[0].isEmpty()) {
-            start = 0L;
-        } else {
-            start = Long.valueOf(strs[0]);
-        }
-
-        Long end;
-        if (strs[1] == null || strs[1].isEmpty()) {
-            end = fileSize - 1;
-        } else {
-            end = Long.valueOf(strs[1]);
-        }
-        return new Range(start, end, fileSize);
-    }
-
-    //TODO 加上事务  回头测试是否实现了事务特性
+    //TODO 加上事务  回头测试是否实现了事务特性 (事务是否有用 毕竟文件删除可能会失败)
     @Transactional
     public void saveFile(String parentUuid, String uuid, String name, int total) {
         // File:文件分片路径/uuid，用来暂存合并后的总文件
@@ -222,13 +195,11 @@ public class IndexService {
             //如果temp文件夹不存在 则抛出异常或return
             return;
         }
-        try {
+        try (FileOutputStream fos = new FileOutputStream(file);
+             FileChannel outFileChannel = fos.getChannel()) {
             //将文件合并
-            FileOutputStream fos = new FileOutputStream(file);
-            FileChannel outFileChannel = fos.getChannel();
-
             List<File> files = new ArrayList<>();
-            for (int i = 1; i <= total; i++) {
+            for (int i = 0; i < total; i++) {
                 files.add(new File(Property.TEMP_DIR + File.separator + uuid + File.separator + i));
             }
             for (File file1: files) {
@@ -237,20 +208,18 @@ public class IndexService {
                 inFileChannel.transferTo(0, file1.length(), outFileChannel);
                 inFileChannel.close();
             }
-            outFileChannel.close();
 
             File dirFile = new File(getFileParentPath(uuid).toString());
             if (!dirFile.exists()) {
                 dirFile.mkdir();
             }
 
+            //将文件挪到data文件夹中
             Path from = Paths.get(file.getAbsolutePath());
             Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + uuid);
             Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
 
-            //获得文件的大小
-            Long size = getFilePath(uuid).toFile().length();
-
+            //验证文件是否与文件夹下现有文件重名，如果重名则修改文件名
             String newName = name;
             Index queryIndex = new Index();
             queryIndex.setParentUuid(parentUuid);
@@ -260,46 +229,28 @@ public class IndexService {
                 newName = judgeName(name, parentUuid);
             }
 
-            Timestamp time = time();
-            String suffix = getSuffix(newName);
-            Type type = getType(newName);
+            //获得文件的大小
+            Long size = getFilePath(uuid).toFile().length();
+            //文件记录入库
+            Timestamp time = Utils.time();
+            String suffix = Utils.getSuffix(newName);
+            Type type = Type.getTypeByFileName(newName);
             Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
-            //先文件的合并,与校验
-
-            //在文件树表中添加记录
             indexDao.insertIndex(index);
+
             //生成缩略图
             generateThumbnail(uuid, type);
             if (checkMap.containsKey(uuid)) {
                 checkMap.remove(uuid);
             }
-
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            //TODO 回头新建一个FileSaveException 此方法出错就抛这个异常  由controller 来处理异常
-            //删除temp里面的文件
-
-            //先删除文件夹下所有东西
-            String[] children = file.getParentFile().list();
-            for (String str : children) {
-                try {
-                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            //再删除文件夹本身
-            try {
-                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            //删除全部temp文件外加temp文件夹本身
+            File dirFile = file.getParentFile();
+            FileUtil.deleteFile(dirFile);
         }
 
     }
@@ -310,6 +261,11 @@ public class IndexService {
         return checkMap;
     }
 
+    /**
+     * 检查文件是否上传完毕
+     * @param uuid
+     * @return
+     */
     public boolean checkUpload(String uuid) {
         if (checkMap.containsKey(uuid)) {
             return false;
@@ -360,15 +316,10 @@ public class IndexService {
      * @param uuid
      */
     public void deleteByUuid(String uuid) {
-        Index index1 = new Index();
-        index1.setUuid(uuid);
-        List<Index> list = indexDao.selectIndex(index1);
-        if (list.size() == 0) {
+        Index index = indexDao.get(uuid);
+        if (index == null) {
             return;
         }
-
-        Index index = list.get(0);
-
         //如果index是一个文件夹的话，递归删除文件夹下所有文件
         if (index.getWasDir()) {
             Index queryIndex = new Index();
@@ -377,30 +328,15 @@ public class IndexService {
             for (Index item : childUuidList) {
                 deleteByUuid(item.getUuid());
             }
-            Map<String, Object> map2 = new HashMap<>();
-            map2.put("uuid", uuid);
-            indexDao.deleteIndex(map2);
+            indexDao.deleteByUuid(uuid);
         } else {
-            //如果不是文件夹 则执行删除数据库信息，判断md5表中是否还有该md5记录，如果没有了，则删除该文件
-//            String md5 = md5Dao.selectMd5ByUuid(uuid);
-
-            Map<String, Object> map3 = new HashMap<>();
-            map3.put("uuid", uuid);
-            indexDao.deleteIndex(map3);
-
-            //查询md5表中是否还有该md5的记录,如果没有的话，删除文件
-//            List<String> list1 = md5Dao.selectUuidByMd5(md5);
-//            if (list1.size() == 0) {
-                deleteFile(uuid);
-                System.out.println("文件删除");
-                return;
-//            }
-
+            indexDao.deleteByUuid(uuid);
+            Path filePath = getFileParentPath(uuid);
+            FileUtil.deleteFile(filePath);
+            logger.info("删除[{}]文件成功", filePath.toString());
+            return;
         }
     }
-
-
-
 
     /**
      * 生成缩略图
@@ -513,109 +449,6 @@ public class IndexService {
         }
     }
 
-//    public static class Range {
-//        public Long start;
-//        public Long end;
-//        public Long length;
-//        public Long total;
-//
-//        public Range(Long start, Long end, Long total) {
-//            this.start = start;
-//            this.end = end;
-//            this.length = end - start + 1;
-//            this.total = total;
-//        }
-//    }
-
-
-    private Timestamp time() {
-        return new Timestamp(System.currentTimeMillis());
-    }
-
-    /**
-     * 根据uuid值删除文件
-     *
-     * @param uuid
-     */
-    private void deleteFile(String uuid) {
-        File parentFile = new File(getFileParentPath(uuid).toString());
-        System.out.println(parentFile.getAbsolutePath());
-        if (!parentFile.exists()) {
-            return;
-        }
-
-        //回头把这个复制的封装成一个方法
-        try {
-            //先删除文件夹下所有东西
-            String[] children = parentFile.list();
-            for (String str : children) {
-                Files.delete(Paths.get(parentFile.getAbsolutePath() + File.separator + str));
-            }
-            //再删除文件夹本身   这两段写的很吉儿不严谨，也很不可读，回头重新写一遍
-            Files.delete(Paths.get(parentFile.getAbsolutePath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-
-    private Pattern videoPattern = Pattern.compile("(mp4|rm|rmvb|wmv|avi|3gp|mkv|mov|MP4|RM|RMVB|WMV|AVI|3GP|MKV|MOV)");
-    private Pattern imagePattern = Pattern.compile("(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)");
-    private Pattern musicPattern = Pattern.compile("(mp3|wav|wma|MP3|WAV|WMA)");
-    private Pattern docPattern = Pattern.compile("txt|pdf|TEXT|PDF");
-    /**
-     * 根据name解析出文件的类型
-     *
-     * @param name
-     * @return
-     */
-    private Type getType(String name) {
-
-        //判断该文件是否有后缀名
-        String[] strs = name.split("\\.", -1);
-        if (strs.length < 2) {
-            return Type.OTHER;
-        }
-
-        //去掉点
-        String suffix = getSuffix(name).replaceAll("\\.", "");
-        //支持的文件类型
-        Matcher videoMatcher = videoPattern.matcher(suffix);
-        if (videoMatcher.matches()) {
-            return Type.VIDEO;
-        }
-        Matcher imageMatcher = imagePattern.matcher(suffix);
-        if (imageMatcher.matches()) {
-            return Type.IMAGE;
-        }
-        Matcher musicMatcher = musicPattern.matcher(suffix);
-        if (musicMatcher.matches()) {
-            return Type.MUSIC;
-        }
-        Matcher docMatcher = docPattern.matcher(suffix);
-        if (docMatcher.matches()) {
-            return Type.DOCUMENT;
-        }
-        return Type.OTHER;
-    }
-
-    /**
-     * 获取文件的后缀名
-     *
-     * @param name
-     * @return
-     */
-    private String getSuffix(String name) {
-        Pattern p = Pattern.compile("\\.\\w+$");
-        Matcher m = p.matcher(name);
-        if (m.find()) {
-            return m.group();
-        }
-        return null;
-    }
-
     /**
      * 循环判断是否重名 如果同名，添加后缀copy
      * @param name
@@ -688,14 +521,12 @@ public class IndexService {
      * @return
      */
     private Path getFileThumbnailPath(String uuid) {
-        Path path = Paths.get(Property.THUMBNAIL_DIR + File.separator + uuid.substring(0, 4) + File.separator + uuid + ".jpg");
+        StringBuilder stringBuilder = new StringBuilder(Property.THUMBNAIL_DIR)
+                .append(File.separator).append(uuid, 0, 4)
+                .append(File.separator).append(uuid).append(".jpg");
+        Path path = Paths.get(stringBuilder.toString());
         return path;
     }
-
-
-
-
-
 
 
 

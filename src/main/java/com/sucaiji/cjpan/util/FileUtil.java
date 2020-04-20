@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -34,12 +36,8 @@ public class FileUtil {
             throw new FileNotFoundException();
         }
         byte[] buffer = new byte[1024];
-//        FileInputStream fis = null;
-//        BufferedInputStream bis = null;
         try (FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis);){
-//            fis = new FileInputStream(file);
-//            bis = new BufferedInputStream(fis);
+             BufferedInputStream bis = new BufferedInputStream(fis)){
             int i = bis.read(buffer);
             while (i != -1) {
                 os.write(buffer, 0, i);
@@ -82,100 +80,42 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 根据传入的地址，删除文件，如果是文件夹的话，则同时删除文件夹下全部文件
+     * @param fileStr
+     */
+    public static void deleteFile(String fileStr) {
+        deleteFile(new File(fileStr));
+    }
 
-//    public static void copyFile() {
-//        Path from = Paths.get(file.getAbsolutePath());
-//        Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + uuid);
-//        Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-//    }
+    /**
+     * 根据传入的地址，删除文件，如果是文件夹的话，则同时删除文件夹下全部文件
+     * @param filePath
+     */
+    public static void deleteFile(Path filePath) {
+        File file = filePath.toFile();
+        deleteFile(file);
+    }
 
+    /**
+     * 根据传入的地址，删除文件，如果是文件夹的话，则同时删除文件夹下全部文件
+     * @param file
+     */
+    public static void deleteFile(File file) {
+        if (!file.exists()) {
+            logger.error("删除文件失败：文件不存在！");
+            return;
+        }
+        try {
+            //先删除文件夹下所有东西
+            String[] children = file.list();
+            for (String str: children) {
+                Files.delete(Paths.get(file.getAbsolutePath() + File.separator + str));
+            }
+            Files.delete(Paths.get(file.getAbsolutePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-//    public void saveFile(String tempPath, String parentUuid, String uuid, String name, int total) {
-//        // File:文件分片路径/uuid，用来暂存合并后的总文件
-//        File file = new File(tempPath.toString() + File.separator + uuid + File.separator + uuid);
-//        if (!file.getParentFile().exists()) {
-//            //如果temp文件夹不存在 则抛出异常或return
-//            return;
-//        }
-//        try {
-//            //将文件合并
-//            FileOutputStream fos = new FileOutputStream(file);
-//            FileChannel outFileChannel = fos.getChannel();
-//
-//            List<File> files = new ArrayList<>();
-//            for (int i = 1; i <= total; i++) {
-//                files.add(new File(tempPath.toString() + File.separator + uuid + File.separator + i));
-//            }
-//            for (File file1: files) {
-//                FileInputStream fis = new FileInputStream(file1);
-//                FileChannel inFileChannel = fis.getChannel();
-//                inFileChannel.transferTo(0, file1.length(), outFileChannel);
-//                inFileChannel.close();
-//            }
-//            outFileChannel.close();
-//
-//            File dirFile = new File(getFileParentPath(uuid).toString());
-//            if (!dirFile.exists()) {
-//                dirFile.mkdir();
-//            }
-//
-//            Path from = Paths.get(file.getAbsolutePath());
-//            Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + uuid);
-//            Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
-//
-//            //获得文件的大小
-//            Long size = getFilePath(uuid).toFile().length();
-//
-//            String newName = name;
-//            Map<String, Object> map = new HashMap<>();
-//            map.put(PARENT_UUID, parentUuid);
-//            map.put(NAME, name);
-//            List<Index> list = indexDao.selectIndex(map);
-//            if (list.size() > 0) {
-//                newName = judgeName(name, parentUuid);
-//            }
-//
-//            Timestamp time = time();
-//            String suffix = getSuffix(newName);
-//            Type type = getType(newName);
-//            Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
-//            //先文件的合并,与校验
-//
-//            //在文件树表中添加记录
-//            indexDao.insertIndex(index);
-//            //生成缩略图
-//            generateThumbnail(uuid, type);
-//            if (checkMap.containsKey(uuid)) {
-//                checkMap.remove(uuid);
-//            }
-//
-//
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            //TODO 回头新建一个FileSaveException 此方法出错就抛这个异常  由controller 来处理异常
-//            //删除temp里面的文件
-//
-//            //先删除文件夹下所有东西
-//            String[] children = file.getParentFile().list();
-//            for (String str : children) {
-//                try {
-//                    Files.delete(Paths.get(file.getParentFile().getAbsolutePath() + File.separator + str));
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//            //再删除文件夹本身
-//            try {
-//                Files.delete(Paths.get(file.getParentFile().getAbsolutePath()));
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//    }
 }

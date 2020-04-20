@@ -52,85 +52,6 @@ public class ApiController {
         subject.logout();
     }
 
-//    /**
-//     *  获取一共有多少条数据
-//     *  如果parent_Uuid不为空，则查询parentUuid文件夹下的type类型文件
-//     *  如果parentUuid为空，获取root目录下文件总条数
-//     * @param parentUuid
-//     * @return
-//     */
-//    @RequestMapping("/total")
-//    public Integer total(@RequestParam(value = "parent_uuid",required = false)String parentUuid) {
-//        if(parentUuid==null){
-//            parentUuid=ROOT;
-//        }
-//        return indexService.getTotal(parentUuid);
-//    }
-
-//    /**
-//     *  获取一共有多少条type类型的数据
-//     * @param type
-//     * @return
-//     */
-//    @RequestMapping("/total_with_type")
-//    public Integer totalWithType(@RequestParam(value="type")String type){
-//
-//        return indexService.getTotalWithType(type);
-//    }
-
-
-
-//    /**
-//     * 访问文件列表
-//     * @param parentUuid 访问的文件夹的uuid，如果为空，则是访问根目录
-//     * @param limit 每页的个数,不填则是默认值
-//     * @param pg 第几页
-//     * @return
-//     */
-//    @RequestMapping("/visit")
-//    public Map<String, Object> visit(@RequestParam(value = "parent_uuid",required = false)String parentUuid,
-//                             @RequestParam(value = "limit",required = false)Integer limit,
-//                             @RequestParam(value = "pg",required = false)Integer pg){//带参数uuid就访问那个文件夹 不带的话就主页
-//        Map<String, Object> map = new HashMap<>();
-//
-//
-//        if(null == parentUuid){
-//            parentUuid = ROOT;
-//            Page page = indexService.getPage(pg, limit, parentUuid);
-//            List<Index> list = indexService.getIndexList(page, parentUuid);
-//            map.put("page", page);
-//            map.put("data", list);
-//            return map;
-//        }
-//        Page page = indexService.getPage(pg, limit, parentUuid);
-//        List<Index> list = indexService.getIndexList(page, parentUuid);
-//        map.put("page", page);
-//        map.put("data", list);
-//        return map;
-//    }
-
-
-//    /**
-//     * 访问文件列表
-//     * @param type 想要访问的文件类型，不填则是全部类型
-//     * @param limit 每页的个数,不填则是默认值
-//     * @param pg 第几页
-//     * @return
-//     */
-//    @RequestMapping("/visit_with_type")
-//    public Map<String, Object> visitWithType(@RequestParam(value = "type")String type,
-//                                     @RequestParam(value = "limit",required = false)Integer limit,
-//                                     @RequestParam(value = "pg",required = false)Integer pg){
-//        Map<String, Object> map = new HashMap<>();
-//        Type type1 = Type.getType(type);
-//        Page page = indexService.getPageWithType(pg, limit, type1);
-//        List<Index> list = indexService.getIndexList(page, type1);
-//        map.put("page", page);
-//        map.put("data", list);
-//
-//        return map;
-//
-//    }
 
     /**
      * 创建文件夹
@@ -167,18 +88,6 @@ public class ApiController {
     @RequestMapping(value = "/is_upload")
     public Map<String,Object> isUpload(@RequestParam(value = "parentUuid",required = false)String parentUuid,
                                        @RequestParam(value = "name")String name){
-//        if(parentUuid==null){
-//            parentUuid=ROOT;
-//        }
-//        if(indexService.md5Exist(md5)){
-//            logger.debug("该文件已经存在，进入秒传分支");
-//            indexService.saveByMd5(md5,parentUuid,name);
-//            logger.debug("保存一个md5[{}],parentUuid[{}],name[{}]的文件",md5,parentUuid,name);
-//            Map<String,Object> map=new HashMap<>();
-//            map.put("flag",MD5_EXIST);
-//            logger.debug("将信息返回到客户端[{}]",map);
-//            return map;
-//        }
         Map<String,Object> map=new HashMap<>();
         map.put("flag",MD5_NOT_EXIST);
         return map;
@@ -331,7 +240,7 @@ public class ApiController {
 
         String rangeStr=request.getHeader("range");
         if(rangeStr!=null){
-            Range range=indexService.getRange(rangeStr,index.getSize());
+            Range range = Range.getRange(rangeStr,index.getSize());
             String total=String.valueOf(range.getTotal());
             String length=String.valueOf(range.getLength());
             String start=String.valueOf(range.getStart());

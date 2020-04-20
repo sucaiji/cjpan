@@ -22,11 +22,10 @@ public class UserRealm implements Realm {
     @Override
     public AuthenticationInfo getAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String account = (String) authenticationToken.getPrincipal();
-        String password=new String((char[])authenticationToken.getCredentials());
+        String password = new String((char[])authenticationToken.getCredentials());
         if(!userService.login(account,password)){
             throw new IncorrectCredentialsException();
         }
-
         return new SimpleAuthenticationInfo(account,password,getName());
     }
 }

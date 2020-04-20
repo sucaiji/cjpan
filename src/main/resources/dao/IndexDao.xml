@@ -26,6 +26,15 @@
         size
     </sql>
 
+    <select id="get" resultMap="index">
+        SELECT
+        <include refid="BaseSql"/>
+        FROM
+        indexs
+        WHERE uuid = #{uuid}
+
+    </select>
+
     <insert id="insertIndex" parameterType="com.sucaiji.cjpan.model.Index">
         INSERT INTO indexs
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -89,6 +98,8 @@
         WHERE name LIKE concat('%',#{name,jdbcType=VARCHAR},'%')
     </select>
 
+
+
     <select id="selectIndex" resultMap="index">
         SELECT
             <include refid="BaseSql"/>
@@ -149,7 +160,7 @@
         WHERE uuid = #{uuid}
     </update>
 
-    <delete id="deleteIndex">
+    <delete id="deleteByUuid">
         DELETE FROM indexs WHERE uuid = #{uuid}
     </delete>
 
