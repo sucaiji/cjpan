@@ -1,6 +1,6 @@
 package com.sucaiji.cjpan.model.vo;
 
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ public class PageVo {
     private Long total;
     private Integer pages;
 
-    private List<Index> indexList;
+    private List<IndexModel> indexList;
 
     public PageVo(Integer page, Integer size) {
         this.page = page;

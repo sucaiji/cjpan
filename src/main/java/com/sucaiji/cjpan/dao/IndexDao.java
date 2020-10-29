@@ -1,21 +1,20 @@
 package com.sucaiji.cjpan.dao;
 
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Mapper
 public interface IndexDao {
 
-    Index get(String uuid);
+    IndexModel get(String uuid);
 
-    void insertIndex(Index index);
+    void insertIndex(IndexModel index);
 
-    List<Index> selectIndex(Index index);
+    List<IndexModel> selectIndex(IndexModel index);
 
-    List<Index> fuzzySelectIndex(String name);
+    List<IndexModel> fuzzySelectIndex(String name);
 
     /**
      *
@@ -23,5 +22,5 @@ public interface IndexDao {
      */
     void deleteByUuid(String uuid);
 
-    void updateIndex(Index index);
+    void updateIndex(IndexModel index);
 }

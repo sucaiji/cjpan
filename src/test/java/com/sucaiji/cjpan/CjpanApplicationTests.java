@@ -3,7 +3,7 @@ package com.sucaiji.cjpan;
 
 import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.dao.IndexDao;
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 
 import com.sucaiji.cjpan.service.IndexService;
 
@@ -68,9 +68,9 @@ public class CjpanApplicationTests {
 			assert "fb363f5e81efddce810df89cdb6ea19d".equalsIgnoreCase(realMd5);
 
 			//查询文件是否正确保存到数据库
-			Index queryIndex = new Index();
+			IndexModel queryIndex = new IndexModel();
 			queryIndex.setUuid(md5);
-			List<Index> indexs = indexDao.selectIndex(queryIndex);
+			List<IndexModel> indexs = indexDao.selectIndex(queryIndex);
 			assert indexs.get(0).getSize().equals(20L);
 			assert indexs.get(0).getUuid().equals(md5);
 			assert indexs.get(0).getName().equals("名杂");

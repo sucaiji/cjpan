@@ -5,18 +5,12 @@ import com.github.pagehelper.PageHelper;
 import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.config.TypeEnum;
 import com.sucaiji.cjpan.dao.IndexDao;
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 
 import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.util.FileUtil;
 import com.sucaiji.cjpan.util.Utils;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Positions;
-import org.jcodec.api.FrameGrab;
-import org.jcodec.api.JCodecException;
-import org.jcodec.common.model.Picture;
-import org.jcodec.scale.AWTUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -37,8 +29,6 @@ import java.util.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.sucaiji.cjpan.config.Property.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -63,7 +53,7 @@ public class IndexService {
      * @param queryIndex
      * @return
      */
-    public PageVo getPageVo(Integer pg, Integer limit, Index queryIndex) {
+    public PageVo getPageVo(Integer pg, Integer limit, IndexModel queryIndex) {
         if (null == limit || limit.equals(0)) {
             limit = DEFAULT_PAGE_SIZE;
         }
@@ -112,8 +102,8 @@ public class IndexService {
      * @param uuid
      * @return
      */
-    public Index getIndexByUuid(String uuid) {
-        Index indexModel = indexDao.get(uuid);
+    public IndexModel getIndexByUuid(String uuid) {
+        IndexModel indexModel = indexDao.get(uuid);
         return indexModel;
     }
 
@@ -121,7 +111,7 @@ public class IndexService {
      * 更新update数据，根据uuid更新，uuid不能为空
      * @param updateIndex
      */
-    public void updateIndex(Index updateIndex) {
+    public void updateIndex(IndexModel updateIndex) {
         indexDao.updateIndex(updateIndex);
     }
 
@@ -143,7 +133,7 @@ public class IndexService {
      * @param index
      * @param os
      */
-    public void writeInOutputStream(Index index, OutputStream os) throws IOException {
+    public void writeInOutputStream(IndexModel index, OutputStream os) throws IOException {
         String uuid = index.getUuid();
         File file = getFileByUuid(uuid);
         FileUtil.writeInOutputStream(file, os);
@@ -156,7 +146,7 @@ public class IndexService {
      * @param range
      * @throws IOException
      */
-    public void writeInOutputStream(Index index, OutputStream os, Range range) throws IOException {
+    public void writeInOutputStream(IndexModel index, OutputStream os, Range range) throws IOException {
         String uuid = index.getUuid();
         File file = getFileByUuid(uuid);
         FileUtil.writeInOutputStream(file, os, range);
@@ -172,15 +162,15 @@ public class IndexService {
         String uuid = Utils.UUID();
         Timestamp time = Utils.time();
 
-        Index queryIndex = new Index();
+        IndexModel queryIndex = new IndexModel();
         queryIndex.setName(name);
         queryIndex.setParentUuid(parentUuid);
 
-        List<Index> list = indexDao.selectIndex(queryIndex);
+        List<IndexModel> list = indexDao.selectIndex(queryIndex);
         if (list.size() > 0) {
             return false;
         }
-        Index index = new Index(uuid, parentUuid, name, true, time);
+        IndexModel index = new IndexModel(uuid, parentUuid, name, true, time);
         indexDao.insertIndex(index);
         return true;
     }
@@ -223,10 +213,10 @@ public class IndexService {
 
             //验证文件是否与文件夹下现有文件重名，如果重名则修改文件名
             String newName = name;
-            Index queryIndex = new Index();
+            IndexModel queryIndex = new IndexModel();
             queryIndex.setParentUuid(parentUuid);
             queryIndex.setName(name);
-            List<Index> list = indexDao.selectIndex(queryIndex);
+            List<IndexModel> list = indexDao.selectIndex(queryIndex);
             if (list.size() > 0) {
                 newName = judgeName(name, parentUuid);
             }
@@ -237,7 +227,7 @@ public class IndexService {
             Timestamp time = Utils.time();
             String suffix = Utils.getSuffix(newName);
             TypeEnum type = TypeEnum.getTypeByFileName(newName);
-            Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
+            IndexModel index = new IndexModel(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
             indexDao.insertIndex(index);
 
             //生成缩略图
@@ -318,16 +308,16 @@ public class IndexService {
      * @param uuid
      */
     public void deleteByUuid(String uuid) {
-        Index index = indexDao.get(uuid);
+        IndexModel index = indexDao.get(uuid);
         if (index == null) {
             return;
         }
         //如果index是一个文件夹的话，递归删除文件夹下所有文件
         if (index.getWasDir()) {
-            Index queryIndex = new Index();
+            IndexModel queryIndex = new IndexModel();
             queryIndex.setParentUuid(index.getUuid());
-            List<Index> childUuidList = indexDao.selectIndex(queryIndex);
-            for (Index item : childUuidList) {
+            List<IndexModel> childUuidList = indexDao.selectIndex(queryIndex);
+            for (IndexModel item : childUuidList) {
                 deleteByUuid(item.getUuid());
             }
             indexDao.deleteByUuid(uuid);
@@ -349,10 +339,10 @@ public class IndexService {
     private String judgeName(String name, String parentUuid) {
         String newName = name;
         while (true) {
-            Index index = new Index();
+            IndexModel index = new IndexModel();
             index.setParentUuid(parentUuid);
             index.setName(newName);
-            List<Index> list = indexDao.selectIndex(index);
+            List<IndexModel> list = indexDao.selectIndex(index);
             if (list.size() > 0) {
                 newName = addCopy(newName);
             } else {

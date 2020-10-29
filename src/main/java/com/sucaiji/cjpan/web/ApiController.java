@@ -1,8 +1,7 @@
 package com.sucaiji.cjpan.web;
 
 
-import com.sucaiji.cjpan.config.TypeEnum;
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
@@ -138,7 +137,7 @@ public class ApiController {
     @RequestMapping("/rename")
     public String rename(@RequestParam("uuid")String uuid,
                          @RequestParam("name")String name) {
-        Index updateIndex = new Index();
+        IndexModel updateIndex = new IndexModel();
         updateIndex.setUuid(uuid);
         updateIndex.setName(name);
         indexService.updateIndex(updateIndex);
@@ -171,7 +170,7 @@ public class ApiController {
     @RequestMapping("/image")
     public void image(@RequestParam("uuid")String uuid,
                       HttpServletRequest request,HttpServletResponse response){
-        Index index=indexService.getIndexByUuid(uuid);
+        IndexModel index=indexService.getIndexByUuid(uuid);
         response.setContentType("image/jpeg");
         try {
             OutputStream os=response.getOutputStream();
@@ -226,7 +225,7 @@ public class ApiController {
     @RequestMapping("/video")
     public void video(@RequestParam("uuid")String uuid,
                       HttpServletRequest request,HttpServletResponse response){
-        Index index=indexService.getIndexByUuid(uuid);
+        IndexModel index=indexService.getIndexByUuid(uuid);
         response.setContentType("video/mp4");//+index.getSuffix());
 
 
@@ -289,7 +288,7 @@ public class ApiController {
         if(uuid==null){
             return;
         }
-        Index index=indexService.getIndexByUuid(uuid);
+        IndexModel index=indexService.getIndexByUuid(uuid);
         String fileName=index.getName();
         Long fileLength=index.getSize();
         response.setContentType("application/force-download");

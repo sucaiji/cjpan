@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sucaiji.cjpan.dao.IndexDao">
 
-    <resultMap id="index" type="com.sucaiji.cjpan.model.Index" >
+    <resultMap id="index" type="com.sucaiji.cjpan.model.IndexModel" >
         <result column="uuid" property="uuid"/>
         <result column="parent_uuid" property="parentUuid"/>
         <result column="name" property="name"/>
@@ -35,7 +35,7 @@
 
     </select>
 
-    <insert id="insertIndex" parameterType="com.sucaiji.cjpan.model.Index">
+    <insert id="insertIndex" parameterType="com.sucaiji.cjpan.model.IndexModel">
         INSERT INTO indexs
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="uuid != null">
@@ -132,7 +132,7 @@
         </if>
     </select>
 
-    <update id="updateIndex" parameterType="com.sucaiji.cjpan.model.Index">
+    <update id="updateIndex" parameterType="com.sucaiji.cjpan.model.IndexModel">
         UPDATE indexs
         <set>
             <if test="parentUuid != null">

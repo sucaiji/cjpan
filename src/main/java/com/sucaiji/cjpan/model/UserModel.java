@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserModel {
     private Integer id;
     private String account;
     private String password;
@@ -15,7 +15,7 @@ public class User {
     private String role;
 
 
-    public User(String account, String password, String name, String role) {
+    public UserModel(String account, String password, String name, String role) {
         this.account = account;
         this.password = password;
         this.name = name;

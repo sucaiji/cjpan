@@ -2,19 +2,13 @@ package com.sucaiji.cjpan.util;
 
 import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.model.Range;
-import com.sucaiji.cjpan.service.IndexService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FileUtil {
     private final static Logger logger = LoggerFactory.getLogger(FileUtil.class);

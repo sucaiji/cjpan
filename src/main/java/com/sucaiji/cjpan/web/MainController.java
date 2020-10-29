@@ -1,8 +1,7 @@
 package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.config.Property;
-import com.sucaiji.cjpan.config.TypeEnum;
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
@@ -44,10 +43,10 @@ public class MainController {
                         @RequestParam(value = "pg", required = false, defaultValue = "1") Integer pageNumber,
                         @RequestParam(value = "limit", required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                         Model model) {
-        Index queryIndex = new Index();
+        IndexModel queryIndex = new IndexModel();
         queryIndex.setParentUuid(parentUuid);
         PageVo vo = indexService.getPageVo(pageNumber, limit, queryIndex);
-        Index index = indexService.getIndexByUuid(parentUuid);
+        IndexModel index = indexService.getIndexByUuid(parentUuid);
         model.addAttribute("vo", vo);
         model.addAttribute("parentIndex", index);
         return "index";
@@ -70,7 +69,7 @@ public class MainController {
                        @RequestParam(value = "limit" , required = false, defaultValue = Property.DEFAULT_PAGE_SIZE_STR) Integer limit,
                        Model model) {
 //        Type type = Type.getType(str);
-        Index index = new Index();
+        IndexModel index = new IndexModel();
         index.setType(type);
         PageVo vo = indexService.getPageVo(pageNumber, limit, index);
         model.addAttribute("vo",vo);
@@ -80,7 +79,7 @@ public class MainController {
     @RequestMapping("/video/{uuid}")
     public String video(@PathVariable("uuid") String uuid,
                         Model model) {
-        Index index = indexService.getIndexByUuid(uuid);
+        IndexModel index = indexService.getIndexByUuid(uuid);
         model.addAttribute("index", index);
         return "video";
     }

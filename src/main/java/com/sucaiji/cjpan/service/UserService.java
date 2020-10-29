@@ -2,7 +2,7 @@ package com.sucaiji.cjpan.service;
 
 
 import com.sucaiji.cjpan.dao.UserDao;
-import com.sucaiji.cjpan.model.User;
+import com.sucaiji.cjpan.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class UserService {
     public boolean login(String account, String password) {
         Map<String, Object> user = new HashMap<>();
         user.put("account", account);
-        List<User> list = userDao.select(user);
+        List<UserModel> list = userDao.select(user);
         if (list.size() == 0) {
             return false;
         }
@@ -46,7 +46,7 @@ public class UserService {
      * @param name
      */
     public void regist(String account, String password, String name, String role) {
-        User user = new User(account, password, name, role);
+        UserModel user = new UserModel(account, password, name, role);
         userDao.insert(user);
     }
 
@@ -58,7 +58,7 @@ public class UserService {
      * @return 旧密码无误且新密码符合格式时返回true，反之返回false
      */
     public boolean changePassword(String account, String oldPassword, String newPassword) {
-        User user = userDao.selectByAccount(account);
+        UserModel user = userDao.selectByAccount(account);
         if (oldPassword.equals(user.getPassword())) {
             userDao.updatePassword(account, newPassword);
             return true;
@@ -72,7 +72,7 @@ public class UserService {
      * @return 为空返回true
      */
     public boolean isEmpty() {
-        List<User> list=userDao.select(new HashMap<>());
+        List<UserModel> list=userDao.select(new HashMap<>());
         if (list==null){
             return true;
         }

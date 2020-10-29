@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Index {
+public class IndexModel {
     private String uuid;
     private String parentUuid;
     private String name;
@@ -20,7 +20,7 @@ public class Index {
     private Timestamp lastUpdate;
     private Long size;
 
-    public Index(String uuid, String parentUuid, String name, boolean wasDir, Timestamp lastUpdate) {
+    public IndexModel(String uuid, String parentUuid, String name, boolean wasDir, Timestamp lastUpdate) {
         this.uuid = uuid;
         this.parentUuid = parentUuid;
         this.name = name;

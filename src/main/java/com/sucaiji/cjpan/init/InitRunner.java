@@ -4,7 +4,7 @@ import com.sucaiji.cjpan.config.ExternalProperties;
 import com.sucaiji.cjpan.config.TypeEnum;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.InitDao;
-import com.sucaiji.cjpan.model.Index;
+import com.sucaiji.cjpan.model.IndexModel;
 import com.sucaiji.cjpan.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -32,7 +32,6 @@ public class InitRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments applicationArguments) throws Exception {
 
-        String initPath = System.getProperty("user.dir");
         File file=new File(APP_DIR);
         if(!file.exists()){
             file.mkdir();
@@ -63,8 +62,8 @@ public class InitRunner implements ApplicationRunner {
      * 初始化视频和图片的缩略图
      */
     private void initThumbnail() {
-        List<Index> indexList = indexDao.selectIndex(new Index());
-        for (Index index: indexList) {
+        List<IndexModel> indexList = indexDao.selectIndex(new IndexModel());
+        for (IndexModel index: indexList) {
             if (index.getType() != null && !index.getType().equals("")) {
                 TypeEnum.getType(index.getType()).generateThumbnail(index.getUuid());
             }
