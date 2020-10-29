@@ -1,7 +1,7 @@
 package com.sucaiji.cjpan.web;
 
 
-import com.sucaiji.cjpan.config.Type;
+import com.sucaiji.cjpan.config.TypeEnum;
 import com.sucaiji.cjpan.model.Index;
 import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.service.IndexService;

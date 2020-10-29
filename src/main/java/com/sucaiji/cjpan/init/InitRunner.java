@@ -1,7 +1,7 @@
 package com.sucaiji.cjpan.init;
 
 import com.sucaiji.cjpan.config.ExternalProperties;
-import com.sucaiji.cjpan.config.Type;
+import com.sucaiji.cjpan.config.TypeEnum;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.dao.InitDao;
 import com.sucaiji.cjpan.model.Index;
@@ -66,7 +66,7 @@ public class InitRunner implements ApplicationRunner {
         List<Index> indexList = indexDao.selectIndex(new Index());
         for (Index index: indexList) {
             if (index.getType() != null && !index.getType().equals("")) {
-                indexService.generateThumbnail(index.getUuid(), Type.getType(index.getType()));
+                TypeEnum.getType(index.getType()).generateThumbnail(index.getUuid());
             }
         }
     }

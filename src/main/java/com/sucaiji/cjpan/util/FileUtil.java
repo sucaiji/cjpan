@@ -1,5 +1,6 @@
 package com.sucaiji.cjpan.util;
 
+import com.sucaiji.cjpan.config.Property;
 import com.sucaiji.cjpan.model.Range;
 import com.sucaiji.cjpan.service.IndexService;
 import org.slf4j.Logger;
@@ -78,6 +79,42 @@ public class FileUtil {
         } finally {
             randomAccessFile.close();
         }
+    }
+
+    /**
+     * 通过uuid返回该文件的父路径的路径 文件的父路径是以该文件uuid值的前4位作为文件夹路径存放的
+     *
+     * @param uuid
+     * @return
+     */
+    public static Path getFileParentPath(String uuid) {
+        Path path = Paths.get(Property.DATA_DIR + File.separator + uuid.substring(0, 4));
+        return path;
+    }
+
+    /**
+     * 通过uuid返回该文件的路径
+     *
+     * @param uuid
+     * @return
+     */
+    public static Path getFilePath(String uuid) {
+        Path path = Paths.get(getFileParentPath(uuid).toString() + File.separator + uuid);
+        return path;
+    }
+
+    /**
+     * 通过uuid返回该文件的缩略图的路径
+     *
+     * @param uuid
+     * @return
+     */
+    public static Path getFileThumbnailPath(String uuid) {
+        StringBuilder stringBuilder = new StringBuilder(Property.THUMBNAIL_DIR)
+                .append(File.separator).append(uuid, 0, 4)
+                .append(File.separator).append(uuid).append(".jpg");
+        Path path = Paths.get(stringBuilder.toString());
+        return path;
     }
 
     /**

@@ -3,7 +3,7 @@ package com.sucaiji.cjpan.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sucaiji.cjpan.config.Property;
-import com.sucaiji.cjpan.config.Type;
+import com.sucaiji.cjpan.config.TypeEnum;
 import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.model.Index;
 
@@ -132,7 +132,7 @@ public class IndexService {
      * @throws IOException
      */
     public void writeThumbnailInOutputStream(String uuid, OutputStream os) throws IOException {
-        File file = getFileThumbnailPath(uuid).toFile();
+        File file = FileUtil.getFileThumbnailPath(uuid).toFile();
         FileUtil.writeInOutputStream(file, os);
     }
 
@@ -211,7 +211,7 @@ public class IndexService {
             outFileChannel.close();
             fos.close();
 
-            File dirFile = new File(getFileParentPath(uuid).toString());
+            File dirFile = new File(FileUtil.getFileParentPath(uuid).toString());
             if (!dirFile.exists()) {
                 dirFile.mkdir();
             }
@@ -232,16 +232,16 @@ public class IndexService {
             }
 
             //获得文件的大小
-            Long size = getFilePath(uuid).toFile().length();
+            Long size = FileUtil.getFilePath(uuid).toFile().length();
             //文件记录入库
             Timestamp time = Utils.time();
             String suffix = Utils.getSuffix(newName);
-            Type type = Type.getTypeByFileName(newName);
+            TypeEnum type = TypeEnum.getTypeByFileName(newName);
             Index index = new Index(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
             indexDao.insertIndex(index);
 
             //生成缩略图
-            generateThumbnail(uuid, type);
+            type.generateThumbnail(uuid);
             if (checkMap.containsKey(uuid)) {
                 checkMap.remove(uuid);
             }
@@ -305,7 +305,7 @@ public class IndexService {
      * @return
      */
     public File getFileByUuid(String uuid) {
-        File file = new File(getFilePath(uuid).toString());
+        File file = new File(FileUtil.getFilePath(uuid).toString());
         if (!file.exists()) {
             return null;
         }
@@ -333,121 +333,10 @@ public class IndexService {
             indexDao.deleteByUuid(uuid);
         } else {
             indexDao.deleteByUuid(uuid);
-            Path filePath = getFileParentPath(uuid);
+            Path filePath = FileUtil.getFileParentPath(uuid);
             FileUtil.deleteFile(filePath);
             logger.info("删除[{}]文件成功", filePath.toString());
             return;
-        }
-    }
-
-    /**
-     * 生成缩略图
-     * @param md5
-     * @param type
-     */
-    public void generateThumbnail(String md5, Type type) {
-        switch (type) {
-            case VIDEO:
-                generateMovieTumbnail(md5);
-                break;
-            case IMAGE:
-                generateImageThumbnail(md5);
-                break;
-            default:
-                break;
-        }
-    }
-
-
-    /**
-     * 生成缩略图并存储
-     */
-    private void generateImageThumbnail(String md5) {
-        //创建路径
-
-        File thumbnailFile = getFileThumbnailPath(md5).toFile();
-        //如果缩略图存在 则跳过
-        if (thumbnailFile.exists()) {
-            return;
-        }
-
-        if (!thumbnailFile.exists()) {
-            thumbnailFile.getParentFile().mkdirs();
-        }
-        Thumbnails.Builder<BufferedImage> builder = null;
-        try {
-            BufferedImage image = ImageIO.read(getFilePath(md5).toFile());
-            int height = image.getHeight();
-            int width = image.getWidth();
-            if (height > width) {
-                image = Thumbnails.of(image)
-                        .width(256)
-                        .asBufferedImage();
-            } else {
-                image = Thumbnails.of(image)
-                        .height(256)
-                        .asBufferedImage();
-            }
-            builder = Thumbnails.of(image).sourceRegion(Positions.CENTER, 256, 256).size(256, 256);
-            builder.outputFormat("jpg").toFile(getFileThumbnailPath(md5).toFile());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 生成视频的缩略图
-     * @param md5
-     */
-    private void generateMovieTumbnail(String md5) {
-        int frameNumber = new Random().nextInt(80000);
-        File thumbnailFile = getFileThumbnailPath(md5).toFile();
-        //如果缩略图已经存在 则返回
-        if (thumbnailFile.exists()) {
-            return;
-        }
-        File tempFile = new File(Property.FRAME_TEMP_DIR + File.separator + md5);
-        if (!thumbnailFile.exists()) {
-            thumbnailFile.getParentFile().mkdirs();
-        }
-        if (!tempFile.exists()) {
-            tempFile.getParentFile().mkdirs();
-        }
-        try {
-            Picture picture = FrameGrab.getFrameFromFile(getFilePath(md5).toFile(), frameNumber);
-            //picture==null代表不支持此格式
-            if (picture == null) {
-                return;
-            }
-            BufferedImage bufferedImage = AWTUtil.toBufferedImage(picture);
-            ImageIO.write(bufferedImage, "jpg", tempFile);
-
-            Thumbnails.Builder<BufferedImage> builder = null;
-            BufferedImage image = ImageIO.read(tempFile);
-            int height = image.getHeight();
-            int width = image.getWidth();
-            if (height > width) {
-                image = Thumbnails.of(image)
-                        .width(256)
-                        .asBufferedImage();
-            } else {
-                image = Thumbnails.of(image)
-                        .height(256)
-                        .asBufferedImage();
-            }
-            builder = Thumbnails.of(image).sourceRegion(Positions.CENTER, 256, 256).size(256, 256);
-            builder.outputFormat("jpg").toFile(thumbnailFile);
-
-            Files.delete(tempFile.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JCodecException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -494,41 +383,7 @@ public class IndexService {
         return newName.toString();
     }
 
-    /**
-     * 通过uuid返回该文件的父路径的路径 文件的父路径是以该文件uuid值的前4位作为文件夹路径存放的
-     *
-     * @param uuid
-     * @return
-     */
-    private Path getFileParentPath(String uuid) {
-        Path path = Paths.get(Property.DATA_DIR + File.separator + uuid.substring(0, 4));
-        return path;
-    }
 
-    /**
-     * 通过uuid返回该文件的路径
-     *
-     * @param uuid
-     * @return
-     */
-    private Path getFilePath(String uuid) {
-        Path path = Paths.get(getFileParentPath(uuid).toString() + File.separator + uuid);
-        return path;
-    }
-
-    /**
-     * 通过uuid返回该文件的缩略图的路径
-     *
-     * @param uuid
-     * @return
-     */
-    private Path getFileThumbnailPath(String uuid) {
-        StringBuilder stringBuilder = new StringBuilder(Property.THUMBNAIL_DIR)
-                .append(File.separator).append(uuid, 0, 4)
-                .append(File.separator).append(uuid).append(".jpg");
-        Path path = Paths.get(stringBuilder.toString());
-        return path;
-    }
 
 
 
