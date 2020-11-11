@@ -99,38 +99,18 @@ public class ApiController {
                       @RequestParam("uuid") String uuid,
                       @RequestParam("name") String name,//文件名称
                       @RequestParam(value = "parentUuid",required = false) String parentUuid,//父uuid，不带此参数的话代表
-                      @RequestParam(value = "index") Integer index,//文件第几片
+//                      @RequestParam(value = "index") Integer index,//文件第几片
                       @RequestParam(value = "total") Integer total,//总片数
                       @RequestParam(value = "finish",required = false) Boolean finish //是否完成
                         ){
         if(parentUuid == null){
             parentUuid = ROOT;
         }
-        indexService.saveTemp(multipartFile, uuid, index);
+        indexService.saveTemp(multipartFile, uuid);
         //判断传过来的包finish参数是不是true 如果是的话代表是最后一个包，这时开始执行合并校验操作
         if(finish){
             indexService.saveFile(parentUuid, uuid, name, total);
         }
-    }
-
-    @RequestMapping(value = "/checkUpload")
-    public Map<String,Object> checkSuccess(@RequestParam("uuid") String uuid) {
-        boolean success = indexService.checkUpload(uuid);
-
-        Map<String,Object> map=new HashMap<>();
-        map.put("success", success);
-        return map;
-
-    }
-
-    //获取全部正在校验md5的list 暂时是测试用
-    @RequestMapping(value = "/getUploadList")
-    public List<String> uploadQueue() {
-        List<String> list = new ArrayList<>();
-        for (Map.Entry<String, Object> entry: indexService.getCheckMap().entrySet()) {
-            list.add(entry.getKey());
-        }
-        return list;
     }
 
 

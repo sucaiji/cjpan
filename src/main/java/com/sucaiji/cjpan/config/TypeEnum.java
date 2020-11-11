@@ -117,7 +117,7 @@ class VideoGeneratePolicy implements ThumbnailGeneratePolicy {
 
     @Override
     public void generate(String uuid) {
-        int frameNumber = new Random().nextInt(80000);
+        int frameNumber = new Random().nextInt(1000);
         File thumbnailFile = FileUtil.getFileThumbnailPath(uuid).toFile();
         //如果缩略图已经存在 则返回
         if (thumbnailFile.exists()) {

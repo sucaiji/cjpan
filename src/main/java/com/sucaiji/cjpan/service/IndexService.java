@@ -1,5 +1,6 @@
 package com.sucaiji.cjpan.service;
 
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sucaiji.cjpan.config.Property;
@@ -42,9 +43,6 @@ public class IndexService {
 
     @Autowired
     private IndexDao indexDao;
-
-    private Map<String, Object> checkMap = new HashMap<>();
-    private ExecutorService checkPool = Executors.newCachedThreadPool();
 
     /**
      * 获取文件列表vo
@@ -175,6 +173,66 @@ public class IndexService {
         return true;
     }
 
+    /**
+     * 将接收到的分片包保存在临时文件夹
+     *
+     * @param multipartFile
+     * @param fileUuid
+     */
+    public void saveTemp(MultipartFile multipartFile, String fileUuid) {
+        try {
+            File tempDir = new File(Property.TEMP_DIR + File.separator + fileUuid);
+            if (!tempDir.exists()) {
+                tempDir.mkdir();
+            }
+            File file = new File(tempDir.getAbsolutePath() + File.separator + fileUuid);
+
+            if (multipartFile.getInputStream() instanceof FileInputStream) {
+                FileChannel fileInChannel = ((FileInputStream) multipartFile.getInputStream()).getChannel();
+                // 追加模式
+                FileChannel fileOutChannel = new FileOutputStream(file, true).getChannel();
+                fileInChannel.transferTo(0, multipartFile.getSize(), fileOutChannel);
+                fileOutChannel.close();
+                fileInChannel.close();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 移动临时文件到数据文件夹中
+     * @param fileUuid
+     */
+    public void moveTempFile(String fileUuid) throws IOException {
+        logger.debug("移动文件至data文件夹中 fileUuid:[{}]", fileUuid);
+        // 判断临时文件夹是否存在
+        File tempDataDir = new File(Property.TEMP_DIR + File.separator + fileUuid);
+        if (!tempDataDir.exists()) {
+            tempDataDir.mkdir();
+        }
+        // 判断上传完毕的文件是否存在
+        File oldDataFile = new File(tempDataDir.getAbsolutePath() + File.separator + fileUuid);
+        if (!oldDataFile.exists()) {
+            logger.error("文件不存在 path:[{}] fileUuid:[{}]", tempDataDir.getAbsolutePath(), fileUuid);
+            return;
+        }
+
+        // 判断数据文件夹是否已经存在
+        File dataDir = FileUtil.getFileParentPath(fileUuid).toFile();
+        if (!dataDir.exists()) {
+            dataDir.mkdir();
+        }
+
+        Path oldDataPath = oldDataFile.toPath();
+        Path newDataPath = Paths.get(dataDir.getAbsolutePath() + File.separator + fileUuid);
+
+        Files.move(oldDataPath, newDataPath, REPLACE_EXISTING, ATOMIC_MOVE);
+
+        logger.debug("文件移动成功 fileUuid:[{}] newPath:[{}]", fileUuid, newDataPath.toString());
+    }
+
 
     //TODO 加上事务  回头测试是否实现了事务特性 (事务是否有用 毕竟文件删除可能会失败)
     @Transactional
@@ -185,31 +243,10 @@ public class IndexService {
             //如果temp文件夹不存在 则抛出异常或return
             return;
         }
-        try (FileOutputStream fos = new FileOutputStream(file);
-             FileChannel outFileChannel = fos.getChannel()) {
-            //将文件合并
-            List<File> files = new ArrayList<>();
-            for (int i = 1; i <= total; i++) {
-                files.add(new File(Property.TEMP_DIR + File.separator + uuid + File.separator + i));
-            }
-            for (File file1: files) {
-                FileInputStream fis = new FileInputStream(file1);
-                FileChannel inFileChannel = fis.getChannel();
-                inFileChannel.transferTo(0, file1.length(), outFileChannel);
-                inFileChannel.close();
-            }
-            outFileChannel.close();
-            fos.close();
+        try {
 
-            File dirFile = new File(FileUtil.getFileParentPath(uuid).toString());
-            if (!dirFile.exists()) {
-                dirFile.mkdir();
-            }
-
-            //将文件挪到data文件夹中
-            Path from = Paths.get(file.getAbsolutePath());
-            Path to = Paths.get(dirFile.getAbsolutePath() + File.separator + uuid);
-            Files.move(from, to, REPLACE_EXISTING, ATOMIC_MOVE);
+            //移动文件至data文件夹中
+            moveTempFile(uuid);
 
             //验证文件是否与文件夹下现有文件重名，如果重名则修改文件名
             String newName = name;
@@ -223,18 +260,17 @@ public class IndexService {
 
             //获得文件的大小
             Long size = FileUtil.getFilePath(uuid).toFile().length();
+
             //文件记录入库
-            Timestamp time = Utils.time();
-            String suffix = Utils.getSuffix(newName);
-            TypeEnum type = TypeEnum.getTypeByFileName(newName);
+            Timestamp time = Utils.time(); //获取当前时间
+            String suffix = Utils.getSuffix(newName); //获取文件后缀名
+            TypeEnum type = TypeEnum.getTypeByFileName(newName); //获取文件类型
             IndexModel index = new IndexModel(uuid, parentUuid, newName, suffix, type.toString(), false, time, size);
             indexDao.insertIndex(index);
+            logger.debug("文件记录入库成功, indexModel:[{}]", JSON.toJSONString(index));
 
             //生成缩略图
             type.generateThumbnail(uuid);
-            if (checkMap.containsKey(uuid)) {
-                checkMap.remove(uuid);
-            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -247,45 +283,6 @@ public class IndexService {
 
     }
 
-
-
-    public Map<String, Object> getCheckMap() {
-        return checkMap;
-    }
-
-    /**
-     * 检查文件是否上传完毕
-     * @param uuid
-     * @return
-     */
-    public boolean checkUpload(String uuid) {
-        if (checkMap.containsKey(uuid)) {
-            return false;
-        }
-        return true;
-    }
-
-
-
-    /**
-     * 将接收到的分片包保存在临时文件夹
-     *
-     * @param multipartFile
-     * @param fileMd5
-     * @param index
-     */
-    public void saveTemp(MultipartFile multipartFile, String fileMd5, Integer index) {
-        try {
-            File tempDir = new File(Property.TEMP_DIR + File.separator + fileMd5);
-            if (!tempDir.exists()) {
-                tempDir.mkdir();
-            }
-            File file = new File(tempDir.getAbsolutePath() + File.separator + index);
-            multipartFile.transferTo(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     /**

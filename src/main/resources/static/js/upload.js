@@ -88,7 +88,6 @@ function uploadRecursion(file, uuid, index) {
     form.append("name", name);
     form.append("size", size);
     form.append("total", shardCount);  //总片数
-    form.append("index", index + 1);        //当前是第几片
 
     // $("#param").append("index==" + index + "<br/>");
     var percent = GetPercent(index + 1, shardCount);
@@ -121,7 +120,15 @@ function uploadRecursion(file, uuid, index) {
                     dataend = new Date();
                     $("#usetime").append(dataend.getTime() - databgein.getTime());
 
-                    checkSuccess(uuid);
+                    var dataObj = eval(data);
+                    var success = dataObj.success;
+                    if (success) {
+                        alert("上传成功！");
+                        //刷新页面
+                        location.reload(true);
+                    } else {
+                        alert("上传失败！");
+                    }
                 } else {
                     //递归调用                　
                     uploadRecursion(file, uuid, index);
@@ -141,42 +148,5 @@ function GetPercent(num, total) {
         return "-";
     }
     return total1 <= 0 ? "0" : (Math.round(num1 / total1 * 10000) / 100.00);
-}
-
-
-function checkSuccess(uuid) {
-    setInterval(function (uuid) {
-        var form = new FormData();
-        form.append("uuid", uuid);
-        $.ajax({
-            url: "api/checkUpload",
-            type: "POST",
-            data: form,
-            async: true,
-            processData: false,
-            contentType: false,
-            success: function (data) {
-                var dataObj = eval(data);
-                var success = dataObj.success;
-                // dataend = new Date();
-                // $("#usetime").append(dataend.getTime() - databgein.getTime());
-                if (success) {
-                    alert("上传成功！");
-                    //刷新页面
-                    location.reload(true);
-                } else {
-                    $("#upload-progress-text").text("正在校验md5值");
-                    // $("#param").append("正在检查md5<br/>");
-                    //递归调用
-                }
-            }, error: function (XMLHttpRequest, errorThrown) {
-                alert("checkMd5出错！");
-            }
-        });
-    }, 2000)
-
-
-
-
 }
 

@@ -55,11 +55,11 @@ public class CjpanApplicationTests {
 		try {
 
 			String md5 = UUID();
-			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5, 1);
-			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5, 2);
-			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5, 3);
-			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5, 4);
-			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5, 5);
+			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5);
+			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5);
+			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5);
+			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5);
+			indexService.saveTemp(new MockMultipartFile("testName", "qwer".getBytes()), md5);
 			indexService.saveFile(Property.ROOT, md5, "名杂", 5);
 
 
