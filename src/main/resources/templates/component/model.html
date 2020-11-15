@@ -1,6 +1,7 @@
 <div th:fragment="model" xmlns:th="http://www.thymeleaf.org" class="no-js">
     <!-- 树插件 -->
     <script src="/plugins/ztree/jquery.ztree.all.min.js"></script>
+    <link rel="stylesheet" href="/plugins/ztree/metroStyle/metroStyle.css" type="text/css">
 
     <!-- 上传窗口 -->
     <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="uploadTitle"
@@ -90,11 +91,8 @@
                     <h4 class="modal-title" id="moveTitle">移动</h4>
                 </div>
                 <div class="modal-body">
-                    移动
-                    <form id="move-form">
-                        <input type="hidden" id="move-uuid">
-                        <input type="text" id="move-name">
-                    </form>
+                    <ul id="fileTree" class="ztree"></ul>
+                    <input type="hidden" id="move-uuid">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">取消</button>
@@ -107,8 +105,8 @@
 
 
     <script>
-        var $renamebtn = $('#rename-btn');
-        $renamebtn.on('click', function () {
+        var $renameBtn = $('#rename-btn');
+        $renameBtn.on('click', function () {
             var uuid = $('#rename-uuid').val();
             var newName = $('#rename-name').val();
             $.ajax({
@@ -118,11 +116,65 @@
                 processData: false,  //很重要，告诉jquery不要对form进行处理
                 contentType: false,  //很重要，指定为false才能形成正确的Content-Type
                 success: function (data) {
-                    alert("重命名成功");
-                    location.reload(true);
+                    Swal.fire("成功", "重命名成功", "success").then(function (isConfirm) {
+                        location.reload(true);
+                    });
 
                 }, error: function (XMLHttpRequest, errorThrown) {
-                    alert("服务器出错!");
+                    Swal.fire("失败", "未知错误", "error");
+                }
+            });
+        })
+
+        var selectedDir = null;
+
+        var zTreeObj;
+        var setting = {
+            async: {
+                enable: true,
+                url:"/api/get_dirs",
+                autoParam:["uuid=parentUuid"]
+            },
+            callback: {
+                onClick: onClick
+            }
+        };
+
+        function onClick(event, treeId, treeNode, clickFlag) {
+            if (clickFlag === 1) {
+                selectedDir = treeNode.uuid;
+
+            } else if (clickFlag === 0) {
+                selectedDir = null;
+            }
+        }
+
+        $(document).ready(function(){
+            zTreeObj = $.fn.zTree.init($("#fileTree"), setting);
+        });
+
+        var moveBtn = $('#move-btn');
+        moveBtn.on('click', function () {
+
+            if (selectedDir == null) {
+                Swal.fire("失败", "未选择移动位置", "warn");
+                return;
+            }
+
+            var uuid = $('#move-uuid').val();
+            $.ajax({
+                url: "/api/move?uuid=" + uuid + "&newParentUuid=" + selectedDir,
+                type: "GET",
+                async: true,        //异步
+                processData: false,  //很重要，告诉jquery不要对form进行处理
+                contentType: false,  //很重要，指定为false才能形成正确的Content-Type
+                success: function (data) {
+                    Swal.fire("成功", "移动成功", "success").then(function (isConfirm) {
+                        location.reload(true);
+                    });
+
+                }, error: function (XMLHttpRequest, errorThrown) {
+                    Swal.fire("失败", "未知错误", "error");
                 }
             });
         })

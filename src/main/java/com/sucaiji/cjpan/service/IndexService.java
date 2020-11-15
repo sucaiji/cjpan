@@ -9,6 +9,7 @@ import com.sucaiji.cjpan.dao.IndexDao;
 import com.sucaiji.cjpan.model.IndexModel;
 
 import com.sucaiji.cjpan.model.Range;
+import com.sucaiji.cjpan.model.vo.FileNodeVo;
 import com.sucaiji.cjpan.model.vo.PageVo;
 import com.sucaiji.cjpan.util.FileUtil;
 import com.sucaiji.cjpan.util.Utils;
@@ -27,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.sucaiji.cjpan.config.Property.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -65,6 +67,8 @@ public class IndexService {
         pageVo.setIndexList(page.getResult());
         return pageVo;
     }
+
+
 
     /**
      * 分页搜索
@@ -322,6 +326,26 @@ public class IndexService {
             logger.info("删除[{}]文件成功", filePath.toString());
             return;
         }
+    }
+
+    /**
+     * 获取文件夹下全部文件夹
+     * @param parentUuid
+     * @return
+     */
+    public List<FileNodeVo> getDirsByUuid(String parentUuid) {
+        IndexModel queryIndex = new IndexModel();
+        queryIndex.setParentUuid(parentUuid);
+        List<IndexModel> list = indexDao.selectIndex(queryIndex);
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<FileNodeVo> result = list.parallelStream()
+                .filter(index -> index.getWasDir()) // 过滤掉非文件夹
+                .map(index -> new FileNodeVo(index.getName(), index.getUuid(), index.getWasDir(), null))
+                .collect(Collectors.toList());
+        return result;
     }
 
     /**

@@ -3,6 +3,7 @@ package com.sucaiji.cjpan.web;
 
 import com.sucaiji.cjpan.model.IndexModel;
 import com.sucaiji.cjpan.model.Range;
+import com.sucaiji.cjpan.model.vo.FileNodeVo;
 import com.sucaiji.cjpan.service.IndexService;
 import com.sucaiji.cjpan.service.UserService;
 import com.sucaiji.cjpan.util.Utils;
@@ -120,6 +121,17 @@ public class ApiController {
         IndexModel updateIndex = new IndexModel();
         updateIndex.setUuid(uuid);
         updateIndex.setName(name);
+        indexService.updateIndex(updateIndex);
+        return "success";
+    }
+
+    @RequestMapping("/move")
+    @ResponseBody
+    public String move(@RequestParam(value = "uuid",required = false) String uuid,
+                                 @RequestParam(value = "newParentUuid",required = false) String newParentUuid){
+        IndexModel updateIndex = new IndexModel();
+        updateIndex.setUuid(uuid);
+        updateIndex.setParentUuid(newParentUuid);
         indexService.updateIndex(updateIndex);
         return "success";
     }
@@ -289,6 +301,16 @@ public class ApiController {
         }
 
     }
+
+    @RequestMapping("/get_dirs")
+    @ResponseBody
+    public List<FileNodeVo> fileTree(@RequestParam(value = "parentUuid",required = false) String parentUuid){
+        if(parentUuid == null) {
+            parentUuid = ROOT;
+        }
+        return indexService.getDirsByUuid(parentUuid);
+    }
+
 
 }
 
