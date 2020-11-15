@@ -120,15 +120,10 @@ function uploadRecursion(file, uuid, index) {
                     dataend = new Date();
                     $("#usetime").append(dataend.getTime() - databgein.getTime());
 
-                    var dataObj = eval(data);
-                    var success = dataObj.success;
-                    if (success) {
-                        alert("上传成功！");
+                    Swal.fire("成功", "上传成功", "success").then(function (isConfirm) {
                         //刷新页面
                         location.reload(true);
-                    } else {
-                        alert("上传失败！");
-                    }
+                    });
                 } else {
                     //递归调用                　
                     uploadRecursion(file, uuid, index);

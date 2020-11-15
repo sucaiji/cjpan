@@ -28,9 +28,6 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import static com.sucaiji.cjpan.config.Property.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -59,7 +56,7 @@ public class IndexService {
             pg = 1;
         }
 
-        PageHelper.startPage(pg, limit);
+        PageHelper.startPage(pg, limit, "is_dir DESC,l_update DESC");
         Page page = (Page) indexDao.selectIndex(queryIndex);
 
         PageVo pageVo = new PageVo(pg, limit);

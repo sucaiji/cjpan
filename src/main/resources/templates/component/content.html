@@ -30,8 +30,9 @@
                                             <b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                             <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
+                                            <li> <a th:name="${index.uuid}" class="move-btn" onclick="move(this)" >移动</a></li>
+                                            <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -66,8 +67,9 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}"  class="rename-btn" onclick="rename(this)" >重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="move-btn" onclick="move(this)" >移动</a></li>
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -100,8 +102,9 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
+                                                <li> <a th:name="${index.uuid}" class="move-btn" onclick="move(this)" >移动</a></li>
+                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                             </ul>
                                         </div>
                                     </div>
@@ -134,9 +137,9 @@
                                                 <b class="caret"></b>
                                             </a>
                                             <ul class="dropdown-menu">
-                                                <li><a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                                 <li> <a th:name="${index.uuid}" class="rename-btn" onclick="rename(this)" >重命名</a></li>
-                                            </ul>
+                                                <li> <a th:name="${index.uuid}" class="move-btn" onclick="move(this)" >移动</a></li></ul>
+                                                <li> <a href="javascript:void(0)" th:onclick="'javascript:del(\''+${index.uuid}+'\')'">删除</a></li>
                                         </div>
                                     </div>
                                 </div>
@@ -190,6 +193,11 @@
         function rename(obj) {
             $('#rename-uuid').val(obj.name);
             $('#rename').modal('show');
+        }
+
+        function move(obj) {
+            $('#move-uuid').val(obj.name);
+            $('#move').modal('show');
         }
 
 

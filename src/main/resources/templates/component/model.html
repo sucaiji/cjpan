@@ -1,4 +1,6 @@
 <div th:fragment="model" xmlns:th="http://www.thymeleaf.org" class="no-js">
+    <!-- 树插件 -->
+    <script src="/plugins/ztree/jquery.ztree.all.min.js"></script>
 
     <!-- 上传窗口 -->
     <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="uploadTitle"
@@ -76,6 +78,32 @@
             </div>
         </div>
     </div>
+
+
+    <!-- 移动文件 -->
+    <div class="modal fade" id="move" tabindex="-1" role="dialog" aria-labelledby="moveTitle"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="moveTitle">移动</h4>
+                </div>
+                <div class="modal-body">
+                    移动
+                    <form id="move-form">
+                        <input type="hidden" id="move-uuid">
+                        <input type="text" id="move-name">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-simple" data-dismiss="modal">取消</button>
+                    <button type="button" id="move-btn" class="btn btn-info btn-simple" data-dismiss="modal">确认</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <script>
